@@ -15,6 +15,12 @@ our $get_product = $connect->prepare_cached("SELECT * FROM $product_db WHERE nam
 
 our $update_product = $connect->prepare_cached(<<"SQL");
 UPDATE $product_db
-SET quanity = ?
+SET quantity = ?
 WHERE name = ? OR barcode = ?
+SQL
+
+our $add_new_product = $connect->prepare_cached(<<"SQL");
+INSERT INTO $comment_db
+(id, name, description, barcode, quanity)
+VALUES (?, ?, ?, ?, ?)
 SQL
