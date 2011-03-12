@@ -21,6 +21,6 @@ SQL
 
 our $add_new_product = $connect->prepare_cached(<<"SQL");
 INSERT INTO $comment_db
-(id, name, description, barcode, quanity)
+(id, name, description, barcode, quantity)
 VALUES (?, ?, ?, ?, ?)
 SQL
