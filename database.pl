@@ -1,9 +1,9 @@
 our $platform = "mysql";
-our $database = "pl_barcode";
+our $database = "joshashb_barcode";
 our $host = "localhost";
 our $port = "3306";
 our $product_db = "products";
-our $user = "root";
+our $user = "joshashb_root";
 our $pw = "speeddyy5";
 our $dsn = "dbi:$platform:$database:$host:$port";
 
