@@ -6,7 +6,9 @@
 import httplib, urllib
 import sys
 import bluetooth
+import virtkey
 
+v = virtkey.virtkey()
 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 
 def find_host():
@@ -33,6 +35,10 @@ def scan():
 		query = receive()
 		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
 		request(params)
+		if (sys.argv[2] == 'keyboard'):
+			for x in query:
+				v.press_unicode(ord(x))
+				v.release_unicode(ord(x))
 
 def request(params):
 	headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
@@ -40,7 +46,7 @@ def request(params):
 	conn.request("POST", "/barcode-perl-API/test.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
-	print data
+	return data
 	conn.close()
 
 type_of_query = sys.argv[1]
