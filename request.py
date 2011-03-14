@@ -16,11 +16,11 @@ y = 0
 v = virtkey.virtkey()
 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 
-API_host = raw_input("Please enter API host address: ")
-if (API_host == ''):
-	API_host = 'localhost'
+#API_host = raw_input("Please enter API host address: ")
+#if (API_host == ''):
+#	API_host = 'localhost'
 	
-conn = httplib.HTTPConnection(API_host)
+conn = httplib.HTTPConnection("192.168.1.108")
 headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
 def find_host():
@@ -60,24 +60,26 @@ def add(params):
 	data = response.read()
 	conn.close()
 	new_data = json.loads(data)
-	print new_data
+	#print new_data
+	return new_data
 
 def request(params, query):
-	conn.request("POST", "/barcode-perl-API/test.pl", params, headers)
+	conn.request("POST", "/perl/barcode/test.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
 	conn.close()
-	print data
+	#print data
 	if (data == ''):
 		new(query)
 	else:
 		new_data = json.loads(data)
-		print new_data
+		print new_data['name']
+		return new_data
 	
 def new(query):
 	print "The product you scanned is not in the database, would you like to add it?"
 	var = raw_input("Y/N: ")
-	if (var == 'Y'):
+	if (var == 'Y' or var == 'y' or var == 'yes'):
 		name = raw_input("Enter Name: ")
 		description = raw_input("Enter Description: ")
 		quantity = raw_input("Enter Quantity: ")
