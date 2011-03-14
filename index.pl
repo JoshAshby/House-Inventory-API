@@ -29,7 +29,7 @@ our $update_product;
 
 my $json = new JSON;
 
-#do 'database.pl';
+do 'database.pl';
 
 print $form->header();
 

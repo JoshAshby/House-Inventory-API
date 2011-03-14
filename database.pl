@@ -1,9 +1,9 @@
 our $platform = "mysql";
-our $database = "joshashb_barcode";
+our $database = "pl_barcode";
 our $host = "localhost";
 our $port = "3306";
 our $product_db = "products";
-our $user = "joshashb_root";
+our $user = "root";
 our $pw = "speeddyy5";
 our $dsn = "dbi:$platform:$database:$host:$port";
 
@@ -20,7 +20,7 @@ WHERE name = ? OR barcode = ?
 SQL
 
 our $add_new_product = $connect->prepare_cached(<<"SQL");
-INSERT INTO $comment_db
-(id, name, description, barcode, quantity)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO $product_db
+(name, description, barcode, quantity)
+VALUES (?, ?, ?, ?)
 SQL
