@@ -101,18 +101,18 @@ if (type_of_query == 'server'):
 
 if (type_of_query == 'total_inventory') :
 	params = urllib.urlencode({'type_of_query': type_of_query})
-	request(params)
+	request(params, type_of_query)
 
 if (type_of_query == 'single_product_info') :
 	query = raw_input("Name: ")
 	params = urllib.urlencode({'type_of_query': type_of_query, 'query': query})
-	request(params)
+	request(params, query)
 
 if (type_of_query =='update_product_quantity') :
 	query = raw_input("Name: ")
 	quantity = raw_input("Quantity: ")
 	params = urllib.urlencode({'type_of_query': type_of_query, 'query': query, 'quantity': quantity})
-	request(params)
+	request(param, query)
 	
 if (type_of_query =='add_new_product') :
 	name = raw_input("Name: ")
