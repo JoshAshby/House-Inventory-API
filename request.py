@@ -146,6 +146,8 @@ def new(query):
 		quantity = raw_input("Enter Quantity: ")
 		params = urllib.urlencode({'type_of_query': 'add_new_product', 'name': name, 'description': description, 'query': query, 'quantity': quantity})
 		add(params)
+	else:
+		pass
 
 """
 returns: python array decrypted from JSON data
