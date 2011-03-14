@@ -21,6 +21,7 @@ if (API_host == ''):
 	API_host = 'localhost'
 	
 conn = httplib.HTTPConnection(API_host)
+headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
 def find_host():
 	for host, name in bluetooth.discover_devices(lookup_names=True):
@@ -47,14 +48,13 @@ def scan():
 	while True:
 		query = receive()
 		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
-		data = request(params,query)
+		data = request(params, query)
 		if (y):
 			for x in query:
 				v.press_unicode(ord(x))
 				v.release_unicode(ord(x))
 
 def add(params):
-	headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 	conn.request("POST", "/barcode-perl-API/test.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
@@ -62,8 +62,7 @@ def add(params):
 	new_data = json.loads(data)
 	print new_data
 
-def request(params,query):
-	headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+def request(params, query):
 	conn.request("POST", "/barcode-perl-API/test.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
