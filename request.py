@@ -180,41 +180,42 @@ def decrypt(json_data):
 """
 rest from here on out is just for command line input, which is only for debugging. Should be realitivly obvious whats happing here, just a bunch of if loops
 """
-print "Types of querys: server\n total_inventory\n single_product_info\n update_product_quantity\n add_new_product"
-type_of_query = raw_input("Please enter a query type or quit:")
+if __name__ == "__main__":
+	print "Types of querys: server\n total_inventory\n single_product_info\n update_product_quantity\n add_new_product"
+	type_of_query = raw_input("Please enter a query type or quit:")
 
-if (type_of_query == 'server'):
-	host = find_host()
-	if (host == 'None'):
+	if (type_of_query == 'server'):
 		host = find_host()
-	port = find_port(host)
-	connect(host,port)
-	scan()
+		if (host == 'None'):
+			host = find_host()
+		port = find_port(host)
+		connect(host,port)
+		scan()
 
-if (type_of_query == 'total_inventory') :
-	params = urllib.urlencode({'type_of_query': type_of_query})
-	request(params, type_of_query)
+	if (type_of_query == 'total_inventory') :
+		params = urllib.urlencode({'type_of_query': type_of_query})
+		request(params, type_of_query)
 
-if (type_of_query == 'single_product_info') :
-	query = raw_input("Name: ")
-	params = urllib.urlencode({'type_of_query': type_of_query, 'query': query})
-	request(params, query)
+	if (type_of_query == 'single_product_info') :
+		query = raw_input("Name: ")
+		params = urllib.urlencode({'type_of_query': type_of_query, 'query': query})
+		request(params, query)
 
-if (type_of_query =='update_product_quantity') :
-	query = raw_input("Name: ")
-	quantity = raw_input("Quantity: ")
-	params = urllib.urlencode({'type_of_query': type_of_query, 'query': query, 'quantity': quantity})
-	request(param, query)
+	if (type_of_query =='update_product_quantity') :
+		query = raw_input("Name: ")
+		quantity = raw_input("Quantity: ")
+		params = urllib.urlencode({'type_of_query': type_of_query, 'query': query, 'quantity': quantity})
+		request(param, query)
 	
-if (type_of_query =='add_new_product') :
-	name = raw_input("Name: ")
-	description = raw_input("Description: ")
-	quantity = raw_input("Quantity: ")
-	host = find_host()
-	if (host == 'None'):
+	if (type_of_query =='add_new_product') :
+		name = raw_input("Name: ")
+		description = raw_input("Description: ")
+		quantity = raw_input("Quantity: ")
 		host = find_host()
-	port = find_port(host)
-	connect(host,port)
-	query = receive()
-	params = urllib.urlencode({'type_of_query': type_of_query, 'name': name, 'description': description, 'query': query, 'quantity': quantity})
-	add(params)
+		if (host == 'None'):
+			host = find_host()
+		port = find_port(host)
+		connect(host,port)
+		query = receive()
+		params = urllib.urlencode({'type_of_query': type_of_query, 'name': name, 'description': description, 'query': query, 'quantity': quantity})
+		add(params)
