@@ -21,27 +21,30 @@ sock is the socket for the bluetooth connection, all bluetooth functions happen 
 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 
 """
-as the user for which 
-"""
-API_host = raw_input("Please enter API host address: ")
-if (API_host == ''):
-	API_host = 'localhost'
-
-"""
 setup stuff for the HTTP requests. conn is the connection to the API that will be used, headers is what type of header gets sent so the server and script know what to do
 """
+API_host = "localhost"
 conn = httplib.HTTPConnection(API_host)
 headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
 """
 returns: host in the format of xx:xx:xx:xx:xx:xx
 takes: nothing
-finds device, this is going to be replaced with a GUI specific function in a little bit which will list return the host and name for a list widget
+finds device, command line use
 """
-def find_host():
+def find_host_CMD():
 	for host, name in bluetooth.discover_devices(lookup_names=True):
 		if (name == 'Josh ashby' or host == '90:21:55:F8:9A:75'):
 			return host
+
+"""
+returns: host in the format of xx:xx:xx:xx:xx:xx
+takes: nothing
+finds device, GUI use
+"""
+def find_host_GUI():
+	for host, name in bluetooth.discover_devices(lookup_names=True):
+		return host, name
 
 """
 returns: port number of SL4A, needed for connecting with the phone's python script inorder to get and pass data between the phone and computer
@@ -96,7 +99,7 @@ takes: params, urllib encoded query data
 add a new product to the database incase the API returns no results for a product
 """
 def add(params):
-	conn.request("POST", "/barcode-perl-API/test.pl", params, headers)
+	conn.request("POST", "/perl/OO/api.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
 	conn.close()
@@ -110,7 +113,7 @@ takes: params, a urllib encoded string
 make a request to the API for data
 """
 def request(params):
-	conn.request("POST", "/perl/barcode/test.pl", params, headers)
+	conn.request("POST", "/perl/OO/api.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
 	conn.close()
@@ -128,7 +131,7 @@ returns: nothing
 takes: query, either barcode or name of a product
 used for GUI interfacing to add a new product
 """
-def newGUI(query):
+def new_GUI(query):
 	params = urllib.urlencode({'type_of_query': 'add_new_product', 'name': name, 'description': description, 'query': query, 'quantity': quantity})
 	add(params)
 
@@ -154,8 +157,8 @@ returns: python array decrypted from JSON data
 takes: params, a urllib encoded string, and query, either barcode or name of a product
 used only for command line
 """
-def requestCMD(params, query):
-	conn.request("POST", "/perl/barcode/test.pl", params, headers)
+def request_CMD(params, query):
+	conn.request("POST", "/perl/OO/api.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
 	conn.close()
@@ -181,6 +184,13 @@ def decrypt(json_data):
 rest from here on out is just for command line input, which is only for debugging. Should be realitivly obvious whats happing here, just a bunch of if loops
 """
 if __name__ == "__main__":
+	"""
+	ask the user for which ip to use
+	"""
+	API_host = raw_input("Please enter API host address: ")
+	if (API_host == ''):
+		API_host = 'localhost'
+		
 	print "Types of querys: server\n total_inventory\n single_product_info\n update_product_quantity\n add_new_product"
 	type_of_query = raw_input("Please enter a query type or quit:")
 

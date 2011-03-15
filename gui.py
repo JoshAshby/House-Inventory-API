@@ -17,6 +17,40 @@ python timer snippet, may use this for bluetooth device refresh...
 	
 '''
 
+class bluetooth_tab(QtGui.QWidget):
+	def __init__(self, parent, main):
+		QtGui.QWidget.__init__(self)
+		
+		mainLayout = QtGui.QVBoxLayout()
+		mainLayout.setContentsMargins(0, 0, 0, 0)
+		mainLayout.setSpacing(0)
+		self.setLayout(mainLayout)
+		
+		self.list = QtGui.QTreeWidget(self)
+		self.list.setHeaderLabels(['Name', 'Host'])
+		
+		name, host = request.find_host_GUI()
+		
+		for i in name:
+			item = QtGui.QTreeWidgetItem([name, host])
+			self.list.addTopLevelItem(item)
+		
+		fileBox = QtGui.QHBoxLayout()
+		mainLayout.addLayout(fileBox, 0)
+		
+		self.con_but = QtGui.QPushButton(self)
+
+		mainLayout.addWidget(self.list, 200)
+		mainLayout.addWidget(self.con_but, 10)
+		
+	def connect(self):
+		data = self.list.currentItem()
+		host_select = data.text(1)
+		
+		port = request.find_port(host_select)
+		
+		request.connect(host_select, port)
+
 class total_inventory(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
@@ -32,7 +66,6 @@ class total_inventory(QtGui.QWidget):
 		params = urllib.urlencode({'type_of_query': 'total_inventory'})
 
 		data = request.request(params)
-		print data
 		
 		for i in range(len(data)):
 			item = QtGui.QTreeWidgetItem([data[i]['name'], data[i]['description'], data[i]['quantity'] ])
@@ -53,12 +86,18 @@ class MainWindow(QtGui.QMainWindow):
 		self.setCentralWidget(self.mainTabWidget)
 
 		self.total_inventory_tab()
+		self.bluetooth_tab()
 
 		self.statusBar()
 		
 	def total_inventory_tab(self):
 		new_inven = total_inventory(self, self)
 		newTab = self.mainTabWidget.addTab(new_inven, "Total Inventory")
+		self.mainTabWidget.setCurrentIndex(newTab)
+		
+	def bluetooth_tab(self):
+		new_inven = bluetooth_tab(self, self)
+		newTab = self.mainTabWidget.addTab(new_inven, "Bluetooth devices")
 		self.mainTabWidget.setCurrentIndex(newTab)
 		
 if __name__ == "__main__":
