@@ -33,4 +33,3 @@ if ($type_of_query eq 'single_product_info') {
    $inventory->add_product($name_value, $description_value, $query_value, $quantity_value);
    $inventory->print_info($name_value);
 }
-

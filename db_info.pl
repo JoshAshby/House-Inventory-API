@@ -3,6 +3,7 @@ my $database = "pl_barcode";
 my $host = "localhost";
 my $port = "3306";
 my $product_db = "products";
+my $stats_db = "stats";
 my $user = "root";
 my $pw = "speeddyy5";
 my $dsn = "dbi:$platform:$database:$host:$port";
@@ -23,4 +24,16 @@ our $add_new_product = $connect->prepare_cached(<<"SQL");
 INSERT INTO $product_db
 (name, description, barcode, quantity)
 VALUES (?, ?, ?, ?)
+SQL
+
+our $add_quantity = $connect->prepare_cached(<<"SQL");
+INSERT INTO $stats_db
+(barcode, quantity)
+VALUES (?, ?)
+SQL
+
+our $remove_quantity = $connect->prepare_cached(<<"SQL");
+INSERT INTO $stats_db
+(barcode, quantity)
+VALUES (?, ?)
 SQL

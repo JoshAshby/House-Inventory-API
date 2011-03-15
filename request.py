@@ -44,7 +44,13 @@ finds device, GUI use
 """
 def find_host_GUI():
 	for host, name in bluetooth.discover_devices(lookup_names=True):
-		return host, name
+		services = bluetooth.find_service(address=host)
+		for service in services:
+			if service['name'] == 'SL4A':
+				port = service['port']
+		if (name):
+			return host, name, port
+	return 'None', 'None', 'None'
 
 """
 returns: port number of SL4A, needed for connecting with the phone's python script inorder to get and pass data between the phone and computer
