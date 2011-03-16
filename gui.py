@@ -10,16 +10,6 @@ import Queue
 debug = 0
 version = ".01 alpha"
 
-'''
-python timer snippet, may use this for bluetooth device refresh...
-
-        timer = QtCore.QTimer(self)
-        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.tabUpdate)
-        timer.start(1000)
-	
-'''
-port = 0
-
 class bluetooth_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
@@ -59,7 +49,7 @@ class bluetooth_tab(QtGui.QWidget):
 		host, name, port = request.find_host_GUI()
 		
 		if (name):
-			item = QtGui.QTreeWidgetItem([name, host, port])
+			item = QtGui.QTreeWidgetItem([name, host, str(port)])
 			self.list.addTopLevelItem(item)
 
 class total_inventory(QtGui.QWidget):
@@ -107,7 +97,7 @@ class total_inventory(QtGui.QWidget):
 		
 		data = request.request(params)
 		
-		self.product_name.setText(data['name'])
+		self.product_name.setText(str(data['name']))
 		
 	def scan(self):
 		"""
