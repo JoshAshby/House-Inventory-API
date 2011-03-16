@@ -91,11 +91,12 @@ class total_inventory(QtGui.QWidget):
 		
 	def product_info(self, num):
 		item = self.list.currentItem()
-		query = item.text(4)
-		
+		query = item.text(3)
+		print query
 		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
 		
 		data = request.request(params)
+		print data, data['name']
 		
 		self.product_name.setText(str(data['name']))
 		
@@ -133,7 +134,6 @@ class MainWindow(QtGui.QMainWindow):
 		self.setCentralWidget(self.mainTabWidget)
 
 		self.total_inventory_tab()
-		self.bluetooth_tab()
 
 		self.statusBar()
 		

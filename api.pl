@@ -23,9 +23,6 @@ if ($type_of_query eq 'single_product_info') {
    $inventory->print_info($query_value);
 } elsif ($type_of_query eq 'total_inventory') {
    $inventory->total_inventory();
-} elsif ($type_of_query eq 'update_product') {
-   $inventory->update_product();
-   $inventory->print_info($query_value);
 } elsif ($type_of_query eq 'update_product_quantity') {
    $inventory->update_product_quantity($query_value, $quantity_value);
    $inventory->print_info($query_value);
