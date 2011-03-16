@@ -78,20 +78,6 @@ def scan():
 		data = request(params, query)
 
 """
-returns: python array from decrypted JSON data
-takes: params, urllib encoded query data
-add a new product to the database incase the API returns no results for a product
-"""
-def add(params):
-	conn.request("POST", "/perl/OO/api.pl", params, headers)
-	response = conn.getresponse()
-	data = response.read()
-	conn.close()
-	new_data = json.loads(data)
-	#print new_data
-	return new_data
-
-"""
 returns: python array or 'no_product' if the product does not exist (ie: API returns no results)
 takes: params, a urllib encoded string
 make a request to the API for data
@@ -101,23 +87,11 @@ def request(params):
 	response = conn.getresponse()
 	data = response.read()
 	conn.close()
-	#print data
 	if (data == ''):
-		#new(query)
 		return "no_product"
 	else:
 		new_data = json.loads(data)
-		#print new_data['name']
 		return new_data
-	
-"""
-returns: nothing
-takes: query, either barcode or name of a product
-used for GUI interfacing to add a new product
-"""
-def new_GUI(query):
-	params = urllib.urlencode({'type_of_query': 'add_new_product', 'name': name, 'description': description, 'query': query, 'quantity': quantity})
-	add(params)
 
 """
 returns: python variables, in the case of the API all data is returned as an array

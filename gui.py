@@ -89,16 +89,22 @@ class total_inventory(QtGui.QWidget):
 		
 		self.connect(self.list, SIGNAL("itemClicked(QTreeWidgetItem *, int)"), self.product_info)
 		
-	def product_info(self, num):
+		timer = QtCore.QTimer(self)
+		QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.product_info)
+		timer.start(1000)
+		
+	def product_info(self):
 		item = self.list.currentItem()
-		query = item.text(3)
-		print query
-		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
+		if (item):
+			query = item.text(0)
+			params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
 		
-		data = request.request(params)
-		print data, data['name']
+			data = request.request(params)
 		
-		self.product_name.setText(str(data['name']))
+			self.product_name.setText(str(data['name']))
+			self.product_barcode.setText(str(data['barcode']))
+			self.product_description.setPlainText(str(data['description']))
+			self.product_quantity.setText(str(data['quantity']))
 		
 	def scan(self):
 		"""
@@ -117,7 +123,7 @@ class total_inventory(QtGui.QWidget):
 		data = request.request(params)
 		
 		for i in range(len(data)):
-			item = QtGui.QTreeWidgetItem([data[i]['name'], data[i]['description'], data[i]['quantity'] ])
+			item = QtGui.QTreeWidgetItem([data[i]['name'], data[i]['description'], data[i]['quantity'], data[i]['barcode'], str(data[i]['flag']) ])
 			self.list.addTopLevelItem(item)
 		
 
