@@ -157,6 +157,10 @@ class total_inventory(QtGui.QWidget):
 		QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.refresh)
 		timer.start(500)
 		
+		timer2 = QtCore.QTimer(self)
+		QtCore.QObject.connect(timer2, QtCore.SIGNAL("timeout()"), self.scan)
+		timer.start(100)
+		
 	def product_info(self):
 		item = self.list.currentItem()
 		self.product_name.setReadOnly(True)
@@ -179,7 +183,12 @@ class total_inventory(QtGui.QWidget):
 	def scan(self):
 		query = request.receive()
 		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
-		data = request(params, query)
+		data = request(params)
+		
+		self.product_name.setText(str(data['name']))
+		self.product_barcode.setText(str(data['barcode']))
+		self.product_description.setPlainText(str(data['description']))
+		self.product_quantity.setText(str(data['quantity']))
 		
 	def edit_info(self):
 		self.product_name.setReadOnly(False)
