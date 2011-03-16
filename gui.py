@@ -177,10 +177,9 @@ class total_inventory(QtGui.QWidget):
 			self.product_quantity.setText(str(data['quantity']))
 		
 	def scan(self):
-		"""
-		Code for when an item is scanned in -> place the text in the text boxes
-		Goes here
-		"""
+		query = request.receive()
+		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
+		data = request(params, query)
 		
 	def edit_info(self):
 		self.product_name.setReadOnly(False)

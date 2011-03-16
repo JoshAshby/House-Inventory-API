@@ -67,17 +67,6 @@ def send(product_name):
 	sock.send(product_name)
 
 """
-returns: nothing
-takes: nothing
-take input from the bluetooth device and make requests to the API based off of barcode scanned
-"""
-def scan():
-	while True:
-		query = receive()
-		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
-		data = request(params, query)
-
-"""
 returns: python array or 'no_product' if the product does not exist (ie: API returns no results)
 takes: params, a urllib encoded string
 make a request to the API for data
