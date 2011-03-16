@@ -13,6 +13,7 @@ our $update_product_quantity;
 our $add_new_product;
 our $flag_set;
 our $update_quantity;
+our $remove_product;
 
 sub new {
    my $class = shift;
@@ -97,23 +98,23 @@ sub add_product {
     $get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
     my $p_text;
     while($get_product_db->fetch()){
-       my %text = ('change' => 'add', 'name' => $name, 'description' => $description, 'barcode' => $barcode, 'quantity' => $quantity, 'flag' => $flag, 'average' => $average_days_left);
+       my %text = ('change' => 'added', 'name' => $name, 'description' => $description, 'barcode' => $barcode, 'quantity' => $quantity, 'flag' => $flag, 'average' => $average_days_left);
        $p_text = $json->encode(\%text);
     }
     print $p_text;
 }
 
-sub remove_product {
-    my $name = @_[1];
-    $get_product_db->execute($name,$name);
-   $get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
-   my $p_text;
-   while($get_product_db->fetch()){
-      my %text = ('change' => 'remove', 'name' => $name, 'description' => $description, 'barcode' => $barcode, 'quantity' => $quantity, 'flag' => $flag, 'average' => $average_days_left);
+sub delete_product {
+    my $barcode_val = @_[1];
+    $get_product_db->execute($barcode_val,$barcode_val);
+    $get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
+    my $p_text;
+    while($get_product_db->fetch()){
+      my %text = ('change' => 'removed', 'name' => $name, 'description' => $description, 'barcode' => $barcode, 'quantity' => $quantity, 'flag' => $flag, 'average' => $average_days_left);
       $p_text = $json->encode(\%text);
    }
    print $p_text;
-    $remove_product->execute($name);
+   $remove_product->execute($barcode_val);
 }
 
 1;

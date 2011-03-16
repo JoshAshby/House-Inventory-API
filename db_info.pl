@@ -10,9 +10,22 @@ my $dsn = "dbi:$platform:$database:$host:$port";
 
 my $connect = DBI->connect($dsn, $user, $pw) or die "Couldn't connect to database!" . DBI->errstr;
 
-our $get_all_products = $connect->prepare_cached("SELECT name, description, barcode, quantity, flag FROM $product_db ORDER BY id desc");
+our $get_all_products = $connect->prepare_cached(<<"SQL");
+SELECT name, description, barcode, quantity, flag
+FROM $product_db
+ORDER BY id desc
+SQL
 
-our $get_product_db = $connect->prepare_cached("SELECT name, description, barcode, quantity, flag, average FROM $product_db WHERE name = ? OR barcode = ?");
+our $remove_product = $connect->prepare_cached(<<"SQL");
+DELETE FROM $product_db
+WHERE barcode = ?
+SQL
+
+our $get_product_db = $connect->prepare_cached(<<"SQL");
+SELECT name, description, barcode, quantity, flag, average
+FROM $product_db
+WHERE name = ? OR barcode = ?
+SQL
 
 our $update_product_quantity = $connect->prepare_cached(<<"SQL");
 UPDATE $product_db
@@ -32,7 +45,11 @@ INSERT INTO $product_db
 VALUES (?, ?, ?, ?)
 SQL
 
-our $flag_set = $connect->prepare_cached("UPDATE $product_db SET flag = ? WHERE name = ? OR barcode = ?");
+our $flag_set = $connect->prepare_cached(<<"SQL");
+UPDATE $product_db
+SET flag = ?
+WHERE name = ? OR barcode = ?
+SQL
 
 our $update_quantity = $connect->prepare_cached(<<"SQL");
 INSERT INTO $stats_db

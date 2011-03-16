@@ -29,4 +29,6 @@ if ($type_of_query eq 'single_product_info') {
    $inventory->add_product($name_value, $description_value, $query_value, $quantity_value);
 } elsif ($type_of_query eq 'update_product_info') {
    $inventory->update_product_info($name_value, $description_value, $query_value, $quantity_value);
+} elsif ($type_of_query eq 'remove_product') {
+   $inventory->delete_product($query_value);
 }
