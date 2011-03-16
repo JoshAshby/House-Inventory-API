@@ -52,16 +52,6 @@ sub total_inventory {
    print $json->encode(\@data_hash);
 }
 
-sub remove_quantity {
-   my $query = shift;
-   $get_product->execute("$query","$query");
-   $get_product->bind_columns(undef, \$id, \$name, \$description, \$barcode, \$quantity);
-   while($get_product->fetch()){
-      $new_quantity = $quantity - 1;
-   }
-   $update_product->execute("$new_quantity","$query","$query");
-}
-
 sub update_product_quantity {
    my $query = shift;
    my $quantity = shift;
@@ -74,6 +64,11 @@ sub add_product {
     my $query = shift;
     my $quantity = shift;
     $add_new_product->execute("$name", "$description", "$query", "$quantity");
+}
+
+sub remove_product {
+    my $name = shift;
+    $remove_product->execute("$name");
 }
 
 1;

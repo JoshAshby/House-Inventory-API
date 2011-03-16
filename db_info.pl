@@ -26,13 +26,9 @@ INSERT INTO $product_db
 VALUES (?, ?, ?, ?)
 SQL
 
-our $add_quantity = $connect->prepare_cached(<<"SQL");
-INSERT INTO $stats_db
-(barcode, quantity)
-VALUES (?, ?)
-SQL
+our $flag_set = $connect->prepare_cached("UPDATE $product_db SET flag = ? WHERE name = ? OR barcode = ?");
 
-our $remove_quantity = $connect->prepare_cached(<<"SQL");
+our $update_quantity = $connect->prepare_cached(<<"SQL");
 INSERT INTO $stats_db
 (barcode, quantity)
 VALUES (?, ?)

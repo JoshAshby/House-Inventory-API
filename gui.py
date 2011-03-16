@@ -83,6 +83,17 @@ class total_inventory(QtGui.QWidget):
 
 		mainLayout.addWidget(self.list, 200)
 		
+	def scan(self):
+		"""
+		Code for when an item is scanned in -> place the text in the text boxes
+		Goes here
+		"""
+	def product_update(self):
+		"""
+		Code for if a product has been updated -> modify database
+		Goes here
+		"""
+		
 	def refresh(self):
 		data = request.request(params)
 		

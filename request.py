@@ -28,17 +28,7 @@ conn = httplib.HTTPConnection(API_host)
 headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
 
 """
-returns: host in the format of xx:xx:xx:xx:xx:xx
-takes: nothing
-finds device, command line use
-"""
-def find_host_CMD():
-	for host, name in bluetooth.discover_devices(lookup_names=True):
-		if (name == 'Josh ashby' or host == '90:21:55:F8:9A:75'):
-			return host
-
-"""
-returns: host in the format of xx:xx:xx:xx:xx:xx
+returns: strings: host in the format of xx:xx:xx:xx:xx:xx, name and port number of the SL4A service as a number
 takes: nothing
 finds device, GUI use
 """
@@ -51,18 +41,6 @@ def find_host_GUI():
 		if (name):
 			return host, name, port
 	return 'None', 'None', 'None'
-
-"""
-returns: port number of SL4A, needed for connecting with the phone's python script inorder to get and pass data between the phone and computer
-takes: host number in the format of xx:xx:xx:xx:xx:xx
-finds which port everything, including the needed SL4A port, is running on. Needed in order to connect to device
-"""
-def find_port(host):
-	services = bluetooth.find_service(address=host)
-	for service in services:
-		if service['name'] == 'SL4A':
-			port = service['port']
-			return port
 	
 """
 returns: nothing
@@ -142,42 +120,6 @@ def new_GUI(query):
 	add(params)
 
 """
-returns: nothing
-takes: query, either barcode or name of a product
-used only for command line interface
-"""
-def new(query):
-	print "The product you scanned is not in the database, would you like to add it?"
-	var = raw_input("Y/N: ")
-	if (var == 'Y' or var == 'y' or var == 'yes'):
-		name = raw_input("Enter Name: ")
-		description = raw_input("Enter Description: ")
-		quantity = raw_input("Enter Quantity: ")
-		params = urllib.urlencode({'type_of_query': 'add_new_product', 'name': name, 'description': description, 'query': query, 'quantity': quantity})
-		add(params)
-	else:
-		pass
-
-"""
-returns: python array decrypted from JSON data
-takes: params, a urllib encoded string, and query, either barcode or name of a product
-used only for command line
-"""
-def request_CMD(params, query):
-	conn.request("POST", "/perl/OO/api.pl", params, headers)
-	response = conn.getresponse()
-	data = response.read()
-	conn.close()
-	#print data
-	if (data == ''):
-		new(query)
-		#return "no_product"
-	else:
-		new_data = json.loads(data)
-		#print new_data['name']
-		return new_data
-
-"""
 returns: python variables, in the case of the API all data is returned as an array
 takes: JSON formated data
 decrypts the API's reponse which is in JSON to python variables
@@ -185,53 +127,3 @@ decrypts the API's reponse which is in JSON to python variables
 def decrypt(json_data):
 	decrypt_json = json.loads(json_data)
 	return decrypt_json
-
-"""
-rest from here on out is just for command line input, which is only for debugging. Should be realitivly obvious whats happing here, just a bunch of if loops
-"""
-if __name__ == "__main__":
-	"""
-	ask the user for which ip to use
-	"""
-	API_host = raw_input("Please enter API host address: ")
-	if (API_host == ''):
-		API_host = 'localhost'
-		
-	print "Types of querys: server\n total_inventory\n single_product_info\n update_product_quantity\n add_new_product"
-	type_of_query = raw_input("Please enter a query type or quit:")
-
-	if (type_of_query == 'server'):
-		host = find_host()
-		if (host == 'None'):
-			host = find_host()
-		port = find_port(host)
-		connect(host,port)
-		scan()
-
-	if (type_of_query == 'total_inventory') :
-		params = urllib.urlencode({'type_of_query': type_of_query})
-		request(params, type_of_query)
-
-	if (type_of_query == 'single_product_info') :
-		query = raw_input("Name: ")
-		params = urllib.urlencode({'type_of_query': type_of_query, 'query': query})
-		request(params, query)
-
-	if (type_of_query =='update_product_quantity') :
-		query = raw_input("Name: ")
-		quantity = raw_input("Quantity: ")
-		params = urllib.urlencode({'type_of_query': type_of_query, 'query': query, 'quantity': quantity})
-		request(param, query)
-	
-	if (type_of_query =='add_new_product') :
-		name = raw_input("Name: ")
-		description = raw_input("Description: ")
-		quantity = raw_input("Quantity: ")
-		host = find_host()
-		if (host == 'None'):
-			host = find_host()
-		port = find_port(host)
-		connect(host,port)
-		query = receive()
-		params = urllib.urlencode({'type_of_query': type_of_query, 'name': name, 'description': description, 'query': query, 'quantity': quantity})
-		add(params)
