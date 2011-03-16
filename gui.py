@@ -70,6 +70,9 @@ class add_product(QtGui.QWidget):
 		self.product_barcode = QtGui.QLineEdit()
 		self.product_description = QtGui.QPlainTextEdit()
 		self.product_quantity = QtGui.QLineEdit()
+		self.product_flag = QtGui.QComboBox()
+		
+		self.product_flag.addItems(['L', 'M', 'H'])
 		
 		self.submit = QtGui.QPushButton("Add New Product")
 		
@@ -77,6 +80,7 @@ class add_product(QtGui.QWidget):
 		formBox.addRow(self.tr("Barcode: "), self.product_barcode)
 		formBox.addRow(self.tr("Description: "), self.product_description)
 		formBox.addRow(self.tr("Quantity: "), self.product_quantity)
+		formBox.addRow(self.tr("Flag: "), self.product_flag)
 		formBox.addRow(self.tr("Submit Product Info Addition? "), self.submit)
 		
 		self.connect(self.submit, QtCore.SIGNAL("clicked()"), self.product_add)
@@ -86,9 +90,16 @@ class add_product(QtGui.QWidget):
 		barcode = self.product_barcode.text()
 		description = self.product_description.toPlainText()
 		quantity = self.product_quantity.text()
+		flag = self.product_flag.currentText()
 		
-		params = urllib.urlencode({'type_of_query': 'add_new_product',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity})
-		data = request.request(params)
+		if (barcode):
+			params = urllib.urlencode({'type_of_query': 'add_new_product',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity, 'flag': flag})
+			data = request.request(params)
+			
+			self.product_name.clear()
+			self.product_barcode.clear()
+			self.product_description.clear()
+			self.product_quantity.clear()
 
 class total_inventory(QtGui.QWidget):
 	def __init__(self, parent, main):
@@ -144,7 +155,7 @@ class total_inventory(QtGui.QWidget):
 		
 		timer = QtCore.QTimer(self)
 		QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.refresh)
-		timer.start(1000)
+		timer.start(500)
 		
 	def product_info(self):
 		item = self.list.currentItem()

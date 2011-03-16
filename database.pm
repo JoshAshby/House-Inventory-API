@@ -92,7 +92,8 @@ sub add_product {
     my $description = @_[2];
     my $query = @_[3];
     my $quantity = @_[4];
-    $add_new_product->execute($name, $description, $query, $quantity);
+    my $flag = @_[5];
+    $add_new_product->execute($name, $description, $query, $quantity, $flag);
     $update_quantity->execute($query, $quantity);
     $get_product_db->execute($query,$query);
     $get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);

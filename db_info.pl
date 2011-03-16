@@ -41,8 +41,8 @@ SQL
 
 our $add_new_product = $connect->prepare_cached(<<"SQL");
 INSERT INTO $product_db
-(name, description, barcode, quantity)
-VALUES (?, ?, ?, ?)
+(name, description, barcode, quantity, flag)
+VALUES (?, ?, ?, ?, ?)
 SQL
 
 our $flag_set = $connect->prepare_cached(<<"SQL");
