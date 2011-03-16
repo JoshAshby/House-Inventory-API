@@ -10,14 +10,20 @@ my $dsn = "dbi:$platform:$database:$host:$port";
 
 my $connect = DBI->connect($dsn, $user, $pw) or die "Couldn't connect to database!" . DBI->errstr;
 
-our $get_all_products = $connect->prepare_cached("SELECT name, description, barcode, quantity FROM $product_db ORDER BY id desc");
+our $get_all_products = $connect->prepare_cached("SELECT name, description, barcode, quantity, flag FROM $product_db ORDER BY id desc");
 
-our $get_product = $connect->prepare_cached("SELECT name, description, barcode, quantity FROM $product_db WHERE name = ? OR barcode = ?");
+our $get_product_db = $connect->prepare_cached("SELECT name, description, barcode, quantity, flag, average FROM $product_db WHERE name = ? OR barcode = ?");
 
 our $update_product_quantity = $connect->prepare_cached(<<"SQL");
 UPDATE $product_db
 SET quantity = ?
 WHERE name = ? OR barcode = ?
+SQL
+
+our $update_product = $connect->prepare_cached(<<"SQL");
+UPDATE $product_db
+SET name = ?, description = ?, barcode = ?, quantity = ?
+WHERE barcode = ?
 SQL
 
 our $add_new_product = $connect->prepare_cached(<<"SQL");

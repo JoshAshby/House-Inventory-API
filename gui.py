@@ -80,21 +80,33 @@ class total_inventory(QtGui.QWidget):
 		self.product_quantity = QtGui.QLineEdit()
 		self.product_quantity.setReadOnly(True)
 		
+		self.edit = QtGui.QPushButton("Edit")
+		self.submit = QtGui.QPushButton("Submit Changes")
+		self.submit.setEnabled(False)
+		self.ref_but = QtGui.QPushButton("Refresh Table")
+		
 		formBox.addRow(self.tr("Name: "), self.product_name)
 		formBox.addRow(self.tr("Barcode: "), self.product_barcode)
 		formBox.addRow(self.tr("Description: "), self.product_description)
 		formBox.addRow(self.tr("Quantity: "), self.product_quantity)
+		formBox.addRow(self.tr("Edit Product Info? "), self.edit)
+		formBox.addRow(self.tr("Submit Product Info Change? "), self.submit)
+		formBox.addRow(self.ref_but)
 		
 		mainLayout.addWidget(self.list, 200)
 		
-		self.connect(self.list, SIGNAL("itemClicked(QTreeWidgetItem *, int)"), self.product_info)
-		
-		timer = QtCore.QTimer(self)
-		QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.product_info)
-		timer.start(1000)
+		self.connect(self.list, QtCore.SIGNAL("itemClicked(QTreeWidgetItem *, int)"), self.product_info)
+		self.connect(self.edit, QtCore.SIGNAL("clicked()"), self.edit_info)
+		self.connect(self.submit, QtCore.SIGNAL("clicked()"), self.product_update)
+		self.connect(self.ref_but, QtCore.SIGNAL("clicked()"), self.refresh)
 		
 	def product_info(self):
 		item = self.list.currentItem()
+		self.product_name.setReadOnly(True)
+		self.product_barcode.setReadOnly(True)
+		self.product_description.setReadOnly(True)
+		self.product_quantity.setReadOnly(True)
+		self.submit.setEnabled(False)
 		if (item):
 			query = item.text(0)
 			params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
@@ -112,13 +124,32 @@ class total_inventory(QtGui.QWidget):
 		Goes here
 		"""
 		
+	def edit_info(self):
+		self.product_name.setReadOnly(False)
+		self.product_barcode.setReadOnly(False)
+		self.product_description.setReadOnly(False)
+		self.product_quantity.setReadOnly(False)
+		self.submit.setEnabled(True)
+		
 	def product_update(self):
-		"""
-		Code for if a product has been updated -> modify database
-		Goes here
-		"""
+		name = self.product_name.text()
+		barcode = self.product_barcode.text()
+		description = self.product_description.toPlainText()
+		quantity = self.product_quantity.text()
+		
+		params = urllib.urlencode({'type_of_query': 'update_product_info',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity})
+		data = request.request(params)
+		
+		self.refresh()
+		
+		item = self.list.findItems(name, QtCore.Qt.MatchExactly ,0)
+		self.list.setCurrentItem(item[0])
+		
+		self.product_info();
+		
 		
 	def refresh(self):
+		self.list.clear()
 		params = urllib.urlencode({'type_of_query': 'total_inventory'})
 		data = request.request(params)
 		
@@ -139,6 +170,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.mainTabWidget.setMovable(True)
 		self.setCentralWidget(self.mainTabWidget)
 
+		self.bluetooth_tab()
 		self.total_inventory_tab()
 
 		self.statusBar()
