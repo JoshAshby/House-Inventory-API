@@ -32,17 +32,17 @@ class bluetooth_tab(QtGui.QWidget):
 		self.list = QtGui.QTreeWidget(self)
 		self.list.setHeaderLabels(['Name', 'Host', 'Port'])
 		
-		self.refresh()
-		
 		fileBox = QtGui.QHBoxLayout()
+		buttonBox = QtGui.QHBoxLayout()
 		mainLayout.addLayout(fileBox, 0)
 		
 		self.con_but = QtGui.QPushButton("Connect")
 		self.ref_but = QtGui.QPushButton("Refresh")
 
-		mainLayout.addWidget(self.list, 200)
-		mainLayout.addWidget(self.con_but, 10)
-		mainLayout.addWidget(self.ref_but, 10)
+		mainLayout.addWidget(self.list)
+		fileBox.addLayout(buttonBox)
+		buttonBox.addWidget(self.con_but)
+		buttonBox.addWidget(self.ref_but)
 		
 		self.connect(self.con_but, QtCore.SIGNAL("clicked()"),  self.connect_but)
 		self.connect(self.ref_but, QtCore.SIGNAL("clicked()"),  self.refresh)
@@ -72,22 +72,49 @@ class total_inventory(QtGui.QWidget):
 		self.setLayout(mainLayout)
 		
 		self.list = QtGui.QTreeWidget(self)
-		self.list.setHeaderLabels(['Name', 'Description', 'Quantity', 'Flags'])
-		
-		params = urllib.urlencode({'type_of_query': 'total_inventory'})
+		self.list.setHeaderLabels(['Name', 'Description', 'Quantity', 'Barcode', 'Flags'])
 
 		self.refresh()
 		
 		fileBox = QtGui.QHBoxLayout()
-		mainLayout.addLayout(fileBox, 0)
-
+		mainLayout.addLayout(fileBox)
+		formBox = QtGui.QFormLayout()
+		fileBox.addLayout(formBox)
+		
+		self.product_name = QtGui.QLineEdit()
+		self.product_name.setReadOnly(True)
+		self.product_barcode = QtGui.QLineEdit()
+		self.product_barcode.setReadOnly(True)
+		self.product_description = QtGui.QPlainTextEdit()
+		self.product_description.setReadOnly(True)
+		self.product_quantity = QtGui.QLineEdit()
+		self.product_quantity.setReadOnly(True)
+		
+		formBox.addRow(self.tr("Name: "), self.product_name)
+		formBox.addRow(self.tr("Barcode: "), self.product_barcode)
+		formBox.addRow(self.tr("Description: "), self.product_description)
+		formBox.addRow(self.tr("Quantity: "), self.product_quantity)
+		
 		mainLayout.addWidget(self.list, 200)
+		
+		self.connect(self.list, SIGNAL("itemClicked(QTreeWidgetItem *, int)"), self.product_info)
+		
+	def product_info(self, num):
+		item = self.list.currentItem()
+		query = item.text(4)
+		
+		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
+		
+		data = request.request(params)
+		
+		self.product_name.setText(data['name'])
 		
 	def scan(self):
 		"""
 		Code for when an item is scanned in -> place the text in the text boxes
 		Goes here
 		"""
+		
 	def product_update(self):
 		"""
 		Code for if a product has been updated -> modify database
@@ -95,6 +122,7 @@ class total_inventory(QtGui.QWidget):
 		"""
 		
 	def refresh(self):
+		params = urllib.urlencode({'type_of_query': 'total_inventory'})
 		data = request.request(params)
 		
 		for i in range(len(data)):
