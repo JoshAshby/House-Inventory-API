@@ -51,6 +51,12 @@ SET flag = ?
 WHERE name = ? OR barcode = ?
 SQL
 
+our $average_set = $connect->prepare_cached(<<"SQL");
+UPDATE $product_db
+SET average = ?
+WHERE name = ? OR barcode = ?
+SQL
+
 our $update_quantity = $connect->prepare_cached(<<"SQL");
 INSERT INTO $stats_db
 (barcode, quantity)

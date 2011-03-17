@@ -1,4 +1,6 @@
 package database;
+use warnings;
+use strict;
 use DBI;
 use DBD::mysql;
 use JSON;
@@ -18,7 +20,8 @@ our $flag_set;
 our $update_quantity;
 our $remove_product;
 our $gen_stats;
-our $gen_stats;
+our $average_set;
+our $update_product;
 
 sub new {
 	my $class = shift;
@@ -40,6 +43,14 @@ sub new {
 
 sub print_info {
 	my $query = @_[1];
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
 	$get_product_db->execute($query,$query);
 	$get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
 	my $p_text;
@@ -50,7 +61,33 @@ sub print_info {
 	print $p_text;
 }
 
+sub return_quantity {
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
+	my $query = @_[1];
+	$get_product_db->execute($query,$query);
+	$get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
+	my $p_text;
+	while($get_product_db->fetch()){
+		return $quantity;
+	}
+}
+
 sub total_inventory {
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
 	$get_all_products->execute();
 	$get_all_products->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag);
 	my @data_hash;
@@ -65,6 +102,14 @@ sub update_product_quantity {
 	my $self = @_[0];
 	my $query = @_[1];
 	my $quantity = @_[2];
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
 	$update_product_quantity->execute($quantity,$query,$query);
 	$self->print_info($query);
 }
@@ -75,6 +120,14 @@ sub update_product_info {
 	my $description = @_[2];
 	my $query = @_[3];
 	my $quantity = @_[4];
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
 	$update_product->execute($name, $description, $query, $quantity, $query);
 	$update_quantity->execute($query, $quantity);
 	$self->print_info($query);
@@ -93,32 +146,94 @@ sub add_product {
 }
 
 sub delete_product {
+	my $self = @_[0];
 	my $barcode_val = @_[1];
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
 	$self->print_info($barcode_val);
 	$remove_product->execute($barcode_val);
 }
 
+sub return_log {
+	my $query = @_[1];
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
+	$gen_stats->execute($query);
+	$gen_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
+	my @dates;
+	my @quantity;
+	while ($gen_stats->fetch()) {
+		push(@dates, \$date);
+		push(@quantity, $quantity);
+	}
+	my @data = (@dates,@quantity);
+	my @val = (\@dates,\@quantity);
+	print $json->encode(\@data);
+	print $json->encode(\@val);
+}
+
 sub gen_stat {
+	my $self = @_[0];
 	my $barcode_val = @_[1];
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $new_quantity;
+	my $flag;
+	my $average_days_left;
+	my $date;
 	$gen_stats->execute($barcode_val);
 	$gen_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
 	my @dates;
+	my @quantity;
 	while ($gen_stats->fetch()) {
 		push(@dates, $date);
+		push(@quantity, $quantity);
 	}
 	my $count;
 	my $average;
-	for ($count = 1; $count <= 10; $count++) {
-		$d1 = DateTime::Format::MySQL->parse_datetime(@dates[$count]);
-		$d2 = DateTime::Format::MySQL->parse_datetime(@dates[$count-1]);
+	for ($count = 1; $count <= 4; $count++) {
+		my $d1 = DateTime::Format::MySQL->parse_datetime(@dates[$count]);
+		my $d2 = DateTime::Format::MySQL->parse_datetime(@dates[$count-1]);
 		my $duration = $d2 - $d1;
 		my $format = DateTime::Format::Duration->new(
 			pattern => '%e'
 		);
-		$format->format_duration($duration);
-		$average = $average+int($format);
+		print int($format->format_duration($duration));
+		$average += int($format->format_duration($duration));
 	}
-	print $average/10;
+	print $average;
+	$average = $average/10;
+	print $average;
+	my $data = @quantity[0];
+	my $d1 = DateTime->now();
+	my $d2 = DateTime::Format::MySQL->parse_datetime(@dates[0]);
+	my $duration = $d2 - $d1;
+	my $format = DateTime::Format::Duration->new(
+		pattern => '%e'
+	);
+	my $time = $data-int($format->format_duration($duration));
+	$average_set->execute($average, $barcode_val, $barcode_val);
+	if ($time <= 10 && $time > 5) {
+		$flag_set->execute('M', $barcode_val, $barcode_val);
+	} elsif ($time <= 5 && $time >= 0) {
+		$flag_set->execute('H', $barcode_val, $barcode_val);
+	} elsif ($time > 10) {
+		$flag_set->execute('L', $barcode_val, $barcode_val);
+	}
 }
 
 1;

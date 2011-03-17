@@ -173,13 +173,13 @@ class total_inventory(QtGui.QWidget):
 		self.connect(self.delete, QtCore.SIGNAL("clicked()"), self.delete_product)
 		self.connect(self.scan_thread_func, SIGNAL("output(QString)"), self.scan_results)
 		
-		timer = QtCore.QTimer(self)
-		QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.refresh)
-		timer.start(500)
+		self.timer = QtCore.QTimer(self)
+		QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.refresh)
+		self.timer.start(500)
 		
-		timer2 = QtCore.QTimer(self)
-		QtCore.QObject.connect(timer2, QtCore.SIGNAL("timeout()"), self.scan)
-		timer2.start(1000)
+		self.timer2 = QtCore.QTimer(self)
+		QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.scan)
+		self.timer2.start(1000)
 		
 	def product_info(self):
 		item = self.list.currentItem()
@@ -216,8 +216,8 @@ class total_inventory(QtGui.QWidget):
 		self.product_quantity.setReadOnly(False)
 		self.submit.setEnabled(True)
 		self.delete.setEnabled(True)
-		timer.stop()
-		timer2.stop()
+		self.timer.stop()
+		self.timer2.stop()
 		
 	def product_update(self):
 		name = self.product_name.text()
@@ -234,8 +234,8 @@ class total_inventory(QtGui.QWidget):
 		self.list.setCurrentItem(item[0])
 		
 		self.product_info()
-		timer.start(500)
-		timer2.start(1000)
+		self.timer.start(500)
+		self.timer2.start(1000)
 		
 	def delete_product(self):
 		barcode = self.product_barcode.text()
@@ -246,6 +246,8 @@ class total_inventory(QtGui.QWidget):
 		self.refresh()
 		
 		self.product_info()
+		self.timer.start(500)
+		self.timer2.start(1000)
 		
 	def refresh(self):
 		old_item = self.list.currentItem()
