@@ -60,7 +60,7 @@ sub update_product_quantity {
 	my $query = @_[1];
 	my $quantity = @_[2];
 	$update_product_quantity->execute($quantity,$query,$query);
-	self->print_info($query);
+	$self->print_info($query);
 }
 
 sub update_product_info {
@@ -75,6 +75,7 @@ sub update_product_info {
 }
 
 sub add_product {
+	my $self = @_[0];
 	my $name = @_[1];
 	my $description = @_[2];
 	my $query = @_[3];
@@ -82,12 +83,13 @@ sub add_product {
 	my $flag = @_[5];
 	$add_new_product->execute($name, $description, $query, $quantity, $flag);
 	$update_quantity->execute($query, $quantity);
-	print_info($query);
+	$self->print_info($query);
 }
 
 sub delete_product {
+	my $self = @_[0];
 	my $barcode_val = @_[1];
-	print_info($barcode_val);
+	$self->print_info($barcode_val);
 	$remove_product->execute($barcode_val);
 }
 
