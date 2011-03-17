@@ -34,13 +34,17 @@ finds device, GUI use
 """
 def find_host_GUI():
 	for host, name in bluetooth.discover_devices(lookup_names=True):
-		services = bluetooth.find_service(address=host)
-		for service in services:
-			if service['name'] == 'SL4A':
-				port = service['port']
-		if (name):
-			return host, name, port
-	return 'None', 'None', 'None'
+		if (host):
+			services = bluetooth.find_service(address=host)
+			for service in services:
+				if (service['name'] == 'SL4A'):
+					port = service['port']
+					if (port):
+						return host, name, port
+					else:
+						return 'None', 'None', 'None'
+		else:
+			return 'None', 'None', 'None'
 	
 """
 returns: nothing
@@ -48,15 +52,17 @@ takes: nothing
 connect to the bluetooth device
 """
 def connect(host, port):
+	#sock.close()
 	sock.connect((host, port))
-
+	
 """
 returns: 100bytes from bluetooth everytime it's called
 takes: nothing
 receive data from the bluetooth device
 """
 def receive():
-	return sock.recv(100)
+	data = sock.recv(100)
+	return data
 	
 """
 returns: nothing

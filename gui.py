@@ -10,6 +10,8 @@ import Queue
 debug = 0
 version = ".5 alpha"
 
+is_connected = False
+
 class bluetooth_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
@@ -41,7 +43,6 @@ class bluetooth_tab(QtGui.QWidget):
 		data = self.list.currentItem()
 		host = str(data.text(1))
 		port = int(data.text(2))
-		
 		request.connect(host, port)
 		
 	def refresh(self):
@@ -100,6 +101,22 @@ class add_product(QtGui.QWidget):
 			self.product_barcode.clear()
 			self.product_description.clear()
 			self.product_quantity.clear()
+			
+class scan_thread(QtCore.QThread):
+	def __init__(self, parent = None):
+		QtCore.QThread.__init__(self, parent)
+		self.exiting = False
+		self.n = 1
+	
+	def __del__(self):
+		self.exiting = True
+		self.wait()
+		
+	def run(self):
+		while not self.exiting and self.n > 0:
+			query = request.receive()
+			self.emit(SIGNAL("output(QString)"), query)
+				
 
 class total_inventory(QtGui.QWidget):
 	def __init__(self, parent, main):
@@ -114,6 +131,8 @@ class total_inventory(QtGui.QWidget):
 		self.list.setHeaderLabels(['Name', 'Description', 'Quantity', 'Barcode', 'Flags'])
 
 		self.refresh()
+		
+		self.scan_thread_func = scan_thread()
 		
 		fileBox = QtGui.QHBoxLayout()
 		mainLayout.addLayout(fileBox)
@@ -152,6 +171,7 @@ class total_inventory(QtGui.QWidget):
 		self.connect(self.submit, QtCore.SIGNAL("clicked()"), self.product_update)
 		self.connect(self.ref_but, QtCore.SIGNAL("clicked()"), self.refresh)
 		self.connect(self.delete, QtCore.SIGNAL("clicked()"), self.delete_product)
+		self.connect(self.scan_thread_func, SIGNAL("output(QString)"), self.scan_results)
 		
 		timer = QtCore.QTimer(self)
 		QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.refresh)
@@ -159,7 +179,7 @@ class total_inventory(QtGui.QWidget):
 		
 		timer2 = QtCore.QTimer(self)
 		QtCore.QObject.connect(timer2, QtCore.SIGNAL("timeout()"), self.scan)
-		timer.start(100)
+		timer2.start(1000)
 		
 	def product_info(self):
 		item = self.list.currentItem()
@@ -179,16 +199,15 @@ class total_inventory(QtGui.QWidget):
 			self.product_barcode.setText(str(data['barcode']))
 			self.product_description.setPlainText(str(data['description']))
 			self.product_quantity.setText(str(data['quantity']))
+			
+	def scan_results(self, query):
+		item = self.list.findItems(query, QtCore.Qt.MatchExactly ,3)
+		self.list.setCurrentItem(item[0])
+		
+		self.product_info()
 		
 	def scan(self):
-		query = request.receive()
-		params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
-		data = request(params)
-		
-		self.product_name.setText(str(data['name']))
-		self.product_barcode.setText(str(data['barcode']))
-		self.product_description.setPlainText(str(data['description']))
-		self.product_quantity.setText(str(data['quantity']))
+		self.scan_thread_func.start()
 		
 	def edit_info(self):
 		self.product_name.setReadOnly(False)
@@ -197,6 +216,8 @@ class total_inventory(QtGui.QWidget):
 		self.product_quantity.setReadOnly(False)
 		self.submit.setEnabled(True)
 		self.delete.setEnabled(True)
+		timer.stop()
+		timer2.stop()
 		
 	def product_update(self):
 		name = self.product_name.text()
@@ -213,6 +234,8 @@ class total_inventory(QtGui.QWidget):
 		self.list.setCurrentItem(item[0])
 		
 		self.product_info()
+		timer.start(500)
+		timer2.start(1000)
 		
 	def delete_product(self):
 		barcode = self.product_barcode.text()
