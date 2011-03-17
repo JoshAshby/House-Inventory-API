@@ -14,6 +14,7 @@ our $add_new_product;
 our $flag_set;
 our $update_quantity;
 our $remove_product;
+our $gen_stats_db;
 
 sub new {
 	my $class = shift;
@@ -91,6 +92,12 @@ sub delete_product {
 	my $barcode_val = @_[1];
 	$self->print_info($barcode_val);
 	$remove_product->execute($barcode_val);
+}
+
+sub gen_stats {
+	my $self = @_[0];
+	my $barcode_val = @_[1];
+	
 }
 
 1;

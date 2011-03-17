@@ -56,3 +56,4 @@ INSERT INTO $stats_db
 (barcode, quantity)
 VALUES (?, ?)
 SQL
+
