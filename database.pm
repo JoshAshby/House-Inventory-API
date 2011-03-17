@@ -2,6 +2,9 @@ package database;
 use DBI;
 use DBD::mysql;
 use JSON;
+use DateTime;
+use DateTime::Format::MySQL;
+use DateTime::Format::Duration;
 
 my $json = new JSON;
    
@@ -14,7 +17,8 @@ our $add_new_product;
 our $flag_set;
 our $update_quantity;
 our $remove_product;
-our $gen_stats_db;
+our $gen_stats;
+our $gen_stats;
 
 sub new {
 	my $class = shift;
@@ -27,6 +31,7 @@ sub new {
 	my $new_quantity;
 	my $flag;
 	my $average_days_left;
+	my $date;
 	my %text;
 
 	bless ($self, $class);
@@ -88,16 +93,32 @@ sub add_product {
 }
 
 sub delete_product {
-	my $self = @_[0];
 	my $barcode_val = @_[1];
 	$self->print_info($barcode_val);
 	$remove_product->execute($barcode_val);
 }
 
-sub gen_stats {
-	my $self = @_[0];
+sub gen_stat {
 	my $barcode_val = @_[1];
-	
+	$gen_stats->execute($barcode_val);
+	$gen_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
+	my @dates;
+	while ($gen_stats->fetch()) {
+		push(@dates, $date);
+	}
+	my $count;
+	my $average;
+	for ($count = 1; $count <= 10; $count++) {
+		$d1 = DateTime::Format::MySQL->parse_datetime(@dates[$count]);
+		$d2 = DateTime::Format::MySQL->parse_datetime(@dates[$count-1]);
+		my $duration = $d2 - $d1;
+		my $format = DateTime::Format::Duration->new(
+			pattern => '%e'
+		);
+		$format->format_duration($duration);
+		$average = $average+int($format);
+	}
+	print $average/10;
 }
 
 1;

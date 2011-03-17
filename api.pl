@@ -32,6 +32,6 @@ if ($type_of_query eq 'single_product_info') {
 	$inventory->update_product_info($name_value, $description_value, $query_value, $quantity_value);
 } elsif ($type_of_query eq 'remove_product') {
 	$inventory->delete_product($query_value);
-} elsif ($type_of_query eq 'gen_stats') {
-	$inventory->gen_product_stats($query_value);
+} elsif ($type_of_query eq 'gen_stat') {
+	$inventory->gen_stat($query_value);
 }

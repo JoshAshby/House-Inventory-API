@@ -57,3 +57,9 @@ INSERT INTO $stats_db
 VALUES (?, ?)
 SQL
 
+our $gen_stats = $connect->prepare_cached(<<"SQL");
+SELECT *
+FROM $stats_db
+WHERE barcode = ?
+ORDER BY date desc
+SQL
