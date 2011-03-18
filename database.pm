@@ -161,7 +161,7 @@ sub gen_stat {
 	}
 	my $count;
 	my $average;
-	for ($count = 1; $count <= 4; $count++) {
+	for ($count = 1; $count <= length(@dates); $count++) {
 		my $d1 = DateTime::Format::MySQL->parse_datetime(@dates[$count]);
 		my $d2 = DateTime::Format::MySQL->parse_datetime(@dates[$count-1]);
 		my $duration = $d2 - $d1;

@@ -186,7 +186,7 @@ class total_inventory(QtGui.QWidget):
 		
 		mainLayout.addWidget(self.list, 200)
 		
-		self.connect(self.list, QtCore.SIGNAL("itemClicked(QTreeWidgetItem *, int)"), self.product_info)
+		self.connect(self.list, QtCore.SIGNAL("itemClicked(QTreeWidgetItem *, int)"), self.product_info_click)
 		self.connect(self.edit, QtCore.SIGNAL("clicked()"), self.edit_info)
 		self.connect(self.submit, QtCore.SIGNAL("clicked()"), self.product_update)
 		self.connect(self.ref_but, QtCore.SIGNAL("clicked()"), self.refresh)
@@ -195,11 +195,30 @@ class total_inventory(QtGui.QWidget):
 		
 		self.timer = QtCore.QTimer(self)
 		QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.refresh)
-		self.timer.start(1000)
+		self.timer.start(500)
 		
 		self.timer2 = QtCore.QTimer(self)
 		QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.scan)
 		self.timer2.start(1000)
+		
+	def re_plot(self, query):
+		params = urllib.urlencode({'type_of_query': 'return_stat', 'query': query})
+		data_new = request.request(params)
+
+		datestrings = data_new[0]
+		quantity = data_new[1]
+
+		dates = [dateutil.parser.parse(s) for s in datestrings]
+
+		self.ax.plot_date(pylab.date2num(dates), quantity, 'ro')
+		self.ax.xaxis.set_major_locator(months)
+		self.ax.xaxis.set_major_formatter(yearsFmt)
+		self.ax.xaxis.set_minor_locator(days)
+		self.ax.autoscale_view()
+		self.ax.fmt_xdata = DateFormatter('%Y-%m-%d')
+		self.fig.autofmt_xdate()
+
+		self.canvas.draw()
 		
 	def product_info(self):
 		item = self.list.currentItem()
@@ -218,25 +237,14 @@ class total_inventory(QtGui.QWidget):
 			self.product_barcode.setText(str(data['barcode']))
 			self.product_description.setPlainText(str(data['description']))
 			self.product_quantity.setText(str(data['quantity']))
-			
-			params = urllib.urlencode({'type_of_query': 'return_stat', 'query': query})
-			data_new = request.request(params)
-			
-			datestrings = data_new[0]
-			quantity = data_new[1]
-			
-			dates = [dateutil.parser.parse(s) for s in datestrings]
-			
-			self.ax.plot_date(pylab.date2num(dates), quantity, 'ro')
-			self.ax.xaxis.set_major_locator(months)
-			self.ax.xaxis.set_major_formatter(yearsFmt)
-			self.ax.xaxis.set_minor_locator(days)
-			self.ax.autoscale_view()
-			self.ax.fmt_xdata = DateFormatter('%Y-%m-%d')
-			self.fig.autofmt_xdate()
-			
-			self.canvas.draw()
-			
+	
+	def product_info_click(self):
+		self.product_info()
+		item = self.list.currentItem()
+		if (item):
+			query = item.text(3)
+			self.re_plot(query)
+	
 	def scan_results(self, query):
 		item = self.list.findItems(query, QtCore.Qt.MatchExactly ,3)
 		self.list.setCurrentItem(item[0])
@@ -289,7 +297,8 @@ class total_inventory(QtGui.QWidget):
 	def refresh(self):
 		old_item = self.list.currentItem()
 		if (old_item):
-			query =old_item.text(0)
+			query = old_item.text(3)
+			quantity = old_item.text(2)
 			
 		self.list.clear()
 		params = urllib.urlencode({'type_of_query': 'total_inventory'})
@@ -300,10 +309,13 @@ class total_inventory(QtGui.QWidget):
 			self.list.addTopLevelItem(item)
 		
 		if (old_item):
-			item = self.list.findItems(query, QtCore.Qt.MatchExactly ,0)
+			item = self.list.findItems(query, QtCore.Qt.MatchExactly , 3)
 			self.list.setCurrentItem(item[0])
 		
 			self.product_info()
+			
+			if (item[0].text(2) != quantity):
+				self.re_plot(query)
 
 class MainWindow(QtGui.QMainWindow):
 	def __init__(self, parent=None):
