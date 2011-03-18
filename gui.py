@@ -12,6 +12,10 @@ version = ".5 alpha"
 
 is_connected = False
 
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
 class bluetooth_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
@@ -136,8 +140,20 @@ class total_inventory(QtGui.QWidget):
 		
 		fileBox = QtGui.QHBoxLayout()
 		mainLayout.addLayout(fileBox)
+		topBox = QtGui.QHBoxLayout()
 		formBox = QtGui.QFormLayout()
-		fileBox.addLayout(formBox)
+		topBox.addLayout(formBox)
+		fileBox.addLayout(topBox)
+		
+		self.dpi = 100
+		self.fig = Figure((2.0, 2.0), dpi=self.dpi)
+		self.canvas = FigureCanvas(self.fig)
+		self.axes = self.fig.add_subplot(111)
+		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
+		vbox = QtGui.QVBoxLayout()
+		vbox.addWidget(self.canvas)
+		vbox.addWidget(self.mpl_toolbar)
+		topBox.addLayout(vbox)
 		
 		self.product_name = QtGui.QLineEdit()
 		self.product_name.setReadOnly(True)
