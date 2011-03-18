@@ -6,15 +6,19 @@ import request
 import httplib, urllib
 import threading
 import Queue
-
-debug = 0
-version = ".5 alpha"
-
-is_connected = False
-
+import datetime, pylab
+import dateutil
+from matplotlib.dates import DayLocator, MonthLocator, DateFormatter
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
+days    = DayLocator()   # every year
+months   = MonthLocator()  # every month
+yearsFmt = DateFormatter('%m-%d')
+
+debug = 0
+version = ".5 alpha"
 
 class bluetooth_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
@@ -148,7 +152,7 @@ class total_inventory(QtGui.QWidget):
 		self.dpi = 100
 		self.fig = Figure((2.0, 2.0), dpi=self.dpi)
 		self.canvas = FigureCanvas(self.fig)
-		self.axes = self.fig.add_subplot(111)
+		self.ax = self.fig.add_subplot(111)
 		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
 		vbox = QtGui.QVBoxLayout()
 		vbox.addWidget(self.canvas)
@@ -191,7 +195,7 @@ class total_inventory(QtGui.QWidget):
 		
 		self.timer = QtCore.QTimer(self)
 		QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.refresh)
-		self.timer.start(500)
+		self.timer.start(1000)
 		
 		self.timer2 = QtCore.QTimer(self)
 		QtCore.QObject.connect(self.timer2, QtCore.SIGNAL("timeout()"), self.scan)
@@ -206,15 +210,32 @@ class total_inventory(QtGui.QWidget):
 		self.submit.setEnabled(False)
 		self.delete.setEnabled(False)
 		if (item):
-			query = item.text(0)
+			query = item.text(3)
 			params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
-		
 			data = request.request(params)
 		
 			self.product_name.setText(str(data['name']))
 			self.product_barcode.setText(str(data['barcode']))
 			self.product_description.setPlainText(str(data['description']))
 			self.product_quantity.setText(str(data['quantity']))
+			
+			params = urllib.urlencode({'type_of_query': 'return_stat', 'query': query})
+			data_new = request.request(params)
+			
+			datestrings = data_new[0]
+			quantity = data_new[1]
+			
+			dates = [dateutil.parser.parse(s) for s in datestrings]
+			
+			self.ax.plot_date(pylab.date2num(dates), quantity, 'ro')
+			self.ax.xaxis.set_major_locator(months)
+			self.ax.xaxis.set_major_formatter(yearsFmt)
+			self.ax.xaxis.set_minor_locator(days)
+			self.ax.autoscale_view()
+			self.ax.fmt_xdata = DateFormatter('%Y-%m-%d')
+			self.fig.autofmt_xdate()
+			
+			self.canvas.draw()
 			
 	def scan_results(self, query):
 		item = self.list.findItems(query, QtCore.Qt.MatchExactly ,3)
