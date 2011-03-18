@@ -27,16 +27,6 @@ sub new {
 	my $class = shift;
 	my $self = {};
 
-	my $name;
-	my $description;
-	my $barcode;
-	my $quantity;
-	my $new_quantity;
-	my $flag;
-	my $average_days_left;
-	my $date;
-	my %text;
-
 	bless ($self, $class);
 	return $self;
 }
@@ -47,10 +37,8 @@ sub print_info {
 	my $description;
 	my $barcode;
 	my $quantity;
-	my $new_quantity;
 	my $flag;
 	my $average_days_left;
-	my $date;
 	$get_product_db->execute($query,$query);
 	$get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
 	my $p_text;
@@ -62,15 +50,13 @@ sub print_info {
 }
 
 sub return_quantity {
+	my $query = @_[1];
 	my $name;
 	my $description;
 	my $barcode;
 	my $quantity;
-	my $new_quantity;
 	my $flag;
 	my $average_days_left;
-	my $date;
-	my $query = @_[1];
 	$get_product_db->execute($query,$query);
 	$get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
 	my $p_text;
@@ -84,10 +70,7 @@ sub total_inventory {
 	my $description;
 	my $barcode;
 	my $quantity;
-	my $new_quantity;
 	my $flag;
-	my $average_days_left;
-	my $date;
 	$get_all_products->execute();
 	$get_all_products->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag);
 	my @data_hash;
@@ -102,14 +85,6 @@ sub update_product_quantity {
 	my $self = @_[0];
 	my $query = @_[1];
 	my $quantity = @_[2];
-	my $name;
-	my $description;
-	my $barcode;
-	my $quantity;
-	my $new_quantity;
-	my $flag;
-	my $average_days_left;
-	my $date;
 	$update_product_quantity->execute($quantity,$query,$query);
 	$self->print_info($query);
 }
@@ -120,14 +95,6 @@ sub update_product_info {
 	my $description = @_[2];
 	my $query = @_[3];
 	my $quantity = @_[4];
-	my $name;
-	my $description;
-	my $barcode;
-	my $quantity;
-	my $new_quantity;
-	my $flag;
-	my $average_days_left;
-	my $date;
 	$update_product->execute($name, $description, $query, $quantity, $query);
 	$update_quantity->execute($query, $quantity);
 	$self->print_info($query);
@@ -148,40 +115,29 @@ sub add_product {
 sub delete_product {
 	my $self = @_[0];
 	my $barcode_val = @_[1];
-	my $name;
-	my $description;
-	my $barcode;
-	my $quantity;
-	my $new_quantity;
-	my $flag;
-	my $average_days_left;
-	my $date;
 	$self->print_info($barcode_val);
 	$remove_product->execute($barcode_val);
 }
 
 sub return_log {
 	my $query = @_[1];
-	my $name;
-	my $description;
 	my $barcode;
 	my $quantity;
-	my $new_quantity;
-	my $flag;
-	my $average_days_left;
 	my $date;
 	$gen_stats->execute($query);
 	$gen_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
-	my @dates;
-	my @quantity;
+	my %dates;
+	my %quantity;
+	my @dates_ar;
+	my @quantity_ar;
 	while ($gen_stats->fetch()) {
-		push(@dates, \$date);
-		push(@quantity, $quantity);
+		push(@dates_ar, $date);
+		push(@quantity_ar, $quantity);
 	}
-	my @data = (@dates,@quantity);
-	my @val = (\@dates,\@quantity);
-	print $json->encode(\@data);
-	print $json->encode(\@val);
+	my @array;
+	push(@array, \@dates_ar);
+	push(@array, \@quantity_ar);
+	print $json->encode(\@array);
 }
 
 sub gen_stat {
