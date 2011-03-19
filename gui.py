@@ -67,55 +67,6 @@ class bluetooth_tab(QtGui.QWidget):
 		if (name):
 			item = QtGui.QTreeWidgetItem([name, host, str(port)])
 			self.list.addTopLevelItem(item)
-
-class add_product(QtGui.QWidget):
-	def __init__(self, parent, main):
-		QtGui.QWidget.__init__(self)
-		
-		mainLayout = QtGui.QVBoxLayout()
-		mainLayout.setContentsMargins(0, 0, 0, 0)
-		mainLayout.setSpacing(0)
-		self.setLayout(mainLayout)
-		
-		fileBox = QtGui.QHBoxLayout()
-		mainLayout.addLayout(fileBox)
-		formBox = QtGui.QFormLayout()
-		fileBox.addLayout(formBox)
-		
-		self.product_name = QtGui.QLineEdit()
-		self.product_barcode = QtGui.QLineEdit()
-		self.product_description = QtGui.QPlainTextEdit()
-		self.product_quantity = QtGui.QLineEdit()
-		self.product_flag = QtGui.QComboBox()
-		
-		self.product_flag.addItems(['L', 'M', 'H'])
-		
-		self.submit = QtGui.QPushButton("Add New Product")
-		
-		formBox.addRow(self.tr("Name: "), self.product_name)
-		formBox.addRow(self.tr("Barcode: "), self.product_barcode)
-		formBox.addRow(self.tr("Description: "), self.product_description)
-		formBox.addRow(self.tr("Quantity: "), self.product_quantity)
-		formBox.addRow(self.tr("Flag: "), self.product_flag)
-		formBox.addRow(self.tr("Submit Product Info Addition? "), self.submit)
-		
-		self.connect(self.submit, QtCore.SIGNAL("clicked()"), self.product_add)
-		
-	def product_add(self):
-		name = self.product_name.text()
-		barcode = self.product_barcode.text()
-		description = self.product_description.toPlainText()
-		quantity = self.product_quantity.text()
-		flag = self.product_flag.currentText()
-		
-		if (barcode):
-			params = urllib.urlencode({'type_of_query': 'add_new_product',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity, 'flag': flag})
-			data = request.request(params)
-			
-			self.product_name.clear()
-			self.product_barcode.clear()
-			self.product_description.clear()
-			self.product_quantity.clear()
 			
 class scan_thread(QtCore.QThread):
 	def __init__(self, parent = None):
@@ -387,24 +338,18 @@ class MainWindow(QtGui.QMainWindow):
 		self.setCentralWidget(self.mainTabWidget)
 
 		self.bluetooth_tab()
-		self.add_product_tab()
 		self.total_inventory_tab()
 
 		self.statusBar()
 		
 	def total_inventory_tab(self):
 		new_inven = total_inventory(self, self)
-		newTab = self.mainTabWidget.addTab(new_inven, "Total Inventory")
+		newTab = self.mainTabWidget.addTab(new_inven, "Inventory")
 		self.mainTabWidget.setCurrentIndex(newTab)
 		
 	def bluetooth_tab(self):
 		new_inven = bluetooth_tab(self, self)
 		newTab = self.mainTabWidget.addTab(new_inven, "Bluetooth devices")
-		self.mainTabWidget.setCurrentIndex(newTab)
-		
-	def add_product_tab(self):
-		new_inven = add_product(self, self)
-		newTab = self.mainTabWidget.addTab(new_inven, "Add Product")
 		self.mainTabWidget.setCurrentIndex(newTab)
 		
 if __name__ == "__main__":
