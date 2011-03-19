@@ -27,29 +27,81 @@ yearsFmt = DateFormatter('%m-%d')
 debug = 0
 version = "1 alpha"
 
+class graph_tab(QtGui.QWidget):
+	def __init__(self, parent, main):
+		QtGui.QWidget.__init__(self)
+		
+		self.mainLayout = QtGui.QVBoxLayout()
+		self.mainLayout.setContentsMargins(0, 0, 0, 0)
+		self.mainLayout.setSpacing(0)
+		self.setLayout(self.mainLayout)
+		
+		self.dpi = 100
+		self.fig = Figure((2.0, 2.0), dpi=self.dpi)
+		self.canvas = FigureCanvas(self.fig)
+		self.ax = self.fig.add_subplot(111)
+		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
+		self.vbox = QtGui.QVBoxLayout()
+		self.vbox.addWidget(self.canvas)
+		self.vbox.addWidget(self.mpl_toolbar)
+		self.mainLayout.addLayout(self.vbox)
+	
+	def re_plot(self, query):
+		self.canvas.close()
+		self.mpl_toolbar.close()
+		self.fig.clear()
+		
+		self.canvas = FigureCanvas(self.fig)
+		self.ax = self.fig.add_subplot(111)
+		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
+		self.vbox.addWidget(self.canvas)
+		self.vbox.addWidget(self.mpl_toolbar)
+		
+		params = urllib.urlencode({'type_of_query': 'return_stat', 'query': query})
+		data_new = request.request(params)
+
+		datestrings = data_new[0]
+		quantity = data_new[1]
+
+		dates = [dateutil.parser.parse(s) for s in datestrings]
+		quantitys = [int(d) for d in quantity]
+		
+		self.ax.plot_date(pylab.date2num(dates), quantity)
+		self.ax.xaxis.set_major_locator(auto)
+		self.ax.xaxis.set_major_formatter(yearsFmt)
+		self.ax.xaxis.set_minor_locator(auto)
+		self.ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+		self.ax.autoscale_view()
+		self.ax.grid(True)
+		
+		self.ax.fmt_xdata = DateFormatter('%Y-%m-%d')
+		self.fig.autofmt_xdate()
+
+		self.canvas.draw()
+		
 class bluetooth_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
 		
-		mainLayout = QtGui.QVBoxLayout()
-		mainLayout.setContentsMargins(0, 0, 0, 0)
-		mainLayout.setSpacing(0)
-		self.setLayout(mainLayout)
+		self.mainLayout = QtGui.QVBoxLayout()
+		self.mainLayout.setContentsMargins(0, 0, 0, 0)
+		self.mainLayout.setSpacing(0)
+		self.setLayout(self.mainLayout)
 		
 		self.list = QtGui.QTreeWidget(self)
 		self.list.setHeaderLabels(['Name', 'Host', 'Port'])
 		
-		fileBox = QtGui.QHBoxLayout()
-		buttonBox = QtGui.QHBoxLayout()
-		mainLayout.addLayout(fileBox, 0)
+		self.fileBox = QtGui.QHBoxLayout()
+		self.buttonBox = QtGui.QHBoxLayout()
+		self.mainLayout.addLayout(self.fileBox, 0)
 		
 		self.con_but = QtGui.QPushButton("Connect")
 		self.ref_but = QtGui.QPushButton("Refresh")
 
-		mainLayout.addWidget(self.list)
-		fileBox.addLayout(buttonBox)
-		buttonBox.addWidget(self.con_but)
-		buttonBox.addWidget(self.ref_but)
+		self.mainLayout.addWidget(self.list)
+		self.fileBox.addLayout(self.buttonBox)
+		self.buttonBox.addWidget(self.con_but)
+		self.buttonBox.addWidget(self.ref_but)
 		
 		self.connect(self.con_but, QtCore.SIGNAL("clicked()"),  self.connect_but)
 		self.connect(self.ref_but, QtCore.SIGNAL("clicked()"),  self.refresh)
@@ -88,10 +140,10 @@ class total_inventory(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
 		
-		mainLayout = QtGui.QVBoxLayout()
-		mainLayout.setContentsMargins(0, 0, 0, 0)
-		mainLayout.setSpacing(0)
-		self.setLayout(mainLayout)
+		self.mainLayout = QtGui.QVBoxLayout()
+		self.mainLayout.setContentsMargins(0, 0, 0, 0)
+		self.mainLayout.setSpacing(0)
+		self.setLayout(self.mainLayout)
 		
 		self.list = QtGui.QTreeWidget(self)
 		self.list.setHeaderLabels(['Name', 'Description', 'Quantity', 'Barcode', 'Flags'])
@@ -100,22 +152,16 @@ class total_inventory(QtGui.QWidget):
 		
 		self.scan_thread_func = scan_thread()
 		
-		fileBox = QtGui.QHBoxLayout()
-		mainLayout.addLayout(fileBox)
-		topBox = QtGui.QHBoxLayout()
-		formBox = QtGui.QFormLayout()
-		topBox.addLayout(formBox)
-		fileBox.addLayout(topBox)
+		self.fileBox = QtGui.QHBoxLayout()
+		self.mainLayout.addLayout(self.fileBox)
+		self.topBox = QtGui.QHBoxLayout()
+		self.formBox = QtGui.QFormLayout()
+		self.topBox.addLayout(self.formBox)
+		self.fileBox.addLayout(self.topBox)
 		
-		self.dpi = 100
-		self.fig = Figure((2.0, 2.0), dpi=self.dpi)
-		self.canvas = FigureCanvas(self.fig)
-		self.ax = self.fig.add_subplot(111)
-		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
-		self.vbox = QtGui.QVBoxLayout()
-		self.vbox.addWidget(self.canvas)
-		self.vbox.addWidget(self.mpl_toolbar)
-		topBox.addLayout(self.vbox)
+		self.graph = graph_tab(self, self)
+		
+		self.topBox.addWidget(self.graph)
 		
 		self.product_name = QtGui.QLineEdit()
 		self.product_name.setReadOnly(True)
@@ -139,18 +185,18 @@ class total_inventory(QtGui.QWidget):
 		self.product_flag.addItems(['L', 'M', 'H'])
 		self.product_flag.setEnabled(False)
 		
-		formBox.addRow(self.tr("Name: "), self.product_name)
-		formBox.addRow(self.tr("Barcode: "), self.product_barcode)
-		formBox.addRow(self.tr("Description: "), self.product_description)
-		formBox.addRow(self.tr("Quantity: "), self.product_quantity)
-		formBox.addRow(self.tr("Flag: "), self.product_flag)
-		formBox.addRow(self.tr("Edit Product Info? "), self.edit)
-		formBox.addRow(self.tr("Submit Product Info Change? "), self.submit)
-		formBox.addRow(self.tr("Delete Product? "), self.delete)
-		formBox.addRow(self.tr("Clear fields? "), self.clear_but)
-		formBox.addRow(self.ref_but)
+		self.formBox.addRow(self.tr("Name: "), self.product_name)
+		self.formBox.addRow(self.tr("Barcode: "), self.product_barcode)
+		self.formBox.addRow(self.tr("Description: "), self.product_description)
+		self.formBox.addRow(self.tr("Quantity: "), self.product_quantity)
+		self.formBox.addRow(self.tr("Flag: "), self.product_flag)
+		self.formBox.addRow(self.tr("Edit Product Info? "), self.edit)
+		self.formBox.addRow(self.tr("Submit Product Info Change? "), self.submit)
+		self.formBox.addRow(self.tr("Delete Product? "), self.delete)
+		self.formBox.addRow(self.tr("Clear fields? "), self.clear_but)
+		self.formBox.addRow(self.ref_but)
 		
-		mainLayout.addWidget(self.list, 200)
+		self.mainLayout.addWidget(self.list, 200)
 		
 		self.connect(self.list, QtCore.SIGNAL("itemClicked(QTreeWidgetItem *, int)"), self.product_info_click)
 		self.connect(self.edit, QtCore.SIGNAL("clicked()"), self.edit_info)
@@ -168,37 +214,7 @@ class total_inventory(QtGui.QWidget):
 		self.timer2.start(1000)
 		
 	def re_plot(self, query):
-		self.canvas.close()
-		self.mpl_toolbar.close()
-		self.fig.clear()
-		
-		self.canvas = FigureCanvas(self.fig)
-		self.ax = self.fig.add_subplot(111)
-		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
-		self.vbox.addWidget(self.canvas)
-		self.vbox.addWidget(self.mpl_toolbar)
-		
-		params = urllib.urlencode({'type_of_query': 'return_stat', 'query': query})
-		data_new = request.request(params)
-
-		datestrings = data_new[0]
-		quantity = data_new[1]
-
-		dates = [dateutil.parser.parse(s) for s in datestrings]
-		quantitys = [int(d) for d in quantity]
-		
-		self.ax.plot_date(pylab.date2num(dates), quantity)
-		self.ax.xaxis.set_major_locator(auto)
-		self.ax.xaxis.set_major_formatter(yearsFmt)
-		self.ax.xaxis.set_minor_locator(auto)
-		self.ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
-		self.ax.autoscale_view()
-		self.ax.grid(True)
-		
-		self.ax.fmt_xdata = DateFormatter('%Y-%m-%d')
-		self.fig.autofmt_xdate()
-
-		self.canvas.draw()
+		self.graph.re_plot(query)
 		
 	def product_info(self):
 		item = self.list.currentItem()
