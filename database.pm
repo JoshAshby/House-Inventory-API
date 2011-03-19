@@ -49,22 +49,6 @@ sub print_info {
 	print $p_text;
 }
 
-sub return_quantity {
-	my $query = @_[1];
-	my $name;
-	my $description;
-	my $barcode;
-	my $quantity;
-	my $flag;
-	my $average_days_left;
-	$get_product_db->execute($query,$query);
-	$get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
-	my $p_text;
-	while($get_product_db->fetch()){
-		return $quantity;
-	}
-}
-
 sub total_inventory {
 	my $name;
 	my $description;
