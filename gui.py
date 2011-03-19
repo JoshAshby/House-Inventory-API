@@ -9,16 +9,19 @@ import Queue
 import datetime, pylab
 import dateutil
 import numpy as np
-from matplotlib.dates import MinuteLocator, HourLocator, DayLocator, MonthLocator, YearLocator, DateFormatter
+from matplotlib.dates import MinuteLocator, HourLocator, DayLocator, MonthLocator, YearLocator, DateFormatter, AutoDateLocator
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.ticker import FormatStrFormatter
+
 
 days = DayLocator()
 months = MonthLocator()
 hours = HourLocator()
 years = YearLocator()
 minutes = MinuteLocator()
+auto = AutoDateLocator()
 yearsFmt = DateFormatter('%m-%d')
 
 debug = 0
@@ -226,9 +229,10 @@ class total_inventory(QtGui.QWidget):
 		quantitys = [int(d) for d in quantity]
 		
 		self.ax.plot_date(pylab.date2num(dates), quantity)
-		self.ax.xaxis.set_major_locator(months)
+		self.ax.xaxis.set_major_locator(auto)
 		self.ax.xaxis.set_major_formatter(yearsFmt)
-		self.ax.xaxis.set_minor_locator(days)
+		self.ax.xaxis.set_minor_locator(auto)
+		self.ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
 		self.ax.autoscale_view()
 		self.ax.grid(True)
 		

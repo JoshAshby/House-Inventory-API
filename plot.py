@@ -15,7 +15,7 @@ dates = [dateutil.parser.parse(s) for s in datestrings]
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.bar(pylab.date2num(dates), quantity)
+ax.hist(pylab.date2num(dates), quantity)
 ax.xaxis.set_major_locator(months)
 ax.xaxis.set_major_formatter(yearsFmt)
 ax.xaxis.set_minor_locator(days)
