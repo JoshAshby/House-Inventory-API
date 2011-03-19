@@ -8,13 +8,17 @@ import threading
 import Queue
 import datetime, pylab
 import dateutil
-from matplotlib.dates import DayLocator, MonthLocator, DateFormatter
+import numpy as np
+from matplotlib.dates import MinuteLocator, HourLocator, DayLocator, MonthLocator, YearLocator, DateFormatter
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
-days    = DayLocator()   # every year
-months   = MonthLocator()  # every month
+days = DayLocator()
+months = MonthLocator()
+hours = HourLocator()
+years = YearLocator()
+minutes = MinuteLocator()
 yearsFmt = DateFormatter('%m-%d')
 
 debug = 0
@@ -154,10 +158,10 @@ class total_inventory(QtGui.QWidget):
 		self.canvas = FigureCanvas(self.fig)
 		self.ax = self.fig.add_subplot(111)
 		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
-		vbox = QtGui.QVBoxLayout()
-		vbox.addWidget(self.canvas)
-		vbox.addWidget(self.mpl_toolbar)
-		topBox.addLayout(vbox)
+		self.vbox = QtGui.QVBoxLayout()
+		self.vbox.addWidget(self.canvas)
+		self.vbox.addWidget(self.mpl_toolbar)
+		topBox.addLayout(self.vbox)
 		
 		self.product_name = QtGui.QLineEdit()
 		self.product_name.setReadOnly(True)
@@ -202,6 +206,16 @@ class total_inventory(QtGui.QWidget):
 		self.timer2.start(1000)
 		
 	def re_plot(self, query):
+		self.canvas.close()
+		self.mpl_toolbar.close()
+		self.fig.clear()
+		
+		self.canvas = FigureCanvas(self.fig)
+		self.ax = self.fig.add_subplot(111)
+		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
+		self.vbox.addWidget(self.canvas)
+		self.vbox.addWidget(self.mpl_toolbar)
+		
 		params = urllib.urlencode({'type_of_query': 'return_stat', 'query': query})
 		data_new = request.request(params)
 
@@ -209,12 +223,15 @@ class total_inventory(QtGui.QWidget):
 		quantity = data_new[1]
 
 		dates = [dateutil.parser.parse(s) for s in datestrings]
-
-		self.ax.plot_date(pylab.date2num(dates), quantity, 'ro')
+		quantitys = [int(d) for d in quantity]
+		
+		self.ax.plot_date(pylab.date2num(dates), quantity)
 		self.ax.xaxis.set_major_locator(months)
 		self.ax.xaxis.set_major_formatter(yearsFmt)
 		self.ax.xaxis.set_minor_locator(days)
 		self.ax.autoscale_view()
+		self.ax.grid(True)
+		
 		self.ax.fmt_xdata = DateFormatter('%Y-%m-%d')
 		self.fig.autofmt_xdate()
 
@@ -277,6 +294,8 @@ class total_inventory(QtGui.QWidget):
 		
 		item = self.list.findItems(name, QtCore.Qt.MatchExactly ,0)
 		self.list.setCurrentItem(item[0])
+		
+		self.re_plot()
 		
 		self.product_info()
 		self.timer.start(500)
