@@ -27,15 +27,9 @@ FROM $product_db
 WHERE name = ? OR barcode = ?
 SQL
 
-our $update_product_quantity = $connect->prepare_cached(<<"SQL");
+our $update_product_db = $connect->prepare_cached(<<"SQL");
 UPDATE $product_db
-SET quantity = ?
-WHERE name = ? OR barcode = ?
-SQL
-
-our $update_product = $connect->prepare_cached(<<"SQL");
-UPDATE $product_db
-SET name = ?, description = ?, barcode = ?, quantity = ?
+SET name = ?, description = ?, barcode = ?, quantity = ?, flag = ?
 WHERE barcode = ?
 SQL
 
@@ -45,27 +39,15 @@ INSERT INTO $product_db
 VALUES (?, ?, ?, ?, ?)
 SQL
 
-our $flag_set = $connect->prepare_cached(<<"SQL");
-UPDATE $product_db
-SET flag = ?
-WHERE name = ? OR barcode = ?
-SQL
-
-our $average_set = $connect->prepare_cached(<<"SQL");
-UPDATE $product_db
-SET average = ?
-WHERE name = ? OR barcode = ?
+our $get_stats = $connect->prepare_cached(<<"SQL");
+SELECT *
+FROM $stats_db
+WHERE barcode = ?
+ORDER BY date desc
 SQL
 
 our $update_quantity = $connect->prepare_cached(<<"SQL");
 INSERT INTO $stats_db
 (barcode, quantity)
 VALUES (?, ?)
-SQL
-
-our $gen_stats = $connect->prepare_cached(<<"SQL");
-SELECT *
-FROM $stats_db
-WHERE barcode = ?
-ORDER BY date desc
 SQL

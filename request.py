@@ -81,6 +81,7 @@ def request(params):
 	conn.request("POST", "/perl/OO/api.pl", params, headers)
 	response = conn.getresponse()
 	data = response.read()
+	print data
 	conn.close()
 	if (data == ''):
 		return "no_product"

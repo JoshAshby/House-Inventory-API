@@ -4,7 +4,6 @@
 
 use warnings;
 use strict;
-
 use CGI;
 use database;
 
@@ -20,16 +19,14 @@ my $inventory = database->new();
 
 print $form->header();
 
-if ($type_of_query eq 'single_product_info') {
+if ($type_of_query eq 'product_info') {
 	$inventory->print_info($query_value);
 } elsif ($type_of_query eq 'total_inventory') {
 	$inventory->total_inventory();
-} elsif ($type_of_query eq 'update_product_quantity') {
-	$inventory->update_product_quantity($query_value, $quantity_value);
-} elsif ($type_of_query eq 'add_new_product') {
+} elsif ($type_of_query eq 'add_product') {
 	$inventory->add_product($name_value, $description_value, $query_value, $quantity_value, $flag_value);
-} elsif ($type_of_query eq 'update_product_info') {
-	$inventory->update_product_info($name_value, $description_value, $query_value, $quantity_value);
+} elsif ($type_of_query eq 'update_product') {
+	$inventory->update_product($name_value, $description_value, $query_value, $quantity_value, $flag_value);
 } elsif ($type_of_query eq 'remove_product') {
 	$inventory->delete_product($query_value);
 } elsif ($type_of_query eq 'return_stat') {

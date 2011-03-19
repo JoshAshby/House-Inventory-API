@@ -176,10 +176,8 @@ class total_inventory(QtGui.QWidget):
 		self.submit = QtGui.QPushButton("Submit Changes")
 		self.submit.setEnabled(False)
 		self.delete = QtGui.QPushButton("Delete Product")
-		self.delete.setEnabled(False)
 		self.ref_but = QtGui.QPushButton("Refresh Table")
-		self.clear_but = QtGui.QPushButton("Clear fields")
-		self.clear_but.setEnabled(False)
+		self.clear_but = QtGui.QPushButton("Add Product")
 		
 		self.product_flag = QtGui.QComboBox()
 		self.product_flag.addItems(['L', 'M', 'H'])
@@ -191,9 +189,9 @@ class total_inventory(QtGui.QWidget):
 		self.formBox.addRow(self.tr("Quantity: "), self.product_quantity)
 		self.formBox.addRow(self.tr("Flag: "), self.product_flag)
 		self.formBox.addRow(self.tr("Edit Product Info? "), self.edit)
-		self.formBox.addRow(self.tr("Submit Product Info Change? "), self.submit)
 		self.formBox.addRow(self.tr("Delete Product? "), self.delete)
-		self.formBox.addRow(self.tr("Clear fields? "), self.clear_but)
+		self.formBox.addRow(self.tr("Add a new Product? "), self.clear_but)
+		self.formBox.addRow(self.tr("Submit Product Info Change? "), self.submit)
 		self.formBox.addRow(self.ref_but)
 		
 		self.mainLayout.addWidget(self.list, 200)
@@ -204,6 +202,7 @@ class total_inventory(QtGui.QWidget):
 		self.connect(self.ref_but, QtCore.SIGNAL("clicked()"), self.refresh)
 		self.connect(self.delete, QtCore.SIGNAL("clicked()"), self.delete_product)
 		self.connect(self.scan_thread_func, SIGNAL("output(QString)"), self.scan_results)
+		self.connect(self.clear_but, SIGNAL("clicked()"), self.clear)
 		
 		self.timer = QtCore.QTimer(self)
 		QtCore.QObject.connect(self.timer, QtCore.SIGNAL("timeout()"), self.refresh)
@@ -223,12 +222,10 @@ class total_inventory(QtGui.QWidget):
 		self.product_description.setReadOnly(True)
 		self.product_quantity.setReadOnly(True)
 		self.submit.setEnabled(False)
-		self.delete.setEnabled(False)
-		self.clear_but.setEnabled(False)
 		self.product_flag.setEnabled(False)
 		if (item):
 			query = item.text(3)
-			params = urllib.urlencode({'type_of_query': 'single_product_info', 'query': query})
+			params = urllib.urlencode({'type_of_query': 'product_info', 'query': query})
 			data = request.request(params)
 			index = { 'L': 0, 'M': 1, 'H': 2}
 			self.product_name.setText(str(data['name']))
@@ -246,9 +243,32 @@ class total_inventory(QtGui.QWidget):
 	
 	def scan_results(self, query):
 		item = self.list.findItems(query, QtCore.Qt.MatchExactly ,3)
-		self.list.setCurrentItem(item[0])
+		if (item):
+			self.list.setCurrentItem(item[0])
 		
-		self.product_info()
+			self.product_info()
+		else:
+			reply = QtGui.QMessageBox.question(self, 'Message',
+			"The product you scanned is not in the database,<br> would you like to add it?", QtGui.QMessageBox.Yes | 
+			QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+			if reply == QtGui.QMessageBox.Yes:
+				self.product_update()
+				
+	def clear(self):
+		self.product_name.setReadOnly(False)
+		self.product_barcode.setReadOnly(False)
+		self.product_description.setReadOnly(False)
+		self.product_quantity.setReadOnly(False)
+		self.submit.setEnabled(True)
+		self.product_flag.setEnabled(True)
+		self.timer.stop()
+		self.timer2.stop()
+		
+		name = self.product_name.clear()
+		barcode = self.product_barcode.clear()
+		description = self.product_description.clear()
+		quantity = self.product_quantity.clear()
 		
 	def scan(self):
 		self.scan_thread_func.start()
@@ -259,8 +279,6 @@ class total_inventory(QtGui.QWidget):
 		self.product_description.setReadOnly(False)
 		self.product_quantity.setReadOnly(False)
 		self.submit.setEnabled(True)
-		self.delete.setEnabled(True)
-		self.clear_but.setEnabled(True)
 		self.product_flag.setEnabled(True)
 		self.timer.stop()
 		self.timer2.stop()
@@ -272,7 +290,7 @@ class total_inventory(QtGui.QWidget):
 		quantity = self.product_quantity.text()
 		flag = self.product_flag.currentText()
 		
-		params = urllib.urlencode({'type_of_query': 'update_product_info',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity})
+		params = urllib.urlencode({'type_of_query': 'update_product',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity, 'flag': flag})
 		data = request.request(params)
 		if (data != 'no_product'):
 			self.refresh()
@@ -286,8 +304,14 @@ class total_inventory(QtGui.QWidget):
 			self.timer.start(500)
 			self.timer2.start(1000)
 		else:
-			params = urllib.urlencode({'type_of_query': 'add_new_product',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity, 'flag': flag})
+			params = urllib.urlencode({'type_of_query': 'add_product',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity, 'flag': flag})
 			request.request(params)
+			
+			item = self.list.findItems(barcode, QtCore.Qt.MatchExactly , 3)
+			if (item):
+				self.list.setCurrentItem(item[0])
+
+				self.product_info()
 			
 			self.refresh()
 		
@@ -295,7 +319,7 @@ class total_inventory(QtGui.QWidget):
 		barcode = self.product_barcode.text()
 		
 		reply = QtGui.QMessageBox.question(self, 'Message',
-			"Are you sure to quit?", QtGui.QMessageBox.Yes | 
+			"Are you sure to delete<br>this product?", QtGui.QMessageBox.Yes | 
 			QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
 		if reply == QtGui.QMessageBox.Yes:
@@ -333,12 +357,6 @@ class total_inventory(QtGui.QWidget):
 
 				if (item[0].text(2) != quantity):
 					self.re_plot(query)
-				
-	def clear(self):
-		name = self.product_name.clear()
-		barcode = self.product_barcode.clear()
-		description = self.product_description.clear()
-		quantity = self.product_quantity.clear()
 		
 """Main window that holds everything"""
 class MainWindow(QtGui.QMainWindow):
