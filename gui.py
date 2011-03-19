@@ -15,18 +15,30 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.ticker import FormatStrFormatter
 
-
-days = DayLocator()
-months = MonthLocator()
-hours = HourLocator()
-years = YearLocator()
-minutes = MinuteLocator()
+"""Sets up stuff for matplotlib to be able to locate and format the tick marks on the product use graph"""
 auto = AutoDateLocator()
-yearsFmt = DateFormatter('%m-%d')
+yearsFmt = DateFormatter('%d-%H')
 
 debug = 0
 version = "1 alpha"
 
+"""Threads"""
+class scan_thread(QtCore.QThread):
+	def __init__(self, parent = None):
+		QtCore.QThread.__init__(self, parent)
+		self.exiting = False
+		self.n = 1
+	
+	def __del__(self):
+		self.exiting = True
+		self.wait()
+		
+	def run(self):
+		while not self.exiting and self.n > 0:
+			query = request.receive()
+			self.emit(SIGNAL("output(QString)"), query)
+
+"""Sub Widgets"""
 class graph_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
@@ -79,6 +91,7 @@ class graph_tab(QtGui.QWidget):
 
 		self.canvas.draw()
 		
+"""Main Widgets"""
 class bluetooth_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
@@ -118,23 +131,7 @@ class bluetooth_tab(QtGui.QWidget):
 		
 		if (name):
 			item = QtGui.QTreeWidgetItem([name, host, str(port)])
-			self.list.addTopLevelItem(item)
-			
-class scan_thread(QtCore.QThread):
-	def __init__(self, parent = None):
-		QtCore.QThread.__init__(self, parent)
-		self.exiting = False
-		self.n = 1
-	
-	def __del__(self):
-		self.exiting = True
-		self.wait()
-		
-	def run(self):
-		while not self.exiting and self.n > 0:
-			query = request.receive()
-			self.emit(SIGNAL("output(QString)"), query)
-				
+			self.list.addTopLevelItem(item)				
 
 class total_inventory(QtGui.QWidget):
 	def __init__(self, parent, main):
@@ -161,7 +158,10 @@ class total_inventory(QtGui.QWidget):
 		
 		self.graph = graph_tab(self, self)
 		
-		self.topBox.addWidget(self.graph)
+		self.sideBox = QtGui.QTabWidget(self)
+		self.topBox.addWidget(self.sideBox)
+		self.graphTab = self.sideBox.addTab(self.graph, "Product Use Graph")
+		self.sideBox.setCurrentIndex(self.graphTab)
 		
 		self.product_name = QtGui.QLineEdit()
 		self.product_name.setReadOnly(True)
@@ -242,7 +242,7 @@ class total_inventory(QtGui.QWidget):
 		item = self.list.currentItem()
 		if (item):
 			query = item.text(3)
-			self.re_plot(query)
+			self.graph.re_plot(query)
 	
 	def scan_results(self, query):
 		item = self.list.findItems(query, QtCore.Qt.MatchExactly ,3)
@@ -274,14 +274,13 @@ class total_inventory(QtGui.QWidget):
 		
 		params = urllib.urlencode({'type_of_query': 'update_product_info',  'name': name, 'description': description, 'query': barcode, 'quantity': quantity})
 		data = request.request(params)
-		print data
 		if (data != 'no_product'):
 			self.refresh()
 		
 			item = self.list.findItems(name, QtCore.Qt.MatchExactly ,0)
 			self.list.setCurrentItem(item[0])
 		
-			self.re_plot()
+			self.graph.re_plot(barcode)
 		
 			self.product_info()
 			self.timer.start(500)
@@ -341,7 +340,7 @@ class total_inventory(QtGui.QWidget):
 		description = self.product_description.clear()
 		quantity = self.product_quantity.clear()
 		
-
+"""Main window that holds everything"""
 class MainWindow(QtGui.QMainWindow):
 	def __init__(self, parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
@@ -350,7 +349,6 @@ class MainWindow(QtGui.QMainWindow):
 		self.setWindowTitle('House Inventory')
 		
 		self.mainTabWidget = QtGui.QTabWidget(self)
-		self.mainTabWidget.setMovable(True)
 		self.setCentralWidget(self.mainTabWidget)
 
 		self.bluetooth_tab()
