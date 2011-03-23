@@ -45,7 +45,7 @@ sub print_info {
 		my %text = ('name' => $name, 'description' => $description, 'barcode' => $barcode, 'quantity' => $quantity, 'flag' => $flag, 'average' => $average_days_left);
 		$p_text = $json->encode(\%text);
 	}
-	print $p_text;
+	return $p_text;
 }
 
 #print the total inventory for the database
@@ -62,7 +62,7 @@ sub total_inventory {
 		my %otext = ('name' => $name, 'description' => $description, 'barcode' => $barcode, 'quantity' => $quantity, 'flag' => $flag);
 		push(@data_hash, \%otext);
 	}
-	print $json->encode(\@data_hash);
+	return $json->encode(\@data_hash);
 }
 
 #update one products info
@@ -118,11 +118,11 @@ sub return_log {
 	my @array;
 	push(@array, \@dates_ar);
 	push(@array, \@quantity_ar);
-	print $json->encode(\@array);
+	return $json->encode(\@array);
 }
 
 #return all the datapoints for a priduct for product use for a specific month (really not done yet)
-return month_log {
+sub  {
 	my $self = @_[0];
 	
 }
