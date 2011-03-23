@@ -18,6 +18,10 @@ my $gui = CGI::escapeHTML($form->param("gui"));
 
 my $inventory = database->new();
 
+#need to clean this all up for CGI but thats for tomorrow...
+#also, please note that the base UI will be built and tested and working before the GUI elements (jQuery, Less.js, flot.js and bluetrip)
+#are intergrated. These declarations are simply so they are here for when I do get the UI finished (shouldn't take that long)
+
 #Less.js will get used most likely, just a matter of figuring out what I want to change in bluetrip and want to do it easily with Less.js
 my $css = "<!--<script src=\"/javascript/less.js\"></script>-->
 <link rel=\"stylesheet/less\" type=\"text/css\" href=\"/css/style.less\ media=\"screen, projection\">
