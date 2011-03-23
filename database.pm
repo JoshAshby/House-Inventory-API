@@ -5,10 +5,13 @@ use DBI;
 use DBD::mysql;
 use JSON;
 
+#For printing out the JSON formated strings
 my $json = new JSON;
-   
+ 
+#This is for all the database related info, to make sure no one can easily see it.
 do 'db_info.pl';
 
+#Prototypes for database functions
 our $get_all_products;
 our $get_product_db;
 our $add_new_product;
@@ -17,6 +20,7 @@ our $remove_product;
 our $get_stats;
 our $update_product_db;
 
+#Setting up a new API call
 sub new {
 	my $class = shift;
 	my $self = {};
@@ -25,6 +29,7 @@ sub new {
 	return $self;
 }
 
+#print the info for just one product
 sub print_info {
 	my $query = @_[1];
 	my $name;
@@ -43,6 +48,7 @@ sub print_info {
 	print $p_text;
 }
 
+#print the total inventory for the database
 sub total_inventory {
 	my $name;
 	my $description;
@@ -59,6 +65,7 @@ sub total_inventory {
 	print $json->encode(\@data_hash);
 }
 
+#update one products info
 sub update_product {
 	my $self = @_[0];
 	my $name = @_[1];
@@ -71,6 +78,7 @@ sub update_product {
 	$self->print_info($query);
 }
 
+#add a new product
 sub add_product {
 	my $self = @_[0];
 	my $name = @_[1];
@@ -83,6 +91,7 @@ sub add_product {
 	$self->print_info($query);
 }
 
+#delete a product
 sub delete_product {
 	my $self = @_[0];
 	my $barcode_val = @_[1];
@@ -90,6 +99,7 @@ sub delete_product {
 	$remove_product->execute($barcode_val);
 }
 
+#return all of the datapoints for a product for product use
 sub return_log {
 	my $query = @_[1];
 	my $barcode;
@@ -109,6 +119,12 @@ sub return_log {
 	push(@array, \@dates_ar);
 	push(@array, \@quantity_ar);
 	print $json->encode(\@array);
+}
+
+#return all the datapoints for a priduct for product use for a specific month (really not done yet)
+return month_log {
+	my $self = @_[0];
+	
 }
 
 1;

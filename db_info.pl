@@ -40,7 +40,7 @@ VALUES (?, ?, ?, ?, ?)
 SQL
 
 our $get_stats = $connect->prepare_cached(<<"SQL");
-SELECT *
+SELECT barcode, quantity, date_time
 FROM $stats_db
 WHERE barcode = ?
 ORDER BY date desc

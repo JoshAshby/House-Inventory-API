@@ -17,7 +17,7 @@ from matplotlib.ticker import FormatStrFormatter
 
 """Sets up stuff for matplotlib to be able to locate and format the tick marks on the product use graph"""
 auto = AutoDateLocator()
-yearsFmt = DateFormatter('%d-%H')
+yearsFmt = DateFormatter('%Y-%m-%d')
 
 debug = 0
 version = "1 alpha"
