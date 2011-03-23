@@ -18,6 +18,26 @@ my $gui = CGI::escapeHTML($form->param("gui"));
 
 my $inventory = database->new();
 
+#Less.js will get used most likely, just a matter of figuring out what I want to change in bluetrip and want to do it easily with Less.js
+my $css = "<!--<script src=\"/javascript/less.js\"></script>-->
+<link rel=\"stylesheet/less\" type=\"text/css\" href=\"/css/style.less\ media=\"screen, projection\">
+<link rel=\"stylesheet\" href=\"/css/screen.css\" type=\"text/css\" media=\"screen, projection\">
+<link rel=\"stylesheet\" href=\"/css/print.css\" type=\"text/css\" media=\"print\">
+<!--[if IE]>
+	<link rel=\"stylesheet\" href=\"/css/ie.css\" type=\"text/css\" media=\"screen, projection\">
+<![endif]-->";
+#Plain vanilla jQuery
+my $jquery = "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
+#jQuery UI for normal interface
+my $jquery_ui = "<script src=\"https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js\"></script>
+<link type=\"text/css\" href=\"/css/Aristo/jquery-ui-1.8.7.custom.css\" rel=\"stylesheet\"/>";
+#jQuery Mobile for mobile interfaces (or all interfaces depending on what I decide)
+my $jquery_mobile = "<link rel=\"stylesheet\" href=\"http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css\" />
+<script src=\"http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js\"></script>";
+#and finally Flot for the graphs
+my $flot = "<!--[if lte IE 8]><script language=\"javascript\" type=\"text/javascript\" src=\"/javascript/excanvas.min.js\"></script><![endif]-->
+<script language=\"javascript\" type=\"text/javascript\" src=\"/javascript/jquery.flot.min.js\"></script>";
+
 print $form->header();
 
 if ($gui eq 'y') {
