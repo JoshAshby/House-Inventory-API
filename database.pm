@@ -160,8 +160,10 @@ sub gen_stats {
 	}
 	my $lineFit = Statistics::LineFit->new();
 	$lineFit->setData(\@days, \@quantity_ar) or die "Invalid data";
-	my ($intercept, $slope) = $lineFit->coefficients();
-	return $intercept, $slope;
+	my @vars = $lineFit->coefficients();
+	push(@vars, \@days);
+	push(@vars, \@quantity_ar);
+	return $json->encode(\@vars);
 }
 
 1;

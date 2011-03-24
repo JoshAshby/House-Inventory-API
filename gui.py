@@ -39,7 +39,7 @@ class scan_thread(QtCore.QThread):
 			self.emit(SIGNAL("output(QString)"), query)
 
 """Sub Widgets"""
-class graph_tab(QtGui.QWidget):
+class stats_graph_tab(QtGui.QWidget):
 	def __init__(self, parent, main):
 		QtGui.QWidget.__init__(self)
 		
@@ -69,15 +69,66 @@ class graph_tab(QtGui.QWidget):
 		self.vbox.addWidget(self.canvas)
 		self.vbox.addWidget(self.mpl_toolbar)
 		
-		params = urllib.urlencode({'type_of_query': 'return_stat', 'query': query})
-		data_new = request.request(params)
+		params = urllib.urlencode({'type_of_query': 'gen_stat', 'query': query})
+		vars = request.request(params) 
+		
+		slope = vars[1]
+		const = vars[0]
+		x = vars[2]
+		points = vars[3]
+		
+		min = np.min(x)
+		max = np.max(x)
+		
+		x_graph = np.arange(min,max, 1)
+		
+		y = slope*x_graph + const
+		self.ax.plot(x_graph, y)
+		self.ax.plot(x, points, 'ro')
+		self.ax.autoscale_view()
+		self.ax.grid(True)
 
+		self.canvas.draw()
+		
+class use_graph_tab(QtGui.QWidget):
+	def __init__(self, parent, main):
+		QtGui.QWidget.__init__(self)
+		
+		self.mainLayout = QtGui.QVBoxLayout()
+		self.mainLayout.setContentsMargins(0, 0, 0, 0)
+		self.mainLayout.setSpacing(0)
+		self.setLayout(self.mainLayout)
+		
+		self.dpi = 100
+		self.fig = Figure((2.0, 2.0), dpi=self.dpi)
+		self.canvas = FigureCanvas(self.fig)
+		self.ax = self.fig.add_subplot(111)
+		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
+		self.vbox = QtGui.QVBoxLayout()
+		self.vbox.addWidget(self.canvas)
+		self.vbox.addWidget(self.mpl_toolbar)
+		self.mainLayout.addLayout(self.vbox)
+	
+	def re_plot(self, query):
+		self.canvas.close()
+		self.mpl_toolbar.close()
+		self.fig.clear()
+		
+		self.canvas = FigureCanvas(self.fig)
+		self.ax = self.fig.add_subplot(111)
+		self.mpl_toolbar = NavigationToolbar(self.canvas, self)
+		self.vbox.addWidget(self.canvas)
+		self.vbox.addWidget(self.mpl_toolbar)
+		
+		params = urllib.urlencode({'type_of_query': 'return_log', 'query': query})
+		data_new = request.request(params)
+		
 		datestrings = data_new[0]
 		quantity = data_new[1]
 
 		dates = [dateutil.parser.parse(s) for s in datestrings]
 		quantitys = [int(d) for d in quantity]
-		
+
 		self.ax.plot_date(pylab.date2num(dates), quantity)
 		self.ax.xaxis.set_major_locator(auto)
 		self.ax.xaxis.set_major_formatter(yearsFmt)
@@ -156,12 +207,15 @@ class total_inventory(QtGui.QWidget):
 		self.topBox.addLayout(self.formBox)
 		self.fileBox.addLayout(self.topBox)
 		
-		self.graph = graph_tab(self, self)
+		self.graph_use = use_graph_tab(self, self)
+		self.graph_stats = stats_graph_tab(self, self)
 		
 		self.sideBox = QtGui.QTabWidget(self)
 		self.topBox.addWidget(self.sideBox)
-		self.graphTab = self.sideBox.addTab(self.graph, "Product Use Graph")
+		self.graphTab = self.sideBox.addTab(self.graph_use, "Product Use Graph")
 		self.sideBox.setCurrentIndex(self.graphTab)
+		self.graphTab = self.sideBox.addTab(self.graph_stats, "Product Stats Graph")
+
 		
 		self.product_name = QtGui.QLineEdit()
 		self.product_name.setReadOnly(True)
@@ -213,7 +267,8 @@ class total_inventory(QtGui.QWidget):
 		self.timer2.start(1000)
 		
 	def re_plot(self, query):
-		self.graph.re_plot(query)
+		self.graph_use.re_plot(query)
+		self.graph_stats.re_plot(query)
 		
 	def product_info(self):
 		item = self.list.currentItem()
@@ -239,7 +294,7 @@ class total_inventory(QtGui.QWidget):
 		item = self.list.currentItem()
 		if (item):
 			query = item.text(3)
-			self.graph.re_plot(query)
+			self.re_plot(query)
 	
 	def scan_results(self, query):
 		item = self.list.findItems(query, QtCore.Qt.MatchExactly ,3)
@@ -298,7 +353,7 @@ class total_inventory(QtGui.QWidget):
 			item = self.list.findItems(name, QtCore.Qt.MatchExactly ,0)
 			self.list.setCurrentItem(item[0])
 		
-			self.graph.re_plot(barcode)
+			self.re_plot(barcode)
 		
 			self.product_info()
 			self.timer.start(500)
