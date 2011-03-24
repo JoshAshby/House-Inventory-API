@@ -20,22 +20,36 @@ my $inventory = database->new();
 
 print $form->header();
 	
-my @css = (Link({-rel=>'stylesheet/less',-type=>'text/css',-src=>'/css/style.less',-media=>'screen, projection'}),
-        Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/css/screen.css',-media=>'screen, projection'}),
-	Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/css/print.css',-media=>'print'}),
-	Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/css/Aristo/jquery-ui-1.8.7.custom.css',-media=>'all'}),
-	Link({-rel=>'stylesheet',-type=>'text/css',-src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css',-media=>'all'}));
+my @css = (Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/style.less',-media=>'screen, projection'}),
+        Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/screen.css',-media=>'screen, projection'}),
+	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/print.css',-media=>'print'}),
+	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/Aristo/jquery-ui-1.8.7.custom.css',-media=>'screen, projection'}),
+	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css',-media=>'handheld'}));
+	
+my $find = <<END;
+
+
+
+END
 	
 if ($gui eq 'y') {
-	print $form->start_html(-title=>'House Inventory API',
-						-script=>[{-type=>'text/javascript', -src=>'/javascript/less.js'},
+	print $form->start_html(-head=>\@css,
+						-title=>'House Inventory API',
+						-script=>[{-type=>'text/javascript', -src=>'javascript/less.js'},
 							{-type=>'text/javascript',-src=>'https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'},
 							{-type=>'text/javascriptjscript', -src=>'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js'},
 							{-type=>'text/javascriptjscript', -src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js'},
-							{-type=>'text/javascript',-src=>'/javascript/jquery.flot.min.js'}],
-						-head=>\@css);
-	print $form->h1("House Inventory API Webfront");
-	print $form->h2("Please enter the name or barcode of a product you would like to look at:");
+							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'}]);
+	print $form->div({-class=>'container showgrid'},
+		$form->div({-class=>'span-24'},
+			$form->h1("House Inventory API Webfront"),
+			$form->h2("Please enter the name or barcode of a product you would like to look at:"),
+			$form->startform('multipart/form-data', -name=>'find_form',-onSubmit=>$find),
+				$form->textfield('query'),
+				$form->submit('type_of_query', 'product_info'),
+			$form->endform()
+		)
+	);
 	print $form->end_html();
 } else {
 	if ($type_of_query eq 'product_info') {
