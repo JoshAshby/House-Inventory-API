@@ -49,8 +49,6 @@ if ($gui eq 'y') {
 	print $form->start_html(-title=>'House Inventory API');
 	print $form->h1("House Inventory API Webfront");
 	print $form->h2("Please enter the name or barcode of a product you would like to look at:");
-	print $form->textfield(-name=>'query_input', -override=>1);
-	$inventory->gen_stats($query_value);
 	print $form->end_html();
 } else {
 	if ($type_of_query eq 'product_info') {
@@ -63,7 +61,9 @@ if ($gui eq 'y') {
 		print $inventory->update_product($name_value, $description_value, $query_value, $quantity_value, $flag_value);
 	} elsif ($type_of_query eq 'remove_product') {
 		print $inventory->delete_product($query_value);
-	} elsif ($type_of_query eq 'return_stat') {
+	} elsif ($type_of_query eq 'return_log') {
 		print $inventory->return_log($query_value);
+	} elsif ($type_of_query eq 'gen_stat') {
+		print $inventory->gen_stats($query_value);
 	}
 }

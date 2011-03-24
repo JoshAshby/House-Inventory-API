@@ -153,21 +153,15 @@ sub gen_stats {
 	my @dates_ar;
 	my @quantity_ar;
 	while ($get_stats->fetch()) {
-		push(@dates_ar, $date);
 		push(@quantity_ar, $quantity);
-	}
-	print @dates_ar, " \= ", \@dates_ar, 'length=', length(@dates_ar), '<br>';
-	for (my $i; $i <= length(@dates_ar); $i++) {
-		my $d2 = DateTime::Format::MySQL->parse_datetime(\@dates_ar[$i]);
-		my $day_dif = $d1->delta_days($d2), '<br>';
-		print $day_dif, '<br>';
-		push(@days, \$day_dif);
-		
+		my $d2 = DateTime::Format::MySQL->parse_datetime($date);
+		my $day_dif = $d1->delta_days($d2)->delta_days;
+		push(@days, $day_dif);
 	}
 	my $lineFit = Statistics::LineFit->new();
-	$lineFit->setData (\@days, \@quantity_ar) or die "Invalid data";
+	$lineFit->setData(\@days, \@quantity_ar) or die "Invalid data";
 	my ($intercept, $slope) = $lineFit->coefficients();
-	print $intercept, $slope;
+	return $intercept, $slope;
 }
 
 1;
