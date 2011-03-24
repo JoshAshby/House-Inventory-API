@@ -85,6 +85,8 @@ class stats_graph_tab(QtGui.QWidget):
 		y = slope*x_graph + const
 		self.ax.plot(x_graph, y)
 		self.ax.plot(x, points, 'ro')
+		self.ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
+		self.ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
 		self.ax.autoscale_view()
 		self.ax.grid(True)
 

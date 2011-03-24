@@ -156,7 +156,7 @@ sub gen_stats {
 		push(@quantity_ar, $quantity);
 		my $d2 = DateTime::Format::MySQL->parse_datetime($date);
 		my $day_dif = $d1->delta_days($d2)->delta_days;
-		push(@days, $day_dif);
+		push(@days, -$day_dif);
 	}
 	my $lineFit = Statistics::LineFit->new();
 	$lineFit->setData(\@days, \@quantity_ar) or die "Invalid data";
