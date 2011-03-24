@@ -4,6 +4,9 @@ use strict;
 use DBI;
 use DBD::mysql;
 use JSON;
+use Statistics::LineFit;
+use DateTime;
+use DateTime::Format::MySQL;
 
 #For printing out the JSON formated strings
 my $json = new JSON;
@@ -46,6 +49,23 @@ sub print_info {
 		$p_text = $json->encode(\%text);
 	}
 	return $p_text;
+}
+
+sub return_info {
+	my $query = @_[1];
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $flag;
+	my $average_days_left;
+	$get_product_db->execute($query,$query);
+	$get_product_db->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag, \$average_days_left);
+	my $p_text;
+	while($get_product_db->fetch()){
+		my %text = ('name' => $name, 'description' => $description, 'barcode' => $barcode, 'quantity' => $quantity, 'flag' => $flag, 'average' => $average_days_left);
+		return %text;
+	}
 }
 
 #print the total inventory for the database
@@ -107,8 +127,6 @@ sub return_log {
 	my $date;
 	$get_stats->execute($query);
 	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
-	my %dates;
-	my %quantity;
 	my @dates_ar;
 	my @quantity_ar;
 	while ($get_stats->fetch()) {
@@ -122,9 +140,32 @@ sub return_log {
 }
 
 #return all the datapoints for a priduct for product use for a specific month (really not done yet)
-sub  {
+sub gen_stats {
 	my $self = @_[0];
-	
+	my $query = @_[1];
+	my $barcode;
+	my $quantity;
+	my $date;
+	my $d1 = DateTime->now;
+	print $d1;
+	$get_stats->execute($query);
+	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
+	my @dates_ar;
+	my @quantity_ar;
+	while ($get_stats->fetch()) {
+		push(@dates_ar, $date);
+		push(@quantity_ar, $quantity);
+	}
+	print @dates_ar, \@dates_ar;
+	for (my $i; $i = length(@dates_ar); $i += 1) {
+		my $d2 = DateTime::Format::MySQL->parse_datetime(@dates_ar[$i]);
+		print $d2;
+		print $d1->delta_days($d2);
+	}
+	my $lineFit = Statistics::LineFit->new();
+	$lineFit->setData (\@dates_ar, \@quantity_ar) or die "Invalid data";
+	my ($intercept, $slope) = $lineFit->coefficients();
+	print $intercept, $slope;
 }
 
 1;
