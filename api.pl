@@ -4,7 +4,7 @@
 
 use warnings;
 use strict;
-use CGI;
+use CGI qw/:standard :html3/;
 use database;
 
 my $form=new CGI;
@@ -18,35 +18,22 @@ my $gui = CGI::escapeHTML($form->param("gui"));
 
 my $inventory = database->new();
 
-#need to clean this all up for CGI but thats for tomorrow...
-#also, please note that the base UI will be built and tested and working before the GUI elements (jQuery, Less.js, flot.js and bluetrip)
-#are intergrated. These declarations are simply so they are here for when I do get the UI finished (shouldn't take that long)
-
-#Less.js will get used most likely, just a matter of figuring out what I want to change in bluetrip and want to do it easily with Less.js
-my $css = "<!--<script src=\"/javascript/less.js\"></script>-->
-<link rel=\"stylesheet/less\" type=\"text/css\" href=\"/css/style.less\ media=\"screen, projection\">
-<link rel=\"stylesheet\" href=\"/css/screen.css\" type=\"text/css\" media=\"screen, projection\">
-<link rel=\"stylesheet\" href=\"/css/print.css\" type=\"text/css\" media=\"print\">
-<!--[if IE]>
-	<link rel=\"stylesheet\" href=\"/css/ie.css\" type=\"text/css\" media=\"screen, projection\">
-<![endif]-->";
-#Plain vanilla jQuery
-my $jquery = "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js\"></script>";
-#jQuery UI for normal interface
-my $jquery_ui = "<script src=\"https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js\"></script>
-<link type=\"text/css\" href=\"/css/Aristo/jquery-ui-1.8.7.custom.css\" rel=\"stylesheet\"/>";
-#jQuery Mobile for mobile interfaces (or all interfaces depending on what I decide)
-my $jquery_mobile = "<link rel=\"stylesheet\" href=\"http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css\" />
-<script src=\"http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js\"></script>";
-#and finally Flot for the graphs
-my $flot = "<!--[if lte IE 8]><script language=\"javascript\" type=\"text/javascript\" src=\"/javascript/excanvas.min.js\"></script><![endif]-->
-<script language=\"javascript\" type=\"text/javascript\" src=\"/javascript/jquery.flot.min.js\"></script>";
-
 print $form->header();
-
+	
+my @css = (Link({-rel=>'stylesheet/less',-type=>'text/css',-src=>'/css/style.less',-media=>'screen, projection'}),
+        Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/css/screen.css',-media=>'screen, projection'}),
+	Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/css/print.css',-media=>'print'}),
+	Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/css/Aristo/jquery-ui-1.8.7.custom.css',-media=>'all'}),
+	Link({-rel=>'stylesheet',-type=>'text/css',-src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css',-media=>'all'}));
+	
 if ($gui eq 'y') {
-	#code for the web front goes here
-	print $form->start_html(-title=>'House Inventory API');
+	print $form->start_html(-title=>'House Inventory API',
+						-script=>[{-type=>'text/javascript', -src=>'/javascript/less.js'},
+							{-type=>'text/javascript',-src=>'https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'},
+							{-type=>'text/javascriptjscript', -src=>'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js'},
+							{-type=>'text/javascriptjscript', -src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js'},
+							{-type=>'text/javascript',-src=>'/javascript/jquery.flot.min.js'}],
+						-head=>\@css);
 	print $form->h1("House Inventory API Webfront");
 	print $form->h2("Please enter the name or barcode of a product you would like to look at:");
 	print $form->end_html();
