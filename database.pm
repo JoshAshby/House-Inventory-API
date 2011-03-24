@@ -147,7 +147,7 @@ sub gen_stats {
 	my $quantity;
 	my $date;
 	my $d1 = DateTime->now;
-	print $d1;
+	my @days;
 	$get_stats->execute($query);
 	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
 	my @dates_ar;
@@ -156,14 +156,16 @@ sub gen_stats {
 		push(@dates_ar, $date);
 		push(@quantity_ar, $quantity);
 	}
-	print @dates_ar, \@dates_ar;
-	for (my $i; $i = length(@dates_ar); $i += 1) {
-		my $d2 = DateTime::Format::MySQL->parse_datetime(@dates_ar[$i]);
-		print $d2;
-		print $d1->delta_days($d2);
+	print @dates_ar, " \= ", \@dates_ar, 'length=', length(@dates_ar), '<br>';
+	for (my $i; $i <= length(@dates_ar); $i++) {
+		my $d2 = DateTime::Format::MySQL->parse_datetime(\@dates_ar[$i]);
+		my $day_dif = $d1->delta_days($d2), '<br>';
+		print $day_dif, '<br>';
+		push(@days, \$day_dif);
+		
 	}
 	my $lineFit = Statistics::LineFit->new();
-	$lineFit->setData (\@dates_ar, \@quantity_ar) or die "Invalid data";
+	$lineFit->setData (\@days, \@quantity_ar) or die "Invalid data";
 	my ($intercept, $slope) = $lineFit->coefficients();
 	print $intercept, $slope;
 }

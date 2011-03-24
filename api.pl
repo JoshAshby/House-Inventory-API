@@ -50,7 +50,7 @@ if ($gui eq 'y') {
 	print $form->h1("House Inventory API Webfront");
 	print $form->h2("Please enter the name or barcode of a product you would like to look at:");
 	print $form->textfield(-name=>'query_input', -override=>1);
-	$inventory->gen_stats();
+	$inventory->gen_stats($query_value);
 	print $form->end_html();
 } else {
 	if ($type_of_query eq 'product_info') {
