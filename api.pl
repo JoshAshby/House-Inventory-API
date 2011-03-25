@@ -33,6 +33,18 @@ my $jquery = <<END;
 	cache: false
 });
 
+\$(function() {
+	var loadUrl = "api.pl";
+	var tags;
+	\$.get(loadUrl, {'type_of_query': "names"},
+		function(data){
+		tags = \$.parseJSON(data);
+		\$("#query").autocomplete({
+			source: tags
+		});
+	});
+});
+
 var loadUrl = "api.pl";
 \$("#load_basic").click(function(){
 	var query = \$("#query").val()
@@ -44,19 +56,29 @@ var loadUrl = "api.pl";
 			\$("#quantity").val(results.quantity);
 			\$("#description").val(results.description);
 			\$("#flag").val(results.flag);
+			var dataP;
+			var query = \$("#barcode").val();
+			\$.get(loadUrl, {'type_of_query': "gen_stat_flot", 'query': query},
+				function(data){
+					dataP = [\$.parseJSON(data)];
+					var options = {
+					legend: {
+							show: true,
+							margin: 10,
+							backgroundOpacity: 0.5
+						},points: {
+							show: true,
+							radius: 3
+						},lines: {
+							show: true
+						}
+					};
+					var plotarea = \$("#plotarea");
+					plotarea.css("height", "250px");
+					plotarea.css("width", "500px");
+					\$.plot(plotarea, dataP, options);
+					});
 		});
-});
-
-\$(function() {
-	var loadUrl = "api.pl";
-	var tags;
-	\$.get(loadUrl, {'type_of_query': "names"},
-		function(data){
-		tags = \$.parseJSON(data);
-		\$("#query").autocomplete({
-			source: tags
-		})
-	});
 });
 END
 	
@@ -74,15 +96,19 @@ if ($gui eq 'y') {
 			$form->h2("Please enter the name or barcode of a product you would like to look at:"),
 			$form->textfield(-id=>'query',-class=>"functions"),
 			$form->button(-value=>"Find", -id=>"load_basic",-class=>"functions"),
-			$form->hr(),
+			$form->hr()),
+		$form->div({-class=>'span-8'},
 			$form->table({-border=>undef},
 				Tr({-align=>'CENTER',-valign=>'TOP'},
 					[th([$form->label('Name'),$form->textfield(-id=>'name',-class=>"functions")]),
 					td([$form->label('Barcode'),$form->textfield(-id=>'barcode',-class=>"functions")]),
 					td([$form->label('Quantity'),$form->textfield(-id=>'quantity',-class=>"functions")]),
-					td([$form->label('Description'),$form->textarea(-id=>'description',-class=>"functions",-columns=>50,-rows=>10)]),
+					td([$form->label('Description'),$form->textarea(-id=>'description',-class=>"functions",-columns=>30,-rows=>10)]),
 					td([$form->label('Flag'),$form->textfield(-id=>'flag',-class=>"functions")])
-					])),
+					]))
+		),
+		$form->div({-class=>'span-16 last'},
+			$form->div({-id=>'plotarea'},''),
 			$form->div({-id=>'result', -class=>'functions'},''),
 			$form->div({-id=>'return', -class=>'functions'},''),
 		)
@@ -106,5 +132,9 @@ if ($gui eq 'y') {
 		print $inventory->gen_stats($query_value);
 	} elsif ($type_of_query eq 'names') {
 		print $inventory->names();
+	} elsif ($type_of_query eq 'return_log_flot') {
+		print $inventory->return_log_flot($query_value);
+	} elsif ($type_of_query eq 'gen_stat_flot') {
+		print $inventory->return_stats_flot($query_value);
 	}
 }

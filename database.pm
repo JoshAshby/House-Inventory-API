@@ -157,6 +157,21 @@ sub return_log {
 	return $json->encode(\@array);
 }
 
+#return all of the datapoints for a product for product use in a flot friendly format
+sub return_log_flot {
+	my $query = @_[1];
+	my $barcode;
+	my $quantity;
+	my $date;
+	$get_stats->execute($query);
+	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
+	my @dates_ar;
+	while ($get_stats->fetch()) {
+		push(@dates_ar, [$date, $quantity]);
+	}
+	return $json->encode(\@dates_ar);
+}
+
 #return all the datapoints for a priduct for product use for a specific month (really not done yet)
 sub gen_stats {
 	my $self = @_[0];
@@ -182,6 +197,33 @@ sub gen_stats {
 	push(@vars, \@days);
 	push(@vars, \@quantity_ar);
 	return $json->encode(\@vars);
+}
+
+#return the stat points in a format thats easy to plug right into flot
+sub return_stats_flot {
+	my $self = @_[0];
+	my $query = @_[1];
+	my $barcode;
+	my $quantity;
+	my $date;
+	my $d1 = DateTime->now;
+	my @days;
+	$get_stats->execute($query);
+	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
+	my @dates_ar;
+	my @quantity_ar;
+	while ($get_stats->fetch()) {
+		push(@quantity_ar, $quantity);
+		my $d2 = DateTime::Format::MySQL->parse_datetime($date);
+		my $day_dif = $d1->delta_days($d2)->delta_days;
+		push(@days, -$day_dif);
+		push(@dates_ar, [-$day_dif, int($quantity)]);
+	}
+	#my $lineFit = Statistics::LineFit->new();
+	#$lineFit->setData(\@days, \@quantity_ar) or die "Invalid data";
+	#my @vars = $lineFit->coefficients();
+	#push(@vars, \@dates_ar);
+	return $json->encode(\@dates_ar);
 }
 
 1;
