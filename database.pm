@@ -51,6 +51,7 @@ sub print_info {
 	return $p_text;
 }
 
+#returns the raw info, mainly for debugging, not currently used
 sub return_info {
 	my $query = @_[1];
 	my $name;
@@ -83,6 +84,23 @@ sub total_inventory {
 		push(@data_hash, \%otext);
 	}
 	return $json->encode(\@data_hash);
+}
+
+#prints the names and barcodes of each product for auto complete to use
+sub names {
+	my $name;
+	my $description;
+	my $barcode;
+	my $quantity;
+	my $flag;
+	$get_all_products->execute();
+	$get_all_products->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag);
+	my @name_hash;
+	while($get_all_products->fetch()){
+		push(@name_hash, $name);
+		push(@name_hash, $barcode);
+	}
+	return $json->encode(\@name_hash);
 }
 
 #update one products info

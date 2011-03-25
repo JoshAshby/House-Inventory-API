@@ -25,24 +25,38 @@ my @css = (Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/style.less',-m
 	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/print.css',-media=>'print'}),
 	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/Aristo/jquery-ui-1.8.7.custom.css',-media=>'screen, projection'}),
 	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css',-media=>'handheld'}));
+
+my @names = $inventory->names();
 	
-my $find = <<END;
+my $jquery = <<END;
 \$.ajaxSetup ({
 	cache: false
 });
+
 var loadUrl = "api.pl";
 \$("#load_basic").click(function(){
 	var query = \$("#query").val()
-	 \$.get(loadUrl, {'type_of_query': "product_info", 'query': query },
-	 function(data){
-	 \$("#return").html(data);
-	 var results = \$.parseJSON(data);
-	 \$("#name").val(results.name);
-	 \$("#barcode").val(results.barcode);
-	 \$("#quantity").val(results.quantity);
-	 \$("#description").val(results.description);
-	 \$("#flag").val(results.flag);
-	 });
+	\$.get(loadUrl, {'type_of_query': "product_info", 'query': query },
+		function(data){
+			var results = \$.parseJSON(data);
+			\$("#name").val(results.name);
+			\$("#barcode").val(results.barcode);
+			\$("#quantity").val(results.quantity);
+			\$("#description").val(results.description);
+			\$("#flag").val(results.flag);
+		});
+});
+
+\$(function() {
+	var loadUrl = "api.pl";
+	var tags;
+	\$.get(loadUrl, {'type_of_query': "names"},
+		function(data){
+		tags = \$.parseJSON(data);
+		\$("#query").autocomplete({
+			source: tags
+		})
+	});
 });
 END
 	
@@ -51,11 +65,10 @@ if ($gui eq 'y') {
 						-title=>'House Inventory API',
 						-script=>[{-type=>'text/javascript', -src=>'javascript/less.js'},
 							{-type=>'text/javascript',-src=>'https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'},
-							{-type=>'text/javascriptjscript', -src=>'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js'},
-							{-type=>'text/javascriptjscript', -src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js'},
-							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'},
-							{-type=>'text/javascript',-src=>'javascript/json2.js'}]);
-	print $form->div({-class=>'container showgrid'},
+							{-type=>'text/javascript', -src=>'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js'},
+							{-type=>'text/javascript', -src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js'},
+							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'}]);
+	print $form->div({-class=>'container ui-widget'},
 		$form->div({-class=>'span-24'},
 			$form->h1("House Inventory API Webfront"),
 			$form->h2("Please enter the name or barcode of a product you would like to look at:"),
@@ -67,12 +80,14 @@ if ($gui eq 'y') {
 					[th([$form->label('Name'),$form->textfield(-id=>'name',-class=>"functions")]),
 					td([$form->label('Barcode'),$form->textfield(-id=>'barcode',-class=>"functions")]),
 					td([$form->label('Quantity'),$form->textfield(-id=>'quantity',-class=>"functions")]),
-					td([$form->label('Description'),$form->textarea(-id=>'description',-class=>"functions")]),
+					td([$form->label('Description'),$form->textarea(-id=>'description',-class=>"functions",-columns=>50,-rows=>10)]),
 					td([$form->label('Flag'),$form->textfield(-id=>'flag',-class=>"functions")])
-					]))
+					])),
+			$form->div({-id=>'result', -class=>'functions'},''),
+			$form->div({-id=>'return', -class=>'functions'},''),
 		)
 	);
-	print $form->script($find);
+	print $form->script($jquery);
 	print $form->end_html();
 } else {
 	if ($type_of_query eq 'product_info') {
@@ -89,5 +104,7 @@ if ($gui eq 'y') {
 		print $inventory->return_log($query_value);
 	} elsif ($type_of_query eq 'gen_stat') {
 		print $inventory->gen_stats($query_value);
+	} elsif ($type_of_query eq 'names') {
+		print $inventory->names();
 	}
 }
