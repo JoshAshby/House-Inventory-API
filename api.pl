@@ -56,19 +56,22 @@ var loadUrl = "api.pl";
 	var query = \$("#query").val()
 	\$.get(loadUrl, {'type_of_query': "product_info", 'query': query },
 		function(data){
+			//parse the JSON into javascript objects
 			var results = \$.parseJSON(data);
+			//set all the fields to the correct value from the JSON string
 			\$("#name").val(results.name);
 			\$("#barcode").val(results.barcode);
 			\$("#quantity").val(results.quantity);
 			\$("#description").val(results.description);
 			\$("#flag").val(results.flag);
+			//plot the two graphs (only one implemented so far)
 			var dataP;
 			var query = \$("#barcode").val();
 			\$.get(loadUrl, {'type_of_query': "gen_stat_flot", 'query': query},
 				function(data){
-					dataP = [\$.parseJSON(data)];
+					dataP = \$.parseJSON(data);
 					var options = {
-					legend: {
+						legend: {
 							show: true,
 							margin: 10,
 							backgroundOpacity: 0.5
@@ -77,10 +80,10 @@ var loadUrl = "api.pl";
 							radius: 3
 						}
 					};
-					var plotarea = \$("#useplotarea");
-					plotarea.css("height", "250px");
-					plotarea.css("width", "500px");
-					\$.plot(plotarea, [{data: dataP, label: 'Stats Points'}], options);
+					var useplotarea = \$("#useplotarea");
+					useplotarea.css("height", "250px");
+					useplotarea.css("width", "500px");
+					\$.plot(useplotarea, [{data: dataP, label: 'Stats Points'}], options);
 					});
 		});
 });
