@@ -28,6 +28,12 @@ my @css = (Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/style.less',-m
 
 my @names = $inventory->names();
 	
+my $start = <<END;
+\$(function() {
+	\$( "#tabs" ).tabs();
+});
+END
+
 my $jquery = <<END;
 \$.ajaxSetup ({
 	cache: false
@@ -69,14 +75,12 @@ var loadUrl = "api.pl";
 						},points: {
 							show: true,
 							radius: 3
-						},lines: {
-							show: true
 						}
 					};
-					var plotarea = \$("#plotarea");
+					var plotarea = \$("#useplotarea");
 					plotarea.css("height", "250px");
 					plotarea.css("width", "500px");
-					\$.plot(plotarea, dataP, options);
+					\$.plot(plotarea, [{data: dataP, label: 'Stats Points'}], options);
 					});
 		});
 });
@@ -90,6 +94,7 @@ if ($gui eq 'y') {
 							{-type=>'text/javascript', -src=>'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js'},
 							{-type=>'text/javascript', -src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js'},
 							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'}]);
+	print $form->script($start);
 	print $form->div({-class=>'container ui-widget'},
 		$form->div({-class=>'span-24'},
 			$form->h1("House Inventory API Webfront"),
@@ -107,10 +112,17 @@ if ($gui eq 'y') {
 					td([$form->label('Flag'),$form->textfield(-id=>'flag',-class=>"functions")])
 					]))
 		),
-		$form->div({-class=>'span-16 last'},
-			$form->div({-id=>'plotarea'},''),
-			$form->div({-id=>'result', -class=>'functions'},''),
-			$form->div({-id=>'return', -class=>'functions'},''),
+		$form->div({-class=>'span-16 last', -id=>'tabs'},
+		$form->ul(
+			$form->li($form->a({-href=>'#tabs-1'}, 'Product Use Plot' )),
+			$form->li($form->a({-href=>'#tabs-2'}, 'Product Stats Plot' )),
+			$form->li($form->a({-href=>'#tabs-3'}, 'Result' )),
+			$form->li($form->a({-href=>'#tabs-4'}, 'Return' ))
+		),
+		$form->div({-id=>'tabs-1'},$form->div({-id=>'statsplotarea'},'Plot area')),
+		$form->div({-id=>'tabs-2'},$form->div({-id=>'useplotarea'},'Plot area')),
+		$form->div({-id=>'tabs-3', -class=>'functions'},$form->p({-id=>'results'},'Some results')),
+		$form->div({-id=>'tabs-4', -class=>'functions'},$form->p({-id=>'return'},'Some returns'))
 		)
 	);
 	print $form->script($jquery);
