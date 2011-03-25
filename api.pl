@@ -27,9 +27,23 @@ my @css = (Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/style.less',-m
 	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css',-media=>'handheld'}));
 	
 my $find = <<END;
-
-
-
+\$.ajaxSetup ({
+	cache: false
+});
+var loadUrl = "api.pl";
+\$("#load_basic").click(function(){
+	var query = \$("#query").val()
+	 \$.get(loadUrl, {'type_of_query': "product_info", 'query': query },
+	 function(data){
+	 \$("#return").html(data);
+	 var results = \$.parseJSON(data);
+	 \$("#name").val(results.name);
+	 \$("#barcode").val(results.barcode);
+	 \$("#quantity").val(results.quantity);
+	 \$("#description").val(results.description);
+	 \$("#flag").val(results.flag);
+	 });
+});
 END
 	
 if ($gui eq 'y') {
@@ -39,17 +53,26 @@ if ($gui eq 'y') {
 							{-type=>'text/javascript',-src=>'https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'},
 							{-type=>'text/javascriptjscript', -src=>'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js'},
 							{-type=>'text/javascriptjscript', -src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js'},
-							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'}]);
+							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'},
+							{-type=>'text/javascript',-src=>'javascript/json2.js'}]);
 	print $form->div({-class=>'container showgrid'},
 		$form->div({-class=>'span-24'},
 			$form->h1("House Inventory API Webfront"),
 			$form->h2("Please enter the name or barcode of a product you would like to look at:"),
-			$form->startform('multipart/form-data', -name=>'find_form',-onSubmit=>$find),
-				$form->textfield('query'),
-				$form->submit('type_of_query', 'product_info'),
-			$form->endform()
+			$form->textfield(-id=>'query',-class=>"functions"),
+			$form->button(-value=>"Find", -id=>"load_basic",-class=>"functions"),
+			$form->hr(),
+			$form->table({-border=>undef},
+				Tr({-align=>'CENTER',-valign=>'TOP'},
+					[th([$form->label('Name'),$form->textfield(-id=>'name',-class=>"functions")]),
+					td([$form->label('Barcode'),$form->textfield(-id=>'barcode',-class=>"functions")]),
+					td([$form->label('Quantity'),$form->textfield(-id=>'quantity',-class=>"functions")]),
+					td([$form->label('Description'),$form->textarea(-id=>'description',-class=>"functions")]),
+					td([$form->label('Flag'),$form->textfield(-id=>'flag',-class=>"functions")])
+					]))
 		)
 	);
+	print $form->script($find);
 	print $form->end_html();
 } else {
 	if ($type_of_query eq 'product_info') {
