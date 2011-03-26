@@ -37,10 +37,27 @@ my $jquery = <<END;
 \$(function() {
 	\$( "#tabs" ).tabs();
 	\$('.flex').flexigrid();
-});
-
-\$(function() {
 	var loadUrl = "api.pl";
+	\$(".flex2").flexigrid({
+		dataType: 'json'
+	});
+	var loadUrl = "api.pl";
+	var total;
+	\$.get(loadUrl, {'type_of_query': 'total_inventory'},
+		function(data){
+		total = \$.parseJSON(data);
+		var po = [];
+		for (var i = 0; i <= total.length-1; i++) {
+			po.push({cell: [total[i]['name'], total[i]['barcode'], total[i]['quantity'], total[i]['flag'], total[i]['description']]});
+		};
+		var da = {
+		total: total.length-1,
+		page: 1,
+		rows: po
+		};
+		\$(".flex2").flexAddData(eval(da));
+	});
+
 	var tags;
 	\$.get(loadUrl, {'type_of_query': "names"},
 		function(data){
@@ -127,7 +144,7 @@ var loadUrl = "api.pl";
 		});
 });
 END
-	
+
 if ($gui eq 'y') {
 	print $form->start_html(-head=>\@css,
 						-title=>'House Inventory API',
@@ -148,44 +165,50 @@ if ($gui eq 'y') {
 		$form->ul(
 			$form->li($form->a({-href=>'#tabs-1'}, 'Info' )),
 			$form->li($form->a({-href=>'#tabs-2'}, 'Product Use Plot' )),
-			$form->li($form->a({-href=>'#tabs-3'}, 'Stats' )),
+			$form->li($form->a({-href=>'#tabs-3'}, 'Product Stats' )),
+			$form->li($form->a({-href=>'#tabs-4'}, 'Total Inventory' )),
 			$form->li(
 				$form->textfield(-id=>'search',-class=>"functions", -value=>'Search'), $form->button(-value=>"Find", -id=>"load_basic",-class=>"functions")
 				)
 			),
-		$form->div({-id=>'tabs-1', -class=>'functions'},$form->p({-id=>'result'},
+		$form->div({-id=>'tabs-1', -class=>'functions'},$form->div({-id=>''},
 			$form->table({-class=>'flex'},
 					thead({},
 						Tr({},
 							th({-width=>'130'}, ['Name', 'Barcode', 'Quantity', 'Flag',]),
 							th({-width=>'300'}, ['Description']))
-					
 					),
 					tbody({},
 						Tr({},
 							td({},[
-					#$form->label('Name:'),
-					$form->textfield(-id=>'name',-class=>"functions"),
-								#$form->p({-id=>'name',-class=>"functions"},'This is some stuff'),
-					#$form->label('Barcode:'),
-					$form->textfield(-id=>'barcode',-class=>"functions"),
-								#$form->p({-id=>'barcode',-class=>"functions"},'And more'),
-					#$form->label('Quantity:'),
-					$form->textfield(-id=>'quantity',-class=>"functions"),
-								#$form->p({-id=>'quantity',-class=>"functions"},'More'),
-					#$form->label('Flag:'),
-					$form->textfield(-id=>'flag',-class=>"functions"),
-								#$form->p({-id=>'flag',-class=>"functions"},'Even more'),
-					#$form->label('Description:'),
-					$form->textarea(-id=>'description',-class=>"functions",-columns=>'30',-rows=>10)
-								#$form->p({-id=>'description',-class=>"functions"},'Last bit')
+					$form->textarea(-id=>'name',-class=>"functions",-columns=>'18',-rows=>5),
+					$form->textarea(-id=>'barcode',-class=>"functions",-columns=>'18',-rows=>5),
+					$form->textarea(-id=>'quantity',-class=>"functions",-columns=>'18',-rows=>5),
+					$form->textarea(-id=>'flag',-class=>"functions",-columns=>'18',-rows=>5),
+					$form->textarea(-id=>'description',-class=>"functions",-columns=>'45',-rows=>5)
 							])
 						)
 					)
 			))
 		),
 		$form->div({-id=>'tabs-2'},$form->div({-id=>'statplotarea'},'')),
-		$form->div({-id=>'tabs-3', -class=>'functions'},$form->p({-id=>'return'},''))
+		$form->div({-id=>'tabs-3', -class=>'functions'},$form->div({-id=>'return'},'')),
+		$form->div({-id=>'tabs-4', -class=>'functions'},$form->div({-id=>'total'},
+		$form->table({-class=>'flex2'},
+					thead({},
+						Tr({},
+							th({-width=>'130'}, ['Name', 'Barcode', 'Quantity', 'Flag',]),
+							th({-width=>'300'}, ['Description']))
+					),
+					tbody({},
+						Tr({},
+							td({},
+								''
+							)
+						)
+					)
+			)
+		))
 		)
 	);
 	print $form->script($jquery);
@@ -213,5 +236,7 @@ if ($gui eq 'y') {
 		print $inventory->return_stats_flot($query_value);
 	} elsif ($type_of_query eq 'gen_stat_flot') {
 		print $inventory->gen_stats_flot($query_value);
+	} elsif ($type_of_query eq 'flex_total') {
+		print $inventory->total_inventory_flex();
 	}
 }
