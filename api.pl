@@ -34,12 +34,37 @@ my $jquery = <<END;
 	cache: false
 });
 
+function doCommand(com, grid) {
+	if (com == 'View') {
+		\$('.trSelected', grid).each(function() {
+			var id = \$('td:nth-child(1) div', this).html();
+			\$("#search").val(id);
+			\$("#load_basic").click();
+			\$( "#tabs" ).tabs( "select", 0 );
+		})
+	}
+};
+
 \$(function() {
 	\$( "#tabs" ).tabs();
-	\$('.flex').flexigrid();
 	var loadUrl = "api.pl";
 	\$(".flex2").flexigrid({
-		dataType: 'json'
+		colModel : [
+			{display: 'Name', name : 'name', width : 130, sortable : true, align: 'left'},
+			{display: 'Barcode', name : 'barcode', width : 130, sortable : true, align: 'left'},
+			{display: 'Quantity', name : 'quantity', width : 130, sortable : true, align: 'left'},
+			{display: 'Flag', name : 'flag', width : 130, sortable : true, align: 'left'},
+			{display: 'Description', name : 'description', width : 300, sortable : true, align: 'left'}
+		],
+		buttons : [
+			{name: 'View', bclass: 'view', onpress : doCommand}
+		],
+		dataType: 'json',
+		usepager: true,
+		singleSelect: true,
+		title: 'Total Inventory',
+		useRp: true,
+		rp: 15
 	});
 	var loadUrl = "api.pl";
 	var total;
@@ -51,7 +76,7 @@ my $jquery = <<END;
 			po.push({cell: [total[i]['name'], total[i]['barcode'], total[i]['quantity'], total[i]['flag'], total[i]['description']]});
 		};
 		var da = {
-		total: total.length-1,
+		total: total.length,
 		page: 1,
 		rows: po
 		};
@@ -195,11 +220,6 @@ if ($gui eq 'y') {
 		$form->div({-id=>'tabs-3', -class=>'functions'},$form->div({-id=>'return'},'')),
 		$form->div({-id=>'tabs-4', -class=>'functions'},$form->div({-id=>'total'},
 		$form->table({-class=>'flex2'},
-					thead({},
-						Tr({},
-							th({-width=>'130'}, ['Name', 'Barcode', 'Quantity', 'Flag',]),
-							th({-width=>'300'}, ['Description']))
-					),
 					tbody({},
 						Tr({},
 							td({},
@@ -236,7 +256,5 @@ if ($gui eq 'y') {
 		print $inventory->return_stats_flot($query_value);
 	} elsif ($type_of_query eq 'gen_stat_flot') {
 		print $inventory->gen_stats_flot($query_value);
-	} elsif ($type_of_query eq 'flex_total') {
-		print $inventory->total_inventory_flex();
 	}
 }
