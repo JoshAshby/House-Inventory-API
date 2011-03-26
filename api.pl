@@ -45,7 +45,7 @@ my $jquery = <<END;
 	\$.get(loadUrl, {'type_of_query': "names"},
 		function(data){
 		tags = \$.parseJSON(data);
-		\$("#query").autocomplete({
+		\$("#name").autocomplete({
 			source: tags
 		});
 	});
@@ -53,7 +53,7 @@ my $jquery = <<END;
 
 var loadUrl = "api.pl";
 \$("#load_basic").click(function(){
-	var query = \$("#query").val()
+	var query = \$("#name").val()
 	\$.get(loadUrl, {'type_of_query': "product_info", 'query': query },
 		function(data){
 			//parse the JSON into javascript objects
@@ -64,10 +64,10 @@ var loadUrl = "api.pl";
 			\$("#quantity").val(results.quantity);
 			\$("#description").val(results.description);
 			\$("#flag").val(results.flag);
-			//plot the two graphs (only one implemented so far)
+			//plot the two graphs
 			var dataP;
 			var query = \$("#barcode").val();
-			\$.get(loadUrl, {'type_of_query': "gen_stat_flot", 'query': query},
+			\$.get(loadUrl, {'type_of_query': "return_stat_flot", 'query': query},
 				function(data){
 					dataP = \$.parseJSON(data);
 					var options = {
@@ -80,11 +80,49 @@ var loadUrl = "api.pl";
 							radius: 3
 						}
 					};
-					var useplotarea = \$("#useplotarea");
-					useplotarea.css("height", "250px");
-					useplotarea.css("width", "500px");
-					\$.plot(useplotarea, [{data: dataP, label: 'Stats Points'}], options);
-					});
+					var statplotarea = \$("#statplotarea");
+					statplotarea.css("height", "250px");
+					statplotarea.css("width", "500px");
+					//\$.plot(statplotarea, [{data: dataP, label: 'Stats Points'}], options);
+					\$.get(loadUrl, {'type_of_query': "gen_stat_flot", 'query': query},
+						function(data){
+							var dataline = \$.parseJSON(data);
+							var fit_line = [];
+							//\$('#result').html(dataline[1]);
+							//\$('#return').html(dataline[0]);
+							for (var i = dataP[dataP.length-1][0]; i <=dataP[0][0]; i += 1) {
+								fit_line.push([i, (dataline[1]*i+dataline[0])]);
+							};
+							var options_line = {
+								legend: {
+									show: true,
+									margin: 10,
+									backgroundOpacity: 0.5
+								},points: {
+									show: true,
+									radius: 3
+								}, lines: {
+									 show: true
+								}
+							};
+							statplotarea.css("height", "250px");
+							statplotarea.css("width", "500px");
+							\$.plot(statplotarea, [{data: dataP, label: 'Stats Points', legend: {
+									show: true,
+									margin: 10,
+									backgroundOpacity: 0.5
+								},points: {
+									show: true,
+									radius: 3
+								}}, {data: fit_line, label: 'Stats Fit Line', legend: {
+									show: true,
+									margin: 10,
+									backgroundOpacity: 0.5
+								}, lines: {
+									 show: true
+								}}]);
+						});
+				});
 		});
 });
 END
@@ -102,13 +140,13 @@ if ($gui eq 'y') {
 		$form->div({-class=>'span-24'},
 			$form->h1("House Inventory API Webfront"),
 			$form->h2("Please enter the name or barcode of a product you would like to look at:"),
-			$form->textfield(-id=>'query',-class=>"functions"),
-			$form->button(-value=>"Find", -id=>"load_basic",-class=>"functions"),
-			$form->hr()),
+			$form->p('Enter this info in the Names field, and press the Find button to search for that product'),
 		$form->div({-class=>'span-8'},
 			$form->table({-border=>undef},
 				Tr({-align=>'CENTER',-valign=>'TOP'},
-					[th([$form->label('Name'),$form->textfield(-id=>'name',-class=>"functions")]),
+					[
+					td([$form->label('Find'),$form->button(-value=>"Find", -id=>"load_basic",-class=>"functions")]),
+					td([$form->label('Name'),$form->textfield(-id=>'name',-class=>"functions")]),
 					td([$form->label('Barcode'),$form->textfield(-id=>'barcode',-class=>"functions")]),
 					td([$form->label('Quantity'),$form->textfield(-id=>'quantity',-class=>"functions")]),
 					td([$form->label('Description'),$form->textarea(-id=>'description',-class=>"functions",-columns=>30,-rows=>10)]),
@@ -118,14 +156,13 @@ if ($gui eq 'y') {
 		$form->div({-class=>'span-16 last', -id=>'tabs'},
 		$form->ul(
 			$form->li($form->a({-href=>'#tabs-1'}, 'Product Use Plot' )),
-			$form->li($form->a({-href=>'#tabs-2'}, 'Product Stats Plot' )),
-			$form->li($form->a({-href=>'#tabs-3'}, 'Result' )),
-			$form->li($form->a({-href=>'#tabs-4'}, 'Return' ))
+			$form->li($form->a({-href=>'#tabs-2'}, 'Stats detail' )),
+			$form->li($form->a({-href=>'#tabs-3'}, 'Return' ))
 		),
-		$form->div({-id=>'tabs-1'},$form->div({-id=>'statsplotarea'},'Plot area')),
-		$form->div({-id=>'tabs-2'},$form->div({-id=>'useplotarea'},'Plot area')),
-		$form->div({-id=>'tabs-3', -class=>'functions'},$form->p({-id=>'results'},'Some results')),
-		$form->div({-id=>'tabs-4', -class=>'functions'},$form->p({-id=>'return'},'Some returns'))
+		$form->div({-id=>'tabs-1'},$form->div({-id=>'statplotarea'},'Plot area')),
+		$form->div({-id=>'tabs-2', -class=>'functions'},$form->p({-id=>'result'},'')),
+		$form->div({-id=>'tabs-3', -class=>'functions'},$form->p({-id=>'return'},''))
+		)
 		)
 	);
 	print $form->script($jquery);
@@ -149,7 +186,9 @@ if ($gui eq 'y') {
 		print $inventory->names();
 	} elsif ($type_of_query eq 'return_log_flot') {
 		print $inventory->return_log_flot($query_value);
-	} elsif ($type_of_query eq 'gen_stat_flot') {
+	} elsif ($type_of_query eq 'return_stat_flot') {
 		print $inventory->return_stats_flot($query_value);
+	} elsif ($type_of_query eq 'gen_stat_flot') {
+		print $inventory->gen_stats_flot($query_value);
 	}
 }

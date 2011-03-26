@@ -149,7 +149,7 @@ sub return_log {
 	my @quantity_ar;
 	while ($get_stats->fetch()) {
 		push(@dates_ar, $date);
-		push(@quantity_ar, $quantity);
+		push(@quantity_ar, int($quantity));
 	}
 	my @array;
 	push(@array, \@dates_ar);
@@ -167,7 +167,7 @@ sub return_log_flot {
 	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
 	my @dates_ar;
 	while ($get_stats->fetch()) {
-		push(@dates_ar, [$date, $quantity]);
+		push(@dates_ar, [$date, int($quantity)]);
 	}
 	return $json->encode(\@dates_ar);
 }
@@ -196,6 +196,30 @@ sub gen_stats {
 	my @vars = $lineFit->coefficients();
 	push(@vars, \@days);
 	push(@vars, \@quantity_ar);
+	return $json->encode(\@vars);
+}
+
+#return the slope and intercept
+sub gen_stats_flot {
+	my $self = @_[0];
+	my $query = @_[1];
+	my $barcode;
+	my $quantity;
+	my $date;
+	my $d1 = DateTime->now;
+	my @days;
+	$get_stats->execute($query);
+	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
+	my @quantity_ar;
+	while ($get_stats->fetch()) {
+		push(@quantity_ar, $quantity);
+		my $d2 = DateTime::Format::MySQL->parse_datetime($date);
+		my $day_dif = $d1->delta_days($d2)->delta_days;
+		push(@days, -$day_dif);
+	}
+	my $lineFit = Statistics::LineFit->new();
+	$lineFit->setData(\@days, \@quantity_ar) or die "Invalid data";
+	my @vars = $lineFit->coefficients();
 	return $json->encode(\@vars);
 }
 
