@@ -19,24 +19,24 @@ my $gui = CGI::escapeHTML($form->param("gui"));
 my $inventory = database->new();
 
 print $form->header();
-	
-my @css = (Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/style.less',-media=>'screen, projection'}),
-        Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/screen.css',-media=>'screen, projection'}),
+
+my @css = (
+        Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/flexigrid/flexigrid.css',-media=>'screen, projection'}),
+	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/screen.css',-media=>'screen, projection'}),
 	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/print.css',-media=>'print'}),
 	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'css/Aristo/jquery-ui-1.8.7.custom.css',-media=>'screen, projection'}),
 	Link({-rel=>'stylesheet',-type=>'text/css',-href=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.css',-media=>'handheld'}));
 
 my @names = $inventory->names();
-	
-my $start = <<END;
-\$(function() {
-	\$( "#tabs" ).tabs();
-});
-END
 
 my $jquery = <<END;
 \$.ajaxSetup ({
 	cache: false
+});
+
+\$(function() {
+	\$( "#tabs" ).tabs();
+	\$('.flex').flexigrid();
 });
 
 \$(function() {
@@ -45,15 +45,19 @@ my $jquery = <<END;
 	\$.get(loadUrl, {'type_of_query': "names"},
 		function(data){
 		tags = \$.parseJSON(data);
-		\$("#name").autocomplete({
+		\$("#search").autocomplete({
 			source: tags
 		});
 	});
 });
 
+\$("#search").click(function(){
+	\$("#search").select();
+});
+
 var loadUrl = "api.pl";
 \$("#load_basic").click(function(){
-	var query = \$("#name").val()
+	var query = \$("#search").val()
 	\$.get(loadUrl, {'type_of_query': "product_info", 'query': query },
 		function(data){
 			//parse the JSON into javascript objects
@@ -83,13 +87,10 @@ var loadUrl = "api.pl";
 					var statplotarea = \$("#statplotarea");
 					statplotarea.css("height", "250px");
 					statplotarea.css("width", "500px");
-					//\$.plot(statplotarea, [{data: dataP, label: 'Stats Points'}], options);
 					\$.get(loadUrl, {'type_of_query': "gen_stat_flot", 'query': query},
 						function(data){
 							var dataline = \$.parseJSON(data);
 							var fit_line = [];
-							//\$('#result').html(dataline[1]);
-							//\$('#return').html(dataline[0]);
 							for (var i = dataP[dataP.length-1][0]; i <=dataP[0][0]; i += 1) {
 								fit_line.push([i, (dataline[1]*i+dataline[0])]);
 							};
@@ -134,35 +135,57 @@ if ($gui eq 'y') {
 							{-type=>'text/javascript',-src=>'https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js'},
 							{-type=>'text/javascript', -src=>'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js'},
 							{-type=>'text/javascript', -src=>'http://code.jquery.com/mobile/1.0a3/jquery.mobile-1.0a3.min.js'},
-							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'}]);
-	print $form->script($start);
+							{-type=>'text/javascript',-src=>'javascript/jquery.flot.min.js'},
+							{-type=>'text/javascript',-src=>'javascript/flexigrid.js'}
+							]);
 	print $form->div({-class=>'container ui-widget'},
 		$form->div({-class=>'span-24'},
 			$form->h1("House Inventory API Webfront"),
 			$form->h2("Please enter the name or barcode of a product you would like to look at:"),
-			$form->p('Enter this info in the Names field, and press the Find button to search for that product'),
-		$form->div({-class=>'span-8'},
-			$form->table({-border=>undef},
-				Tr({-align=>'CENTER',-valign=>'TOP'},
-					[
-					td([$form->label('Find'),$form->button(-value=>"Find", -id=>"load_basic",-class=>"functions")]),
-					td([$form->label('Name'),$form->textfield(-id=>'name',-class=>"functions")]),
-					td([$form->label('Barcode'),$form->textfield(-id=>'barcode',-class=>"functions")]),
-					td([$form->label('Quantity'),$form->textfield(-id=>'quantity',-class=>"functions")]),
-					td([$form->label('Description'),$form->textarea(-id=>'description',-class=>"functions",-columns=>30,-rows=>10)]),
-					td([$form->label('Flag'),$form->textfield(-id=>'flag',-class=>"functions")])
-					]))
+			$form->p('Enter this info in the Search field, and press the Find button to search for that product'),
 		),
-		$form->div({-class=>'span-16 last', -id=>'tabs'},
+		$form->div({-class=>'span-24', -id=>'tabs'},
 		$form->ul(
-			$form->li($form->a({-href=>'#tabs-1'}, 'Product Use Plot' )),
-			$form->li($form->a({-href=>'#tabs-2'}, 'Stats detail' )),
-			$form->li($form->a({-href=>'#tabs-3'}, 'Return' ))
+			$form->li($form->a({-href=>'#tabs-1'}, 'Info' )),
+			$form->li($form->a({-href=>'#tabs-2'}, 'Product Use Plot' )),
+			$form->li($form->a({-href=>'#tabs-3'}, 'Stats' )),
+			$form->li(
+				$form->textfield(-id=>'search',-class=>"functions", -value=>'Search'), $form->button(-value=>"Find", -id=>"load_basic",-class=>"functions")
+				)
+			),
+		$form->div({-id=>'tabs-1', -class=>'functions'},$form->p({-id=>'result'},
+			$form->table({-class=>'flex'},
+					thead({},
+						Tr({},
+							th({-width=>'130'}, ['Name', 'Barcode', 'Quantity', 'Flag',]),
+							th({-width=>'300'}, ['Description']))
+					
+					),
+					tbody({},
+						Tr({},
+							td({},[
+					#$form->label('Name:'),
+					$form->textfield(-id=>'name',-class=>"functions"),
+								#$form->p({-id=>'name',-class=>"functions"},'This is some stuff'),
+					#$form->label('Barcode:'),
+					$form->textfield(-id=>'barcode',-class=>"functions"),
+								#$form->p({-id=>'barcode',-class=>"functions"},'And more'),
+					#$form->label('Quantity:'),
+					$form->textfield(-id=>'quantity',-class=>"functions"),
+								#$form->p({-id=>'quantity',-class=>"functions"},'More'),
+					#$form->label('Flag:'),
+					$form->textfield(-id=>'flag',-class=>"functions"),
+								#$form->p({-id=>'flag',-class=>"functions"},'Even more'),
+					#$form->label('Description:'),
+					$form->textarea(-id=>'description',-class=>"functions",-columns=>'30',-rows=>10)
+								#$form->p({-id=>'description',-class=>"functions"},'Last bit')
+							])
+						)
+					)
+			))
 		),
-		$form->div({-id=>'tabs-1'},$form->div({-id=>'statplotarea'},'Plot area')),
-		$form->div({-id=>'tabs-2', -class=>'functions'},$form->p({-id=>'result'},'')),
+		$form->div({-id=>'tabs-2'},$form->div({-id=>'statplotarea'},'')),
 		$form->div({-id=>'tabs-3', -class=>'functions'},$form->p({-id=>'return'},''))
-		)
 		)
 	);
 	print $form->script($jquery);

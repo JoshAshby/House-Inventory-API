@@ -11,7 +11,7 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 
 /*** BASIC TYPOGRAPHY ***/
 html { font-size: 62.5%; font-family: "Liberation Sans", Helvetica, Arial, sans-serif; }
-strong, th, thead td, h1, h2, h3, h4, h5, h6 { font-weight: bold; }
+strong, h1, h2, h3, h4, h5, h6 { font-weight: bold; }
 cite, em, dfn { font-style: italic; }
 code, kbd, samp, pre, tt, var, input[type='text'], input[type='password'], textarea { font-size: 92%; font-family: monaco, "Lucida Console", courier, monospace; }
 del { text-decoration: line-through; color: #666; }
@@ -39,7 +39,7 @@ input, select { cursor: pointer; }
 input[type='text'],input[type='password'] { cursor: text; }
 
 /*** BASE SIZES ***/
-.container { font-size: 1.2em; line-height: 1.6em; }
+.container { font-size: 1.2em;}
 h1 { font-size: 1.9em; }
 h2 { font-size: 1.7em; }
 h3 { font-size: 1.5em; }
@@ -55,13 +55,9 @@ ul ul ul { list-style-type: circle; }
 ol { list-style-position: outside; list-style-type: decimal; }
 dt { font-weight: bold; }
 
-/*** TABLES ***/
-table { border-top: 1px solid #ccc;  border-left: 1px solid #ccc; }
-th, td { border-bottom: 1px solid #ddd; border-right: 1px solid #ccc; }
-
 /*** MARGINS & PADDINGS ***/
 blockquote *:first-child { margin: .8em 0; }
-hr, p, ul, ol, dl, pre, blockquote, address, table, form { margin-bottom: 1.6em; }
+hr, p, ul, ol, dl, pre, blockquote, address, form { margin-bottom: 1.6em; }
 /*** NOTE: Calulate header margins: TOP: 1.6em/size, BOTTOM: 1.6em/size/2 ***/
 h1 { margin: 1em 0 .5em;  }
 h2 { margin: 1.07em 0 .535em; }
@@ -69,16 +65,13 @@ h3 { margin: 1.14em 0 .57em; }
 h4 { margin: 1.23em 0 .615em; }
 h5 { margin: 1.33em 0 .67em; }
 h6 { margin: 1.6em 0 .8em; }
-th, td { padding: .8em; }
 caption { padding-bottom: .8em; } /*** padding instead of margin for IE ***/
 blockquote { padding: 0 1em; margin: 1.6em 0; }
 fieldset { padding: 0 1em 1em 1em; margin: 1.6em 0; } /*** padding-top is margin-top for fieldsets in Opera ***/
 legend { padding-left: .8em; padding-right: .8em; }
 legend+* { margin-top: 1em; } /*** compensates for the opera margin bug ***/
-textarea, input { padding: .3em .4em .15em .4em; }
 select { padding: .1em .2em 0 .2em; }
 option { padding: 0 .4em; }
-a { position: relative; padding: 0.3em 0 .1em 0; } /*** for larger click-area ***/
 dt { margin-top: .8em; margin-bottom: .4em; }
 ul { margin-left: 1.5em; }
 ol { margin-left: 2.35em; }
