@@ -38,6 +38,10 @@ textarea:focus, input[type='text']:focus, input[type='password']:focus, select:f
 input, select { cursor: pointer; }
 input[type='text'],input[type='password'] { cursor: text; }
 
+/* TABLES */
+table { border-top: 1px solid #ccc;  border-left: 1px solid #ccc; }
+th, td { border-bottom: 1px solid #ddd; border-right: 1px solid #ccc; }
+
 /*** BASE SIZES ***/
 .container { font-size: 1.2em;}
 h1 { font-size: 1.9em; }

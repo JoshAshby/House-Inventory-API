@@ -46,9 +46,12 @@ function doCommand(com, grid) {
 };
 
 \$(function() {
-	\$( "#tabs" ).tabs();
-	var loadUrl = "api.pl";
-	\$(".flex2").flexigrid({
+	\$('#tabs').tabs();
+	\$('#accordion').accordion({
+		autoHeight: false
+	});
+	var loadUrl = 'api.pl';
+	\$('.flex2').flexigrid({
 		colModel : [
 			{display: 'Name', name : 'name', width : 130, sortable : true, align: 'left'},
 			{display: 'Barcode', name : 'barcode', width : 130, sortable : true, align: 'left'},
@@ -128,7 +131,7 @@ var loadUrl = "api.pl";
 					};
 					var statplotarea = \$("#statplotarea");
 					statplotarea.css("height", "250px");
-					statplotarea.css("width", "500px");
+					statplotarea.css("width", "540px");
 					\$.get(loadUrl, {'type_of_query': "gen_stat_flot", 'query': query},
 						function(data){
 							var dataline = \$.parseJSON(data);
@@ -148,8 +151,6 @@ var loadUrl = "api.pl";
 									 show: true
 								}
 							};
-							statplotarea.css("height", "250px");
-							statplotarea.css("width", "500px");
 							\$.plot(statplotarea, [{data: dataP, label: 'Stats Points', legend: {
 									show: true,
 									margin: 10,
@@ -167,6 +168,15 @@ var loadUrl = "api.pl";
 						});
 				});
 		});
+});
+
+\$("#edit").click(function(){
+	var name = \$("#name").val();
+	var barcode = \$("#barcode").val();
+	var quantity = \$("#quantity").val();
+	var description = \$("#description").val();
+	var flag = \$("#flag").val();
+	
 });
 END
 
@@ -189,37 +199,65 @@ if ($gui eq 'y') {
 		$form->div({-class=>'span-24', -id=>'tabs'},
 		$form->ul(
 			$form->li($form->a({-href=>'#tabs-1'}, 'Info' )),
-			$form->li($form->a({-href=>'#tabs-2'}, 'Product Use Plot' )),
-			$form->li($form->a({-href=>'#tabs-3'}, 'Product Stats' )),
-			$form->li($form->a({-href=>'#tabs-4'}, 'Total Inventory' )),
+			$form->li($form->a({-href=>'#tabs-2'}, 'Add Product' )),
+			$form->li($form->a({-href=>'#tabs-3'}, 'Total Inventory' )),
 			$form->li(
 				$form->textfield(-id=>'search',-class=>"functions", -value=>'Search'), $form->button(-value=>"Find", -id=>"load_basic",-class=>"functions")
 				)
 			),
-		$form->div({-id=>'tabs-1', -class=>'functions'},$form->div({-id=>''},
-			$form->table({-class=>'flex'},
-					thead({},
-						Tr({},
-							th({-width=>'130'}, ['Name', 'Barcode', 'Quantity', 'Flag',]),
-							th({-width=>'300'}, ['Description']))
-					),
+		$form->div({-id=>'tabs-1', -class=>'functions'},
+			$form->div({-class=>''},
+				$form->table({-width=>'100%'},
 					tbody({},
 						Tr({},
+							th({-width=>'130'}, ['Name', 'Barcode']),
+							th({-width=>'100%'}, ['plot'])
+						),
+						Tr({},
 							td({},[
-					$form->textarea(-id=>'name',-class=>"functions",-columns=>'18',-rows=>5),
-					$form->textarea(-id=>'barcode',-class=>"functions",-columns=>'18',-rows=>5),
-					$form->textarea(-id=>'quantity',-class=>"functions",-columns=>'18',-rows=>5),
-					$form->textarea(-id=>'flag',-class=>"functions",-columns=>'18',-rows=>5),
-					$form->textarea(-id=>'description',-class=>"functions",-columns=>'45',-rows=>5)
+								$form->textarea(-id=>'name',-class=>"functions",-columns=>'20',-rows=>2),
+								$form->textarea(-id=>'barcode',-class=>"functions",-columns=>'20',-rows=>2)
+							]),
+							td({-rowspan=>'7'},[
+								$form->div({-id=>'accordion'},
+									$form->h3($form->a({-href=>'#'}, 'Product Use Plot' )),
+									$form->div($form->div({-id=>'statplotarea'},'')),
+									$form->h3($form->a({-href=>'#'}, 'Product Stats' )),
+									$form->div({-id=>'statarea'},'')
+								)
+							]),
+						),
+						Tr({},
+							th({}, ['Quantity', 'Flag',])
+						),
+						Tr({},
+							td({},[
+								$form->textarea(-id=>'quantity',-class=>"functions",-columns=>'20',-rows=>2),
+								$form->textarea(-id=>'flag',-class=>"functions",-columns=>'20',-rows=>2)
+							])
+						),
+						Tr({},
+							th({-colspan=>'2'}, ['Description'])
+						),
+						Tr({},
+							td({-colspan=>'2'}, [
+								$form->textarea(-id=>'description',-class=>"functions",-columns=>'45',-rows=>20)
+							])
+						)
+						Tr({},
+							td({-colspan=>'2'}, [
+								$form->button(-value=>"Edit Product", -id=>"edit",-class=>"functions"),
+								$form->button(-value=>"Delete Product", -id=>"delete",-class=>"functions"),
 							])
 						)
 					)
-			))
+				)
+			)
 		),
-		$form->div({-id=>'tabs-2'},$form->div({-id=>'statplotarea'},'')),
-		$form->div({-id=>'tabs-3', -class=>'functions'},$form->div({-id=>'return'},'')),
-		$form->div({-id=>'tabs-4', -class=>'functions'},$form->div({-id=>'total'},
-		$form->table({-class=>'flex2'},
+		$form->div({-id=>'tabs-2', -class=>'functions'},$form->div({-id=>'return'},'')),
+		$form->div({-id=>'tabs-3', -class=>'functions'},
+			$form->div({-id=>'total'},
+				$form->table({-class=>'flex2'},
 					tbody({},
 						Tr({},
 							td({},
@@ -227,8 +265,9 @@ if ($gui eq 'y') {
 							)
 						)
 					)
+				)
 			)
-		))
+		)
 		)
 	);
 	print $form->script($jquery);
