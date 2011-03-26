@@ -42,8 +42,6 @@ function doCommand(com, grid) {
 			\$("#search").val(id);
 			//click the search button, this is a bit of a cheat that saves code
 			\$("#load_basic").click();
-			//switch tabs to the info tab
-			\$( "#tabs" ).tabs( "select", 0 );
 		})
 	}
 };
@@ -116,6 +114,7 @@ function doCommand(com, grid) {
 	//setup the auto update for the total inventory tab so it updates every second to make sure it has all the products
 	//and make sure the search bar is always updated
 	function update() {
+	
 		\$.get(loadUrl, {'type_of_query': 'total_inventory'},
 			function(data){
 				total = \$.parseJSON(data);
@@ -145,7 +144,7 @@ function doCommand(com, grid) {
 	update();
 	
 	//setup the dialog for deleting a product
-	\$('#dialog').dialog({
+	\$('#dialog_delete').dialog({
 		autoOpen: false,
 		width: 600,
 		buttons: {
@@ -159,6 +158,37 @@ function doCommand(com, grid) {
 		},
 		modal: true
 	});
+	
+	\$('#dialog_edit').dialog({
+		autoOpen: false,
+		width: 600,
+		buttons: {
+			"Edit": function() {
+				edit_product();
+				\$(this).dialog("close"); 
+			}, 
+			"Cancel": function() { 
+				\$(this).dialog("close"); 
+			} 
+		},
+		modal: true
+	});
+	
+	\$('#dialog_add').dialog({
+		autoOpen: false,
+		width: 600,
+		buttons: {
+			"Add": function() {
+				add_product();
+				\$(this).dialog("close"); 
+			}, 
+			"Cancel": function() { 
+				\$(this).dialog("close"); 
+			} 
+		},
+		modal: true
+	});
+	
 });
 
 //select the search text in the search bar if it's clicked
@@ -169,6 +199,7 @@ function doCommand(com, grid) {
 //if the find button has been pressed, get and set all the info for the fields and what not
 var loadUrl = "api.pl";
 \$("#load_basic").click(function(){
+	\$( "#tabs" ).tabs( "select", 0 );
 	\$('#update').hide();
 	var query = \$("#search").val()
 	\$.get(loadUrl, {'type_of_query': "product_info", 'query': query },
@@ -265,6 +296,10 @@ var loadUrl = "api.pl";
 });
 
 \$("#edit").click(function(){
+	\$('#dialog_edit').dialog('open');
+});
+
+function edit_product() {
 	var name = \$("#name").html();
 	var barcode = \$("#barcode").html();
 	var quantity = \$("#quantity").html();
@@ -279,10 +314,32 @@ var loadUrl = "api.pl";
 			\$('#update').show();
 		}
 	);
+};
+
+\$("#add").click(function(){
+	\$('#dialog_add').dialog('open');
 });
 
+function add_product() {
+	var name = \$("#name_new").html();
+	var barcode = \$("#barcode_new").html();
+	var quantity = \$("#quantity_new").html();
+	var description = \$("#description_new").html();
+	var flag = \$("#flag_new").html();
+	\$.get(loadUrl, {'type_of_query': 'add_product','name': name, 'description': description, 'query': barcode, 'quantity':quantity, 'flag': flag},
+		function(data){
+			if (\$("#update").hasClass('notice')) {
+				\$("#update").removeClass('notice');
+			};
+			\$('#update').html('Product Added').addClass('success');
+			\$('#update').show();
+			\$( "#tabs" ).tabs( "select", 0 );
+		}
+	);
+};
+
 \$("#delete").click(function(){
-	\$('#dialog').dialog('open');
+	\$('#dialog_delete').dialog('open');
 });
 
 function delete_product() {
@@ -315,8 +372,14 @@ if ($gui eq 'y') {
 							{-type=>'text/javascript',-src=>'javascript/jquery.editableText.js'}
 							]);
 	print $form->div({-class=>'container ui-widget'},
-		$form->div({-id=>'dialog', -title=>'Delete Product?'},
+		$form->div({-id=>'dialog_delete', -title=>'Delete Product?'},
 			$form->p({}, 'Are you sure you want to delete this product?')
+		),
+		$form->div({-id=>'dialog_add', -title=>'Add Product?'},
+			$form->p({}, 'Are you sure you want to add this product?')
+		),
+		$form->div({-id=>'dialog_edit', -title=>'Edit Product?'},
+			$form->p({}, 'Are you sure you want to submit the changes to this product?')
 		),
 		$form->div({-class=>'span-24'},
 			$form->h1("House Inventory API Webfront"),
@@ -339,7 +402,7 @@ if ($gui eq 'y') {
 				),
 				$form->table({-id=>'hide',-style=>"display: none",-cellspacing=>10},
 					Tr({},
-						td({-width=>400},
+						td({-width=>300},
 							$form->div({},
 								$form->p({-id=>'name',-class=>"functions large editableText"},
 									''
@@ -380,7 +443,11 @@ if ($gui eq 'y') {
 				)
 			)
 		),
-		$form->div({-id=>'tabs-2', -class=>'functions'},$form->div({-id=>'return'},'')),
+		$form->div({-id=>'tabs-2', -class=>'functions'},
+			$form->div({-id=>'return'},
+				''
+			)
+		),
 		$form->div({-id=>'tabs-3', -class=>'functions'},
 			$form->div({-id=>'total'},
 				$form->table({-class=>'flex2'},
