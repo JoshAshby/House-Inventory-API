@@ -46,10 +46,32 @@ function doCommand(com, grid) {
 };
 
 \$(function() {
+	function update() {
+		\$.get(loadUrl, {'type_of_query': 'total_inventory'},
+			function(data){
+				total = \$.parseJSON(data);
+				var po = [];
+				for (var i = 0; i <= total.length-1; i++) {
+					po.push({cell: [total[i]['name'], total[i]['barcode'], total[i]['quantity'], total[i]['flag'], total[i]['description']]});
+				};
+				var da = {
+				total: total.length,
+				page: 1,
+				rows: po
+			};
+		\$(".flex2").flexAddData(eval(da));
+		});
+		setTimeout(update, 5000);
+	};
+	update();
+	
+
+
 	\$('#tabs').tabs();
 	\$('#accordion').accordion({
 		autoHeight: false
 	});
+	
 	var loadUrl = 'api.pl';
 	\$('.flex2').flexigrid({
 		colModel : [
@@ -69,7 +91,7 @@ function doCommand(com, grid) {
 		useRp: true,
 		rp: 15
 	});
-	var loadUrl = "api.pl";
+	
 	var total;
 	\$.get(loadUrl, {'type_of_query': 'total_inventory'},
 		function(data){
@@ -108,14 +130,40 @@ var loadUrl = "api.pl";
 			//parse the JSON into javascript objects
 			var results = \$.parseJSON(data);
 			//set all the fields to the correct value from the JSON string
-			\$("#name").val(results.name);
-			\$("#barcode").val(results.barcode);
-			\$("#quantity").val(results.quantity);
-			\$("#description").val(results.description);
-			\$("#flag").val(results.flag);
+			\$("#name").html(results.name);
+			\$("#barcode").html(results.barcode);
+			\$("#quantity").html('Quantity: '+results.quantity);
+			\$("#description").html(results.description);
+			\$("#flag").html('Flag: '+results.flag)
+			if (results.flag == 'M') {
+				if (\$("#flag").hasClass('error')) {
+					\$("#flag").removeClass('error');
+				};
+				if (\$("#flag").hasClass('success')) {
+					\$("#flag").removeClass('success');
+				};
+				\$("#flag").addClass('notice');
+			} else if (results.flag == 'H') {
+				if (\$("#flag").hasClass('notice')) {
+					\$("#flag").removeClass('notice');
+				};
+				if (\$("#flag").hasClass('success')) {
+					\$("#flag").removeClass('success');
+				};
+				\$("#flag").addClass('error');
+			} else if (results.flag == 'L') {
+				if (\$("#flag").hasClass('error')) {
+					\$("#flag").removeClass('error');
+				};
+				if (\$("#flag").hasClass('notice')) {
+					\$("#flag").removeClass('notice');
+				};
+				\$("#flag").addClass('success');
+			};
+			\$('#hide').show();
 			//plot the two graphs
 			var dataP;
-			var query = \$("#barcode").val();
+			var query = \$("#barcode").html();
 			\$.get(loadUrl, {'type_of_query': "return_stat_flot", 'query': query},
 				function(data){
 					dataP = \$.parseJSON(data);
@@ -176,7 +224,6 @@ var loadUrl = "api.pl";
 	var quantity = \$("#quantity").val();
 	var description = \$("#description").val();
 	var flag = \$("#flag").val();
-	
 });
 END
 
@@ -206,49 +253,28 @@ if ($gui eq 'y') {
 				)
 			),
 		$form->div({-id=>'tabs-1', -class=>'functions'},
-			$form->div({-class=>''},
-				$form->table({-width=>'100%'},
-					tbody({},
-						Tr({},
-							th({-width=>'130'}, ['Name', 'Barcode']),
-							th({-width=>'100%'}, ['plot'])
+			$form->div({},
+				$form->table({-id=>'hide',-style=>"display: none",-cellspacing=>10},
+					Tr({},
+						td({-width=>400},
+							$form->div({},
+								$form->h1({-id=>'name',-class=>"functions"},''),
+								$form->h2({-id=>'barcode',-class=>"functions"},''),
+								$form->p({-id=>'quantity',-class=>"functions"},''),
+								$form->p({-id=>'flag',-class=>"functions"},''),
+								$form->p({-id=>'description',-class=>"functions"},'')
+							)
 						),
-						Tr({},
-							td({},[
-								$form->textarea(-id=>'name',-class=>"functions",-columns=>'20',-rows=>2),
-								$form->textarea(-id=>'barcode',-class=>"functions",-columns=>'20',-rows=>2)
-							]),
-							td({-rowspan=>'7'},[
-								$form->div({-id=>'accordion'},
-									$form->h3($form->a({-href=>'#'}, 'Product Use Plot' )),
-									$form->div($form->div({-id=>'statplotarea'},'')),
-									$form->h3($form->a({-href=>'#'}, 'Product Stats' )),
-									$form->div({-id=>'statarea'},'')
-								)
-							]),
+						td({-width=>10},
+						
 						),
-						Tr({},
-							th({}, ['Quantity', 'Flag',])
-						),
-						Tr({},
-							td({},[
-								$form->textarea(-id=>'quantity',-class=>"functions",-columns=>'20',-rows=>2),
-								$form->textarea(-id=>'flag',-class=>"functions",-columns=>'20',-rows=>2)
-							])
-						),
-						Tr({},
-							th({-colspan=>'2'}, ['Description'])
-						),
-						Tr({},
-							td({-colspan=>'2'}, [
-								$form->textarea(-id=>'description',-class=>"functions",-columns=>'45',-rows=>20)
-							])
-						)
-						Tr({},
-							td({-colspan=>'2'}, [
-								$form->button(-value=>"Edit Product", -id=>"edit",-class=>"functions"),
-								$form->button(-value=>"Delete Product", -id=>"delete",-class=>"functions"),
-							])
+						td({-width=>540},
+							$form->div({-id=>'accordion'},
+								$form->h3($form->a({-href=>'#'}, 'Product Use Plot' )),
+								$form->div($form->div({-id=>'statplotarea'},'')),
+								$form->h3($form->a({-href=>'#'}, 'Product Stats' )),
+								$form->div({-id=>'statarea'},'')
+							)
 						)
 					)
 				)
