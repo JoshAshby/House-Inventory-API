@@ -19,20 +19,20 @@ API Info:
 --------------
 
 The available querys to the API currently are (All return data and all data is in JSON format):
-* ``gui`` will open the web front end if set to ``y``
-* ``type_of_query`` sets what type of query your going to be calling.
-* Types include:
-* ``product_info`` returns a single products info based off of barcode
-* ``total_inventory`` returns the whole product database
-* ``add_product`` adds a product
-* ``update_product`` updates a product
-* ``remove_product`` removes a product based off of barcode
-* ``return_log`` returns the usage log based off of barcode
-* ``gen_stat`` returns the slope, intercept and data points for the stats plots based off of barcode
-* ``names`` returns all the names and barcodes in the database (mainly for auto complete)
-* ``return_log_flot`` same as return_log however data is formated for flot to read (not currently used as it requires the dates to be converted based off of barcode
-* ``return_stat_flot`` returns the points of the stats graph in a format flot can read based off of barcode
-* ``gen_stat_flot`` returns the slope and intercept for flot to use based off of barcode
+	gui will open the web front end if set to ``y``
+	type_of_query sets what type of query your going to be calling.
+Types include:
+	product_info returns a single products info based off of barcode
+	total_inventory returns the whole product database
+	add_product adds a product
+	update_product updates a product
+	remove_product removes a product based off of barcode
+	return_log returns the usage log based off of barcode
+	gen_stat returns the slope, intercept and data points for the stats plots based off of barcode
+	names returns all the names and barcodes in the database (mainly for auto complete)
+	return_log_flot same as return_log however data is formated for flot to read (not currently used as it requires the dates to be converted based off of barcode
+	return_stat_flot returns the points of the stats graph in a format flot can read based off of barcode
+	gen_stat_flot returns the slope and intercept for flot to use based off of barcode
 
 ###API Examples:
 
@@ -56,13 +56,13 @@ Database Info:
 Products are stored in a MySQL database with the following columns:
 ``[id][name][description][barcode][quantity][average][flag]``
 
-	``[id]`` is just an arbitrary id number which may go away in future versions of the database as none of the code uses it.
-	``[name]`` is the name of the product
-	``[description]`` is the product description
-	``[barcode]`` is the barcode
-	``[quantity]`` is the current quantity
-	``[average]`` is reserved for when more stats functions are added in to the API
-	``[flag]`` is also reserved but can be manually set as it's just H,M or L for high priority, medium priority, and low priority, in terms of the quantity left. This will be used for shopping list generation later on when thats added to the API.
+	[id] is just an arbitrary id number which may go away in future versions of the database as none of the code uses it.
+	[name] is the name of the product
+	[description] is the product description
+	[barcode] is the barcode
+	[quantity] is the current quantity
+	[average] is reserved for when more stats functions are added in to the API
+	[flag] is also reserved but can be manually set as it's just H,M or L for high priority, medium priority, and low priority, in terms of the quantity left. This will be used for shopping list generation later on when thats added to the API.
 
 Product use is stored in a second MySQL table which is formated like so:
 ``[barcode][quantity][date][date_time]``
