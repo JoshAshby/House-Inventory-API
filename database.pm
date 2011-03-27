@@ -86,24 +86,6 @@ sub total_inventory {
 	return $json->encode(\@data_hash);
 }
 
-#print the total inventory for the database
-sub total_inventory_flex {
-	my $name;
-	my $description;
-	my $barcode;
-	my $quantity;
-	my $flag;
-	$get_all_products->execute();
-	$get_all_products->bind_columns(undef, \$name, \$description, \$barcode, \$quantity, \$flag);
-	my @temp_hash;
-	while($get_all_products->fetch()){
-		my %otext = ('cell'=>[$name, $barcode, $quantity, $flag, $description]);
-		push(@temp_hash, \%otext);
-	}
-	my %hash = ('total'=>length(\@temp_hash), 'page'=>1, 'rows'=>@temp_hash);
-	print $json->encode(\%hash);;
-}
-
 #prints the names and barcodes of each product for auto complete to use
 sub names {
 	my $name;
