@@ -22,17 +22,17 @@ The available querys to the API currently are (All return data and all data is i
 * ``gui`` will open the web front end if set to ``y``
 * ``type_of_query`` sets what type of query your going to be calling.
 * Types include:
-** ``product_info`` returns a single products info based off of barcode
-** ``total_inventory`` returns the whole product database
-** ``add_product`` adds a product
-** ``update_product`` updates a product
-** ``remove_product`` removes a product based off of barcode
-** ``return_log`` returns the usage log based off of barcode
-** ``gen_stat`` returns the slope, intercept and data points for the stats plots based off of barcode
-** ``names`` returns all the names and barcodes in the database (mainly for auto complete)
-** ``return_log_flot`` same as return_log however data is formated for flot to read (not currently used as it requires the dates to be converted based off of barcode
-** ``return_stat_flot`` returns the points of the stats graph in a format flot can read based off of barcode
-** ``gen_stat_flot`` returns the slope and intercept for flot to use based off of barcode
+* ``product_info`` returns a single products info based off of barcode
+* ``total_inventory`` returns the whole product database
+* ``add_product`` adds a product
+* ``update_product`` updates a product
+* ``remove_product`` removes a product based off of barcode
+* ``return_log`` returns the usage log based off of barcode
+* ``gen_stat`` returns the slope, intercept and data points for the stats plots based off of barcode
+* ``names`` returns all the names and barcodes in the database (mainly for auto complete)
+* ``return_log_flot`` same as return_log however data is formated for flot to read (not currently used as it requires the dates to be converted based off of barcode
+* ``return_stat_flot`` returns the points of the stats graph in a format flot can read based off of barcode
+* ``gen_stat_flot`` returns the slope and intercept for flot to use based off of barcode
 
 ###API Examples:
 
