@@ -193,7 +193,23 @@ function doCommand(com, grid) {
 
 //select the search text in the search bar if it's clicked
 \$("#search").click(function(){
-	\$("#search").select();
+	\$(this).select();
+});
+
+\$("#name_new").click(function(){
+	\$(this).select();
+});
+\$("#barcode_new").click(function(){
+	\$(this).select();
+});
+\$("#quantity_new").click(function(){
+	\$(this).select();
+});
+\$("#flag_new").click(function(){
+	\$(this).select();
+});
+\$("#description_new").click(function(){
+	\$(this).select();
 });
 
 //if the find button has been pressed, get and set all the info for the fields and what not
@@ -321,19 +337,18 @@ function edit_product() {
 });
 
 function add_product() {
-	var name = \$("#name_new").html();
-	var barcode = \$("#barcode_new").html();
-	var quantity = \$("#quantity_new").html();
-	var description = \$("#description_new").html();
-	var flag = \$("#flag_new").html();
+	var name = \$("#name_new").val();
+	var barcode = \$("#barcode_new").val();
+	var quantity = \$("#quantity_new").val();
+	var description = \$("#description_new").val();
+	var flag = \$("#flag_new").val();
 	\$.get(loadUrl, {'type_of_query': 'add_product','name': name, 'description': description, 'query': barcode, 'quantity':quantity, 'flag': flag},
 		function(data){
-			if (\$("#update").hasClass('notice')) {
-				\$("#update").removeClass('notice');
+			if (\$("#add").hasClass('notice')) {
+				\$("#add").removeClass('notice');
 			};
-			\$('#update').html('Product Added').addClass('success');
-			\$('#update').show();
-			\$( "#tabs" ).tabs( "select", 0 );
+			\$('#add').html('Product Added!').addClass('success');
+			\$('#add').show();
 		}
 	);
 };
@@ -372,6 +387,8 @@ if ($gui eq 'y') {
 							{-type=>'text/javascript',-src=>'javascript/jquery.editableText.js'}
 							]);
 	print $form->div({-class=>'container ui-widget'},
+		#setup the dialogs for the various functions.
+		#These are divs but jquery makes them hidden, using them only as place holders in a way for the dialog
 		$form->div({-id=>'dialog_delete', -title=>'Delete Product?'},
 			$form->p({}, 'Are you sure you want to delete this product?')
 		),
@@ -381,6 +398,7 @@ if ($gui eq 'y') {
 		$form->div({-id=>'dialog_edit', -title=>'Edit Product?'},
 			$form->p({}, 'Are you sure you want to submit the changes to this product?')
 		),
+		#start the main form, what you see
 		$form->div({-class=>'span-24'},
 			$form->h1("House Inventory API Webfront"),
 			$form->h2("Please enter the name or barcode of a product you would like to look at:"),
@@ -445,7 +463,17 @@ if ($gui eq 'y') {
 		),
 		$form->div({-id=>'tabs-2', -class=>'functions'},
 			$form->div({-id=>'return'},
-				''
+				$form->label({}, 'Name'),
+				$form->textfield(-id=>'name_new',-class=>"functions", -value=>'Name'),
+				$form->label({}, 'Barcode'),
+				$form->textfield(-id=>'barcode_new',-class=>"functions", -value=>'Barcode'),
+				$form->label({}, 'Quantity'),
+				$form->textfield(-id=>'quantity_new',-class=>"functions", -value=>'Quantity'),
+				$form->label({}, 'Flag'),
+				$form->textfield(-id=>'flag_new',-class=>"functions", -value=>'Flag'),
+				$form->label({}, 'Description'),
+				$form->textarea(-id=>'description_new',-class=>"functions", -value=>'Description'),
+				$form->button(-value=>"Add Product", -id=>"add",-class=>"functions")
 			)
 		),
 		$form->div({-id=>'tabs-3', -class=>'functions'},
