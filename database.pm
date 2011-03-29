@@ -21,6 +21,7 @@ our $add_new_product;
 our $update_quantity;
 our $remove_product;
 our $get_stats;
+our $get_stats_lim;
 our $update_product_db;
 
 #Setting up a new API call
@@ -185,18 +186,36 @@ sub gen_stats {
 	$get_stats->bind_columns(undef, \$barcode, \$quantity, \$date);
 	my @dates_ar;
 	my @quantity_ar;
+	my @quantity_test;
+	my $i;
 	while ($get_stats->fetch()) {
+		push(@quantity_test, $quantity);
+	}
+	#print length(\@quantity_test), '<br />';
+	for ($i = 0; $i <= length(\@quantity_test)-1; $i += 1) {
+	#	print $i, ':', @quantity_test[$i], '<br />';
+		last if (@quantity_test[$i+1]-@quantity_test[$i] >= 5);
+	}
+	#print $i, '<br />';
+	$get_stats_lim->execute($query, $i);
+	$get_stats_lim->bind_columns(undef, \$barcode, \$quantity, \$date);
+	while ($get_stats_lim->fetch()) {
+		print $quantity, 'q<br />';
 		push(@quantity_ar, $quantity);
 		my $d2 = DateTime::Format::MySQL->parse_datetime($date);
 		my $day_dif = $d1->delta_days($d2)->delta_days;
 		push(@days, -$day_dif);
 	}
-	my $lineFit = Statistics::LineFit->new();
-	$lineFit->setData(\@days, \@quantity_ar) or die "Invalid data";
-	my @vars = $lineFit->coefficients();
-	push(@vars, \@days);
-	push(@vars, \@quantity_ar);
-	return $json->encode(\@vars);
+	print length(\@days), '::', length(\@quantity_ar), '<br />';
+	for (my $u = 0; $u <= length(\@quantity_ar); $u += 1) {
+		print $u, ':', @quantity_ar[$u], '<br />';
+	}
+	#my $lineFit = Statistics::LineFit->new();
+	#$lineFit->setData(\@days, \@quantity_ar) or die "Invalid data";
+	#my @vars = $lineFit->coefficients();
+	#push(@vars, \@days);
+	#push(@vars, \@quantity_ar);
+	#return $json->encode(\@vars);
 }
 
 #return the slope and intercept

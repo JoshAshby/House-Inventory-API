@@ -46,6 +46,14 @@ WHERE barcode = ?
 ORDER BY date desc
 SQL
 
+our $get_stats_lim = $connect->prepare_cached(<<"SQL");
+SELECT barcode, quantity, date_time
+FROM $stats_db
+WHERE barcode = ?
+ORDER BY date desc
+LIMIT 0, ?
+SQL
+
 our $update_quantity = $connect->prepare_cached(<<"SQL");
 INSERT INTO $stats_db
 (barcode, quantity)
