@@ -27,6 +27,19 @@ API Info:
 --------------
 Coming soon after this Python branch of the API is finished.
 
+	/
+	/total/
+	/product/info/dog987
+	/product/add/dog987/Beagle/3/A+dog+with+brown+and+white+and+black+fur.
+	/product/delete/dog987
+	/product/update/dog987/Beagle/3/A+dog+with+brown+and+white+and+black+fur.
+	/log/dog987
+	/log_flot/dog987
+	/stats/dog987
+	/stats_flot/dog987
+	/names/
+	
+
 Database Info:
 --------------------------
 
