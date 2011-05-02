@@ -27,17 +27,20 @@ API Info:
 --------------
 Coming soon after this Python branch of the API is finished.
 
-	/
-	/total/
-	/product/info/dog987
-	/product/add/dog987/Beagle/3/A+dog+with+brown+and+white+and+black+fur.
-	/product/delete/dog987
-	/product/update/dog987/Beagle/3/A+dog+with+brown+and+white+and+black+fur.
-	/log/dog987
-	/log_flot/dog987
-	/stats/dog987
-	/stats_flot/dog987
-	/names/
+	/ General home page currently, It will eventually be the web front address... I think
+
+The following return JSON formated data:
+
+	/product/dog987/info/ Info for the product whos barcode  comes after the /product/
+	/product/dog987/delete/ Delete said product with barcode stated
+	/product/dog987/Beagle/3/A+dog+with+brown+and+black+and+white+fur./add/ Add the given product, the url should be: barcode, name, quantity, description
+	/product/dog987/Beagle/3/A+dog+with+brown+and+black+and+white+fur./update/ Update the given product, the url should be: barcode, name, quantity, description
+	/product/ get the total products
+	/product/names/ only the names and barcodes of all the products for auto complete
+	/product/dog987/log/ display the quantity change log for the product
+	/product/dog987/stats/ coming soon
+	/product/dog987/log/flot/ display the quantity change log for the product in a format flot.js can understand
+	/product/dog987/stats/flot/ coming soon
 	
 
 Database Info:
@@ -60,7 +63,7 @@ Product use is stored in a second MySQL table which is formated like so:
 	[barcode] is the product barcode
 	[quantity] is the products new quantity at the time the entry was added (after a change has happened to the quantity)
 	[date] is not used currently
-	[date_time] is a MySQL timestamp which is automatically set by the database for generating stats and plotting the use over time.
+	[date_time] is a MySQL timestamp which is automatically set by the database for generating stats and plotting the use over time. (removed)
 
 Other info:
 -----------------

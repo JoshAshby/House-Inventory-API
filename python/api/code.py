@@ -6,16 +6,16 @@ db = web.database(dbn='mysql', user='root', pw='speeddyy5', db='pl_barcode')
         
 urls = (
 	'/', 'index',
-	'/product/info/(.*)', 'info',
-	'/product/delete/(.*)', 'delete',
-	'/product/add/(.*)/(.*)/(.*)/(.*)', 'add',
-	'/product/update/(.*)/(.*)/(.*)/(.*)', 'update',
-	'/total/', 'total',
-	'/names/', 'names',
-	'/log/(.*)', 'log',
-	'/stats/(.*)', 'stats',
-	'/log/flot/(.*)', 'log_flot',
-	'/stats/flot/(.*)', 'stats_flot'
+	'/product/(.*)/info/', 'info',
+	'/product/(.*)/delete/', 'delete',
+	'/product/(.*)/(.*)/(.*)/(.*)/add/', 'add',
+	'/product/(.*)/(.*)/(.*)/(.*)/update/', 'update',
+	'/product/', 'total',
+	'/product/names/', 'names',
+	'/product/(.*)/log/', 'log',
+	'/product/(.*)/stats/', 'stats',
+	'/product/(.*)/log/flot/', 'log_flot',
+	'/product/(.*)/stats/flot/', 'stats_flot'
 )
 
 render = web.template.render('/srv/http/template/')
@@ -48,6 +48,7 @@ class add:
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		inform['added'] = 'true'
+		db.query('INSERT INTO stats (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
 		web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 		
@@ -59,6 +60,7 @@ class update:
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		inform['updated'] = 'true'
+		db.query('INSERT INTO stats (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
 		web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 
@@ -70,6 +72,29 @@ class delete:
 		inform['deleted'] = 'true'
 		web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
+
+class names:
+	def GET(self):
+		query = []
+		name = db.query('SELECT * FROM products')
+		for i in range(len(name)):
+			query.append(name[i]['name'])
+		name = db.query('SELECT * FROM products')
+		for i in range(len(name)):
+			query.append(name[i]['barcode'])
+		web.header('Content-Type', 'application/json')
+		return json.dumps(query)
+		
+class log:
+	def GET(self, barcode):
+		query = []
+		name = db.query('SELECT quantity, date FROM stats WHERE barcode = $barcode', vars={'barcode':barcode})
+		for i in range(len(name)):
+			query.append(name[i])
+		for i in range(len(query)):
+			query[i]['date'] = query[i]['date'].isoformat(' ')
+		web.header('Content-Type', 'application/json')
+		return json.dumps(query)
 		
 if __name__ == "__main__":
 	app.run()
