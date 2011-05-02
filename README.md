@@ -62,8 +62,7 @@ Product use is stored in a second MySQL table which is formated like so:
 
 	[barcode] is the product barcode
 	[quantity] is the products new quantity at the time the entry was added (after a change has happened to the quantity)
-	[date] is not used currently
-	[date_time] is a MySQL timestamp which is automatically set by the database for generating stats and plotting the use over time. (removed)
+	[date] name says it all
 
 Other info:
 -----------------
