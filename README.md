@@ -7,6 +7,11 @@ House Inventory API:
 * http://www.flickr.com/photos/joshashby/
 * https://github.com/JoshAshby
 
+Forword:
+--------------
+Please note that this is a major work in progress, the API maybe broken at anytime, and the URL scheme may change without warning, should a btter solution present itself.
+Also throughout the documentation, the word peak comes up. Peak referes to the stated interval on which a restock has just happened, till the next restock or the current day.
+
 License:
 -------------
 This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
@@ -47,22 +52,24 @@ Database Info:
 --------------------------
 
 Products are stored in a MySQL database with the following columns:
-``[id][name][description][barcode][quantity][average][flag]``
+``[id][name][description][barcode][quantity][average][coef][flag]``
 
 	[id] is just an arbitrary id number which may go away in future versions of the database as none of the code uses it.
 	[name] is the name of the product
 	[description] is the product description
 	[barcode] is the barcode
 	[quantity] is the current quantity
-	[average] is reserved for when more stats functions are added in to the API
+	[average] last 5 ratios of the number of products over days per each peak
+	[coef] Storage of the coefficents for the products last ran regression line
 	[flag] is also reserved but can be manually set as it's just H,M or L for high priority, medium priority, and low priority, in terms of the quantity left. This will be used for shopping list generation later on when thats added to the API.
 
 Product use is stored in a second MySQL table which is formated like so:
-``[barcode][quantity][date][date_time]``
+``[barcode][quantity][date][reason]``
 
 	[barcode] is the product barcode
 	[quantity] is the products new quantity at the time the entry was added (after a change has happened to the quantity)
 	[date] name says it all
+	[reason] either restock or soon to be the order ID this will be tied in with a third table for storing orders
 
 Other info:
 -----------------
