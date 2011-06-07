@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Basic math type implimentation for Python. Very basic, nothing fancy.
 
@@ -18,7 +19,8 @@ class MathError(Exception):
 		return repr(self.value)
 		
 class thorVector(object):
-	def __init__(self, data):
+	#Even though it's not that powerful...
+	def __init__(self, data=[]):
 		self.data = data
 	
 	def __repr__(self):
@@ -149,3 +151,12 @@ class thorVector(object):
 			return self.__class__(data)
 		else:
 			raise MathError('Really? It *must* be a Vector of the same length or a plain old integer! Gosh, get it right...')
+	
+	def insert(self, where, what):
+		self.data.insert(where, what)
+	
+	def append(self, what):
+		self.data.append(what)
+		
+	def pop(self, where):
+		return self.data.pop(where)
