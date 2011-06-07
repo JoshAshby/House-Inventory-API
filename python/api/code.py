@@ -25,10 +25,14 @@ For some reason, python and web.py don't want to import this file so for the tim
 '''
 
 #debug setter
-debug = 0
+spamandeggs = 0
 
 #Don't ask... this error is just better than a standard raise
 class MathError(Exception):
+	'''
+	class documentation
+	MathError for use by the Vector
+	'''
 	def __init__(self, value):
 		self.value = value
 
@@ -36,6 +40,10 @@ class MathError(Exception):
 		return repr(self.value)
 		
 class thorVector(object):
+	'''
+	class documentation
+	Creates a Vector type for Python. More coming soon.
+	'''
 	#Even though it's not that powerful...
 	def __init__(self, data=[]):
 		self.data = data
@@ -205,10 +213,18 @@ urls = (
 render = web.template.render('/srv/http/template/')
 
 class index:        
+	'''
+	class documentation
+	Base Index...
+	'''
 	def GET(self):
 		return render.index()
 
 class info:
+	'''
+	class documentation
+	Info about the given product.
+	'''
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
@@ -216,6 +232,10 @@ class info:
 		return json.dumps(inform)
 		
 class total:
+	'''
+	class documentation
+	Returns all the product info. Used for product info tables in the main client
+	'''
 	def GET(self):
 		query = []
 		name = db.query('SELECT * FROM products')
@@ -225,6 +245,10 @@ class total:
 		return json.dumps(query)
 		
 class add:
+	'''
+	class documentation
+	Adds the given product.
+	'''
 	def GET(self, barcode, name, quantity, description):
 		p = re.compile('\+')
 		found = p.sub( ' ', description)
@@ -237,6 +261,10 @@ class add:
 		return json.dumps(inform)
 		
 class update:
+	'''
+	class documentation
+	Updates the given product.
+	'''
 	def GET(self, barcode, name, quantity, description):
 		p = re.compile('\+')
 		found = p.sub( ' ', description)
@@ -249,6 +277,10 @@ class update:
 		return json.dumps(inform)
 
 class order:
+	'''
+	class documentation
+	More coming soon, since this is pretty worthless right now...
+	'''
 	def GET(self, barcode, quantity):
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
@@ -261,6 +293,10 @@ class order:
 		return json.dumps(inform)
 
 class delete:
+	'''
+	class documentation
+	Deletes the given product.
+	'''
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
@@ -270,6 +306,10 @@ class delete:
 		return json.dumps(inform)
 
 class names:
+	'''
+	class documentation
+	Generates a list of names and barcodes for auto complete
+	'''
 	def GET(self):
 		query = []
 		name = db.query('SELECT * FROM products')
@@ -282,6 +322,10 @@ class names:
 		return json.dumps(query)
 		
 class log:
+	'''
+	class documentation
+	Generates the use log about the given product.
+	'''
 	def GET(self, barcode):
 		query = []
 		log = []
@@ -293,7 +337,12 @@ class log:
 		web.header('Content-Type', 'application/json')
 		return json.dumps(log)
 
+
 class stats:
+	'''
+	class documentation
+	Generates stats about the given product.
+	'''
 	def GET(self, barcode):
 		query = []
 		quantity = []
@@ -315,6 +364,7 @@ class stats:
 				date.append((query[0]['date'] - query[i]['date']).days)
 				break
 		
+		#its 2am and I got bored with standard naming conventions...
 		bob = thorVector(date)
 		sara = thorVector(quantity)
 		frank = thorVector([])
@@ -323,7 +373,7 @@ class stats:
 			frank.append(0)
 			
 		#testing section: 
-		if debug:
+		if spamandeggs:
 			return json.dumps([len(bob),len(frank)])
 		'''
 		This is what we need to solve for: it should give us the x intercept as being the number of days on average if the pattern was to continue at the given rate
@@ -334,10 +384,14 @@ class stats:
 		5 = 2+2**2+x
 		which is really just 5-2-2**2 = x
 		so we just set that up in python also
+		Because it's all in Vector form already, it works just as if this was linear math (funny that...) so everything is solved for properly
 		'''
 		
+		#interesting combo... typically to make a new person, wouldn't one add the people? or multiply?
 		frank = sara - bob - bob**2
 		
+		#just something to return until this bit of code is finished.
+		#Yes, frank is also a raptor if called properly...
 		raptor = frank.average()
 		
 		#web.header('Content-Type', 'application/json')
@@ -346,5 +400,6 @@ class stats:
 if __name__ == "__main__":
 	app.run()
 
+#wsgi stuff
 app = web.application(urls, globals(), autoreload=False)
 application = app.wsgifunc()
