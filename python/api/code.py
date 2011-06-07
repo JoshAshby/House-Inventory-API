@@ -382,13 +382,23 @@ class stats:
 		r['lm']('quantity_y ~cbind(date_x,(date_x)^2)')
 		which runs a linear regression on the dataset which now looks something like this (for one line of the vectors)
 		5 = 2+2**2+x
-		which is really just 5-2-2**2 = x
+		which is really just 5-2-2**2 = x and then the derivative of that...
 		so we just set that up in python also
 		Because it's all in Vector form already, it works just as if this was linear math (funny that...) so everything is solved for properly
 		'''
 		
 		#interesting combo... typically to make a new person, wouldn't one add the people? or multiply?
 		frank = sara - bob - bob**2
+		#Derivative should be taken
+		
+		'''
+		#at this point I need to take the derivative to get the slope at each point, at which time I'll be able to make the equation for the line which these points form
+		#the intercept of this line is how many days the current stock will run out at. This will then be converted into a standard dataset, by dividing the quantity by this guess.
+		#The machine learning bit will be using this standardized approximation and storie it each time in two columns of the product database. 
+		#This first will be a rolling list of the last five guesses, the second will be a list of every one made for reference purposes.
+		#The reason for standardizing them is because the units then become how many days per one unit, which makes it easy to just take the average of the last
+		#5 guesses to try and make a better guess. It'll also learn from everytime the stock reaches zero.
+		'''
 		
 		#just something to return until this bit of code is finished.
 		#Yes, frank is also a raptor if called properly...
