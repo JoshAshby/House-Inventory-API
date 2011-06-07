@@ -3,7 +3,6 @@ import web
 import json
 import re
 import time
-
 """
 Basic math type implimentation for Python. Very basic, nothing fancy.
 
@@ -24,6 +23,10 @@ For some reason, python and web.py don't want to import this file so for the tim
 [Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111]     from linear import *
 [Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111] ImportError: No module named linear
 '''
+
+#debug setter
+debug = 0
+
 #Don't ask... this error is just better than a standard raise
 class MathError(Exception):
 	def __init__(self, value):
@@ -310,24 +313,29 @@ class stats:
 		
 		
 		frank = thorVector([])
-		dr = thorVector([])
 		
 		
 		for n in range(len(bob)):
 			frank.append(0)
-			dr.append(0)
 			
 		#testing section: 
 		if debug:
 			return json.dumps([len(bob),len(frank)])
 		'''
-		This is waht we need to solve for: it should give us the x intercept as being the number of days on average if the pattern was to continue at the given rate
-		bob = sara+dr*sara^2+frank
+		This is what we need to solve for: it should give us the x intercept as being the number of days on average if the pattern was to continue at the given rate
+		sara = bob+bob^2
+		in R we do something like this: (in rpy2 format)
+		r['lm']('quantity_y ~cbind(date_x,(date_x)^2)')
+		which runs a linear regression on the dataset which now looks something like this (for one line of the vectors)
+		5 = 2+2**2+x
+		which is really just 5-2-2**2 = x
+		so we just set that up in python also
 		'''
 		
-		#not being used just yet since we need to solve the system first
+		frank = sara - bob - bob**2
+		
 		#web.header('Content-Type', 'application/json')
-		#return json.dumps(log)
+		return json.dumps(str(frank))
 		
 if __name__ == "__main__":
 	app.run()
