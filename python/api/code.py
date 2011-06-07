@@ -178,6 +178,13 @@ class thorVector(object):
 	def pop(self, where):
 		return self.data.pop(where)
 		
+	def average(self):
+		avg_undiv = 0
+		for w in range(len(self.data)):
+			avg_undiv =+ self.data[w]
+		avg = avg_undiv/(len(self.data)+1)
+		return avg
+		
 #Start main web.py app:
 
 db = web.database(dbn='mysql', user='root', pw='speeddyy5', db='barcode')
@@ -310,10 +317,7 @@ class stats:
 		
 		bob = thorVector(date)
 		sara = thorVector(quantity)
-		
-		
 		frank = thorVector([])
-		
 		
 		for n in range(len(bob)):
 			frank.append(0)
@@ -334,8 +338,10 @@ class stats:
 		
 		frank = sara - bob - bob**2
 		
+		raptor = frank.average()
+		
 		#web.header('Content-Type', 'application/json')
-		return json.dumps(str(frank))
+		return json.dumps(str(raptor))
 		
 if __name__ == "__main__":
 	app.run()
