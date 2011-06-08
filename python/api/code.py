@@ -73,7 +73,7 @@ class thorVector(object):
 				data.append(self.data[j] - other.data[j])
 			return self.__class__(data)
 		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
+			raise MathError('Spiderman can do better... It *must* (MUST) be another Vector object! NOTHING ELSE!')
 
 	def __mul__(self, other):
 		data = []
@@ -124,7 +124,7 @@ class thorVector(object):
 				data.append(self.data[j] + other.data[j])
 			return self.__class__(data)
 		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
+			raise MathError('So can Mary Poppins... It *must* (MUST) be another Vector object! NOTHING ELSE!')
 		
 	def __rsub__(self, other):
 		data = []
@@ -357,24 +357,21 @@ class stats:
 		
 		for i in range(m):
 			if (query[i]['quantity'] < query[i+1]['quantity']):
-				quantity.append(int(query[i]['quantity']))
-				date.append((query[0]['date'] - query[i]['date']).days)
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((query[0]['date'] - query[i]['date']).days))
 			else:
-				quantity.append(int(query[i]['quantity']))
-				date.append((query[0]['date'] - query[i]['date']).days)
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((query[0]['date'] - query[i]['date']).days))
 				break
 		
 		#its 2am and I got bored with standard naming conventions...
 		bob = thorVector(date)
 		sara = thorVector(quantity)
 		frank = thorVector([])
-		
-		for n in range(len(bob)):
-			frank.append(0)
 			
 		#testing section: 
 		if spamandeggs:
-			return json.dumps([len(bob),len(frank)])
+			pass
 		'''
 		This is what we need to solve for: it should give us the x intercept as being the number of days on average if the pattern was to continue at the given rate
 		sara = bob+bob^2
@@ -385,13 +382,6 @@ class stats:
 		which is really just 5-2-2**2 = x and then the derivative of that...
 		so we just set that up in python also
 		Because it's all in Vector form already, it works just as if this was linear math (funny that...) so everything is solved for properly
-		'''
-		
-		#interesting combo... typically to make a new person, wouldn't one add the people? or multiply?
-		frank = sara - bob - bob**2
-		#Derivative should be taken
-		
-		'''
 		#at this point I need to take the derivative to get the slope at each point, at which time I'll be able to make the equation for the line which these points form
 		#the intercept of this line is how many days the current stock will run out at. This will then be converted into a standard dataset, by dividing the quantity by this guess.
 		#The machine learning bit will be using this standardized approximation and storie it each time in two columns of the product database. 
@@ -400,9 +390,18 @@ class stats:
 		#5 guesses to try and make a better guess. It'll also learn from everytime the stock reaches zero.
 		'''
 		
+		def derivative(f):
+			def df(x, h=0.1e-5):
+				return ( f*(x+h/2) - f*(x-h/2) )/h
+			return df
+		
+		for d in range(len(bob)):
+			yoyo = derivative(sara[d]-bob[d]-bob[d]**2)
+			frank.append(yoyo(sara[d]))
+		
 		#just something to return until this bit of code is finished.
 		#Yes, frank is also a raptor if called properly...
-		raptor = frank.average()
+		raptor = frank
 		
 		#web.header('Content-Type', 'application/json')
 		return json.dumps(str(raptor))
