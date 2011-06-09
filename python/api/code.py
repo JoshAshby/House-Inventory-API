@@ -26,6 +26,10 @@ For some reason, python and web.py don't want to import this file so for the tim
 
 #debug setter
 spamandeggs = 0
+#firefox debug setter (this is because firefox seems to want to download the json text instead of display it)...
+'''set this to 1 for normal opperation, 0 for firefox...'''
+spam = 0
+
 
 #Don't ask... this error is just better than a standard raise
 class MathError(Exception):
@@ -38,7 +42,14 @@ class MathError(Exception):
 
 	def __str__(self):
 		return repr(self.value)
-		
+
+#just something I found online that works well so far...
+def polyderiv(a):
+	b = []
+	for i in range(1, len(a)):
+		b.append(i * a[i])
+	return b
+
 class thorVector(object):
 	'''
 	class documentation
@@ -228,7 +239,8 @@ class info:
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
-		web.header('Content-Type', 'application/json')
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 		
 class total:
@@ -241,7 +253,8 @@ class total:
 		name = db.query('SELECT * FROM products')
 		for i in range(len(name)):
 			query.append(name[i])
-		web.header('Content-Type', 'application/json')
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(query)
 		
 class add:
@@ -256,8 +269,10 @@ class add:
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		inform['added'] = 'true'
-		db.query('INSERT INTO stats (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-		web.header('Content-Type', 'application/json')
+		db.query('INSERT INTO usage (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+		db.query('INSERT INTO satats (barcode) VALUES ($barcode)', vars={'barcode': barcode})
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 		
 class update:
@@ -272,8 +287,9 @@ class update:
 		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		inform['updated'] = 'true'
-		db.query('INSERT INTO stats (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-		web.header('Content-Type', 'application/json')
+		db.query('INSERT INTO usage (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 
 class order:
@@ -288,8 +304,9 @@ class order:
 		quantity = quant - quantity
 		db.query('UPDATE products SET quantity = $quantity WHERE barcode = $barcode', vars={'quantity': quantity , 'barcode': barcode})
 		inform['ordered'] = 'true'
-		db.query('INSERT INTO stats (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-		web.header('Content-Type', 'application/json')
+		db.query('INSERT INTO usage (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 
 class delete:
@@ -302,7 +319,8 @@ class delete:
 		inform = name[0]
 		db.query('DELETE FROM products WHERE barcode = $barcode', vars={'barcode': barcode})
 		inform['deleted'] = 'true'
-		web.header('Content-Type', 'application/json')
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 
 class names:
@@ -318,7 +336,8 @@ class names:
 		name = db.query('SELECT * FROM products')
 		for i in range(len(name)):
 			query.append(name[i]['barcode'])
-		web.header('Content-Type', 'application/json')
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(query)
 		
 class log:
@@ -329,12 +348,13 @@ class log:
 	def GET(self, barcode):
 		query = []
 		log = []
-		name = db.query('SELECT quantity, date FROM stats WHERE barcode = $barcode', vars={'barcode':barcode})
+		name = db.query('SELECT quantity, date FROM usage WHERE barcode = $barcode ORDER BY date desc', vars={'barcode':barcode})
 		for i in range(len(name)):
 			query.append(name[i])
 		for i in range(len(query)):
 			log.append([query[i]['date'].isoformat(' '), query[i]['quantity']])
-		web.header('Content-Type', 'application/json')
+		if spam:
+			web.header('Content-Type', 'application/json')
 		return json.dumps(log)
 
 
@@ -342,13 +362,14 @@ class stats:
 	'''
 	class documentation
 	Generates stats about the given product.
+	Currently this just replies with the intercept of the slope of the line formed by the datapoints from the stats table. This is the predicted time when the current amount of food will run out.
 	'''
 	def GET(self, barcode):
 		query = []
 		quantity = []
 		date = []
 		
-		name = db.query('SELECT quantity, date FROM stats WHERE barcode = $barcode ORDER BY date desc', vars={'barcode':barcode})
+		name = db.query('SELECT quantity, date FROM usage WHERE barcode = $barcode ORDER BY date desc', vars={'barcode':barcode})
 		
 		for i in range(len(name)):
 			query.append(name[i])
@@ -368,10 +389,7 @@ class stats:
 		bob = thorVector(date)
 		sara = thorVector(quantity)
 		frank = thorVector([])
-			
-		#testing section: 
-		if spamandeggs:
-			pass
+
 		'''
 		This is what we need to solve for: it should give us the x intercept as being the number of days on average if the pattern was to continue at the given rate
 		sara = bob+bob^2
@@ -390,21 +408,42 @@ class stats:
 		#5 guesses to try and make a better guess. It'll also learn from everytime the stock reaches zero.
 		'''
 		
-		def derivative(f):
-			def df(x, h=0.1e-5):
-				return ( f*(x+h/2) - f*(x-h/2) )/h
-			return df
-		
 		for d in range(len(bob)):
-			yoyo = derivative(sara[d]-bob[d]-bob[d]**2)
-			frank.append(yoyo(sara[d]))
+			frank.append(polyderiv([sara[d],-bob[d],-bob[d]**2]))
 		
-		#just something to return until this bit of code is finished.
+		yoyo = sara[len(sara)-1]/frank[len(frank)-1][0]
+		
+		stat  = db.query('SELECT last_5, all FROM usage WHERE barcode = $barcode', vars={'barcode':barcode})
+		
+		last_5Raw = stat[0]
+		allRaw = stat[1]
+		
+		try:
+			last_5 = json.loads(last_5Raw)
+		except:
+			last_5 = []
+		
+		try:
+			all = json.loads(allRaw)
+		except:
+			all = []
+		
+		try:
+			last_5.pop(0)
+		except:
+			pass
+			
+		last_5.append(yoyo)
+		all.append(yoyo)
+		
+		db.query('UPDATE stats (barcode, quantity) VALUES ($barcode, $last_5, $all)', vars={'last_5': last_5, 'all': all , 'barcode': barcode})
+		
 		#Yes, frank is also a raptor if called properly...
-		raptor = frank
+		raptor = {'rate': frank[len(frank)-1][0], 'standard rate':  yoyo, }
 		
-		#web.header('Content-Type', 'application/json')
-		return json.dumps(str(raptor))
+		if spam:
+			web.header('Content-Type', 'application/json')
+		return json.dumps(raptor)
 		
 if __name__ == "__main__":
 	app.run()
