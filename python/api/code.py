@@ -4,6 +4,10 @@ import json
 import re
 import time
 """
+Project Blue Ring
+A scalable inventory control and management system based in the cloud.
+
+Plus:
 Basic math type implimentation for Python. Very basic, nothing fancy.
 
 http://xkcd.com/353/
@@ -30,7 +34,9 @@ spamandeggs = 0
 '''set this to 1 for normal opperation, 0 for firefox...'''
 spam = 0
 
-
+'''
+Start linear.py
+'''
 #Don't ask... this error is just better than a standard raise
 class MathError(Exception):
 	'''
@@ -386,6 +392,11 @@ class stats:
 				break
 		
 		#its 2am and I got bored with standard naming conventions...
+		'''
+		Plus the fact that my vectors arn't needed currently because of the way the math has worked out,
+		but its cooler to say it's running your own math type, and plus you never know, in the future there
+		might be a need for a vector...
+		'''
 		bob = thorVector(date)
 		sara = thorVector(quantity)
 		frank = thorVector([])
@@ -409,29 +420,41 @@ class stats:
 		#5 guesses to try and make a better guess. It'll also learn from everytime the stock reaches zero.
 		'''
 		
+		#take the partial deriv of each part of the vector to gain the total deriv or gradient...
 		for d in range(len(bob)):
 			frank.append(polyderiv([sara[d],-bob[d],-bob[d]**2]))
 		
+		#make the standard rate...
 		yoyo = sara[len(sara)-1]/frank[len(frank)-1][0]
 		
+		'''
+		These next few lines go through and do the rolling list and total rates for the product
+		rates are the intercepts of the gradient.
+		These rates are stored in the database table 'stats' and are stored as json objects for ease of use and storage.
+		'''
 		stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		
+		#error prevention stuff...
 		for q in range(len(stat)):
 			raven.append(stat[q])
 		
+		#load everything
 		last_5Raw = raven[0]['last_5']
 		allRaw = raven[0]['all']
 		
+		#try to load the json, if that fails, it means that there is no data for this product yet, so generate a list
 		try:
 			last_5 = json.loads(last_5Raw)
 		except:
 			last_5 = []
 		
+		#try to load the json, if that fails, it means that there is no data for this product yet, so generate a list
 		try:
 			all = json.loads(allRaw)
 		except:
 			all = []
 		
+		#try to do a rolling list thingy...
 		try:
 			if len(last_5) == 5:
 				last_5.pop(0)
@@ -439,13 +462,20 @@ class stats:
 				pass
 		except:
 			pass
-			
+		
+		#add the rates to the list...
 		last_5.append(yoyo)
 		all.append(yoyo)
 		
-		db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
-		
+		#and now I have the hic-ups...
+		#try to update the product, unless it doesn't have data or an entry yet (which really should not happen... (may remove this late because of this fact...))
+		try:
+			db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
+		except:
+			db.query('INSERT INTO `stats` (`last_5`, `all`, `barcode`) VALUES ($last_5, $all, $barcode)', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
+			
 		#Yes, frank is also a raptor if called properly...
+		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
 		raptor = {'rate': frank[len(frank)-1][0], 'standard rate':  yoyo, }
 		
 		if spam:
