@@ -237,7 +237,7 @@ class info:
 	Info about the given product.
 	'''
 	def GET(self, barcode):
-		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
+		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		if spam:
 			web.header('Content-Type', 'application/json')
@@ -250,7 +250,7 @@ class total:
 	'''
 	def GET(self):
 		query = []
-		name = db.query('SELECT * FROM products')
+		name = db.query('SELECT * FROM `products`')
 		for i in range(len(name)):
 			query.append(name[i])
 		if spam:
@@ -265,12 +265,12 @@ class add:
 	def GET(self, barcode, name, quantity, description):
 		p = re.compile('\+')
 		found = p.sub( ' ', description)
-		db.query('INSERT INTO products (name, description, barcode, quantity) VALUES ($name, $description, $barcode, $quantity)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode})
-		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
+		db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`) VALUES ($name, $description, $barcode, $quantity)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode})
+		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		inform['added'] = 'true'
-		db.query('INSERT INTO usage (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-		db.query('INSERT INTO satats (barcode) VALUES ($barcode)', vars={'barcode': barcode})
+		db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+		db.query('INSERT INTO `stats` (`barcode`) VALUES ($barcode)', vars={'barcode': barcode})
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
@@ -283,11 +283,11 @@ class update:
 	def GET(self, barcode, name, quantity, description):
 		p = re.compile('\+')
 		found = p.sub( ' ', description)
-		db.query('UPDATE products SET name = $name, description = $description, barcode = $barcode, quantity = $quantity WHERE barcode = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode})
-		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
+		db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity WHERE `barcode` = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode})
+		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		inform['updated'] = 'true'
-		db.query('INSERT INTO usage (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+		db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
@@ -298,13 +298,13 @@ class order:
 	More coming soon, since this is pretty worthless right now...
 	'''
 	def GET(self, barcode, quantity):
-		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
+		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		quant = inform['quantity']
 		quantity = quant - quantity
-		db.query('UPDATE products SET quantity = $quantity WHERE barcode = $barcode', vars={'quantity': quantity , 'barcode': barcode})
+		db.query('UPDATE `products` SET `quantity` = $quantity WHERE `barcode` = $barcode', vars={'quantity': quantity , 'barcode': barcode})
 		inform['ordered'] = 'true'
-		db.query('INSERT INTO usage (barcode, quantity) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+		db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
@@ -315,9 +315,9 @@ class delete:
 	Deletes the given product.
 	'''
 	def GET(self, barcode):
-		name = db.query('SELECT * FROM products WHERE barcode = $barcode', vars={'barcode':barcode})
+		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
-		db.query('DELETE FROM products WHERE barcode = $barcode', vars={'barcode': barcode})
+		db.query('DELETE FROM `products` WHERE `barcode` = $barcode', vars={'barcode': barcode})
 		inform['deleted'] = 'true'
 		if spam:
 			web.header('Content-Type', 'application/json')
@@ -330,10 +330,10 @@ class names:
 	'''
 	def GET(self):
 		query = []
-		name = db.query('SELECT * FROM products')
+		name = db.query('SELECT * FROM `products`')
 		for i in range(len(name)):
 			query.append(name[i]['name'])
-		name = db.query('SELECT * FROM products')
+		name = db.query('SELECT * FROM `products`')
 		for i in range(len(name)):
 			query.append(name[i]['barcode'])
 		if spam:
@@ -348,7 +348,7 @@ class log:
 	def GET(self, barcode):
 		query = []
 		log = []
-		name = db.query('SELECT quantity, date FROM usage WHERE barcode = $barcode ORDER BY date desc', vars={'barcode':barcode})
+		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date desc', vars={'barcode':barcode})
 		for i in range(len(name)):
 			query.append(name[i])
 		for i in range(len(query)):
@@ -369,7 +369,7 @@ class stats:
 		quantity = []
 		date = []
 		
-		name = db.query('SELECT quantity, date FROM usage WHERE barcode = $barcode ORDER BY date desc', vars={'barcode':barcode})
+		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date` desc', vars={'barcode':barcode})
 		
 		for i in range(len(name)):
 			query.append(name[i])
@@ -389,6 +389,7 @@ class stats:
 		bob = thorVector(date)
 		sara = thorVector(quantity)
 		frank = thorVector([])
+		raven = []
 
 		'''
 		This is what we need to solve for: it should give us the x intercept as being the number of days on average if the pattern was to continue at the given rate
@@ -413,10 +414,13 @@ class stats:
 		
 		yoyo = sara[len(sara)-1]/frank[len(frank)-1][0]
 		
-		stat  = db.query('SELECT last_5, all FROM usage WHERE barcode = $barcode', vars={'barcode':barcode})
+		stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		
-		last_5Raw = stat[0]
-		allRaw = stat[1]
+		for q in range(len(stat)):
+			raven.append(stat[q])
+		
+		last_5Raw = raven[0]['last_5']
+		allRaw = raven[0]['all']
 		
 		try:
 			last_5 = json.loads(last_5Raw)
@@ -429,14 +433,17 @@ class stats:
 			all = []
 		
 		try:
-			last_5.pop(0)
+			if len(last_5) == 5:
+				last_5.pop(0)
+			else:
+				pass
 		except:
 			pass
 			
 		last_5.append(yoyo)
 		all.append(yoyo)
 		
-		db.query('UPDATE stats (barcode, quantity) VALUES ($barcode, $last_5, $all)', vars={'last_5': last_5, 'all': all , 'barcode': barcode})
+		db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
 		
 		#Yes, frank is also a raptor if called properly...
 		raptor = {'rate': frank[len(frank)-1][0], 'standard rate':  yoyo, }
