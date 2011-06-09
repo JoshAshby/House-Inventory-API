@@ -424,14 +424,19 @@ class stats:
 		for d in range(len(bob)):
 			frank.append(polyderiv([sara[d],-bob[d],-bob[d]**2]))
 		
-		#make the standard rate...
-		yoyo = sara[len(sara)-1]/frank[len(frank)-1][0]
+		print frank
 		
+		if frank[len(frank)-1][0]:
+			#make the standard rate...
+			yoyo = sara[len(sara)-1]/frank[len(frank)-1][0]
+		else:
+			yoyo = 'Not Enough Data'
 		'''
 		These next few lines go through and do the rolling list and total rates for the product
 		rates are the intercepts of the gradient.
 		These rates are stored in the database table 'stats' and are stored as json objects for ease of use and storage.
 		'''
+		
 		stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		
 		#error prevention stuff...
@@ -439,8 +444,15 @@ class stats:
 			raven.append(stat[q])
 		
 		#load everything
-		last_5Raw = raven[0]['last_5']
-		allRaw = raven[0]['all']
+		try:
+			last_5Raw = raven[0]['last_5']
+		except:
+			lasat_5Raw = []
+			
+		try:
+			allRaw = raven[0]['all']
+		except:
+			allRaw = []
 		
 		#try to load the json, if that fails, it means that there is no data for this product yet, so generate a list
 		try:
@@ -463,12 +475,19 @@ class stats:
 		except:
 			pass
 		
-		#add the rates to the list...
-		last_5.append(yoyo)
-		all.append(yoyo)
+		if yoyo != 'Not Enough Data':
+			#add the rates to the list...
+			last_5.append(yoyo)
+			all.append(yoyo)
 		
-		#take the average to try and make a better guess...
-		batman = reduce((lambda x, y: x + y), last_5)/5
+		if frank[len(frank)-1][0]:
+			try:
+				#take the average to try and make a better guess...
+				batman = reduce((lambda x, y: x + y), last_5)/5
+			except:
+				pass
+		else:
+			batman = 'Not Enough Data'
 		
 		#and now I have the hic-ups...
 		#try to update the product, unless it doesn't have data or an entry yet (which really should not happen... (may remove this late because of this fact...))
