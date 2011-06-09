@@ -354,7 +354,7 @@ class log:
 	def GET(self, barcode):
 		query = []
 		log = []
-		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date desc', vars={'barcode':barcode})
+		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date` desc', vars={'barcode':barcode})
 		for i in range(len(name)):
 			query.append(name[i])
 		for i in range(len(query)):
@@ -467,6 +467,9 @@ class stats:
 		last_5.append(yoyo)
 		all.append(yoyo)
 		
+		#take the average to try and make a better guess...
+		batman = reduce((lambda x, y: x + y), last_5)/5
+		
 		#and now I have the hic-ups...
 		#try to update the product, unless it doesn't have data or an entry yet (which really should not happen... (may remove this late because of this fact...))
 		try:
@@ -476,7 +479,7 @@ class stats:
 			
 		#Yes, frank is also a raptor if called properly...
 		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
-		raptor = {'rate': frank[len(frank)-1][0], 'standard rate':  yoyo, }
+		raptor = {'rate': frank[len(frank)-1][0], 'standard rate':  yoyo, 'guessed rate': batman}
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
