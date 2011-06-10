@@ -424,26 +424,27 @@ class stats:
 		for d in range(len(bob)):
 			frank.append(polyderiv([sara[d],-bob[d],-bob[d]**2]))
 		
-		print frank
-		
+		#if there is a rate to convert
 		if frank[len(frank)-1][0]:
 			#make the standard rate...
 			yoyo = sara[len(sara)-1]/frank[len(frank)-1][0]
 		else:
 			yoyo = 'Not Enough Data'
+			
 		'''
 		These next few lines go through and do the rolling list and total rates for the product
 		rates are the intercepts of the gradient.
 		These rates are stored in the database table 'stats' and are stored as json objects for ease of use and storage.
 		'''
 		
+		#load the stats info
 		stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		
 		#error prevention stuff...
 		for q in range(len(stat)):
 			raven.append(stat[q])
 		
-		#load everything
+		#load everything from the query into the proper variables...
 		try:
 			last_5Raw = raven[0]['last_5']
 		except:
@@ -475,11 +476,14 @@ class stats:
 		except:
 			pass
 		
+		#if you do have stuff to put into it...
+		#if you don't have anything to put into it, then don't put 'not enough data' into the table...
 		if yoyo != 'Not Enough Data':
 			#add the rates to the list...
 			last_5.append(yoyo)
 			all.append(yoyo)
 		
+		#if there is a rate...
 		if frank[len(frank)-1][0]:
 			try:
 				#take the average to try and make a better guess...
@@ -488,16 +492,14 @@ class stats:
 				pass
 		else:
 			batman = 'Not Enough Data'
+			#He's a ninja...
 		
 		#and now I have the hic-ups...
-		#try to update the product, unless it doesn't have data or an entry yet (which really should not happen... (may remove this late because of this fact...))
-		try:
-			db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
-		except:
-			db.query('INSERT INTO `stats` (`last_5`, `all`, `barcode`) VALUES ($last_5, $all, $barcode)', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
+		db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
 			
 		#Yes, frank is also a raptor if called properly...
 		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
+		#Ie: Raptor eats everything... nom nom nom
 		raptor = {'rate': frank[len(frank)-1][0], 'standard rate':  yoyo, 'guessed rate': batman}
 		
 		if spam:
