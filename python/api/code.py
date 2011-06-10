@@ -3,12 +3,25 @@ import web
 import json
 import re
 import time
+
+'''
+From: http://webpy.org/install
+and 
+http://code.google.com/p/modwsgi/wiki/ApplicationIssues
+
+This must be done to avoid the import errors which come up with having linear.py and config.py
+'''
+import sys, os
+abspath = os.path.dirname(__file__)
+sys.path.append(abspath)
+os.chdir(abspath)
+from ashmath import *
+from config import *
+
+
 """
 Project Blue Ring
 A scalable inventory control and management system based in the cloud.
-
-Plus:
-Basic math type implimentation for Python. Very basic, nothing fancy.
 
 http://xkcd.com/353/
 
@@ -17,217 +30,6 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 """
-
-'''
-For some reason, python and web.py don't want to import this file so for the time being it's in here (get an error if you try to import it...)
-[Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111] mod_wsgi (pid=2395): Target WSGI script '/srv/http/code.py' cannot be loaded as Python module.
-[Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111] mod_wsgi (pid=2395): Exception occurred processing WSGI script '/srv/http/code.py'.
-[Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111] Traceback (most recent call last):
-[Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111]   File "/srv/http/code.py", line 6, in <module>
-[Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111]     from linear import *
-[Tue Jun 07 00:50:01 2011] [error] [client 192.168.1.111] ImportError: No module named linear
-'''
-
-#debug setter
-spamandeggs = 0
-#firefox debug setter (this is because firefox seems to want to download the json text instead of display it)...
-'''set this to 1 for normal opperation, 0 for firefox...'''
-spam = 0
-
-'''
-Start linear.py
-'''
-#Don't ask... this error is just better than a standard raise
-class MathError(Exception):
-	'''
-	class documentation
-	MathError for use by the Vector
-	'''
-	def __init__(self, value):
-		self.value = value
-
-	def __str__(self):
-		return repr(self.value)
-
-#just something I found online that works well so far...
-def polyderiv(a):
-	b = []
-	for i in range(1, len(a)):
-		b.append(i * a[i])
-	return b
-
-class thorVector(object):
-	'''
-	class documentation
-	Creates a Vector type for Python. More coming soon.
-	'''
-	#Even though it's not that powerful...
-	def __init__(self, data=[]):
-		self.data = data
-	
-	def __repr__(self):
-		return repr(self.data)
-		
-	def __getitem__(self, index):
-		return self.data[index]
-
-	def __len__(self):
-		return len(self.data)
-	
-	def __add__(self, other):
-		data = []
-		if type(other) == self.__class__:
-			for j in range(len(self.data)):
-				data.append(self.data[j] + other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
-		
-	def __sub__(self, other):
-		data = []
-		if len(self.data) == len(other):
-			for j in range(len(self.data)):
-				data.append(self.data[j] - other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('Spiderman can do better... It *must* (MUST) be another Vector object! NOTHING ELSE!')
-
-	def __mul__(self, other):
-		data = []
-		if type(other) == int:
-			for j in range(len(self.data)):
-				data.append(self.data[j] * other)
-			return self.__class__(data)
-		elif len(self.data) == len(other):
-			result = None
-			for j in range(len(self.data)):
-				data.append(self.data[j] * other.data[j])
-			for i in range(len(self.data)-1):
-				result = data[i] + data [i-1]
-			return self.__class__(result)
-		else:
-			raise MathError('Really? It *must* be a Vector of the same length or a plain old integer! Gosh, get it right...')
-	
-	def __div__(self, other):
-		data = []
-		if type(other) == int:
-			for j in range(len(self.data)):
-				data.append(self.data[j] / other)
-			return self.__class__(data)
-		elif len(self.data) == len(other):
-			for j in range(len(self.data)):
-				data.append(self.data[j] / other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('Really? It *must* be a Vector of the same length or a plain old integer! Gosh, get it right...')
-		
-	def __pow__(self, other):
-		data = []
-		if type(other) == int:
-			for j in range(len(self.data)):
-				data.append(self.data[j] ** other)
-			return self.__class__(data)
-		elif len(self.data) == len(other):
-			for j in range(len(self.data)):
-				data.append(self.data[j] ** other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('Really? It *must* be a Vector of the same length or a plain old integer! Gosh, get it right...')
-			
-	def __radd__(self, other):
-		data = []
-		if type(other) == self.__class__:
-			for j in range(len(self.data)):
-				data.append(self.data[j] + other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('So can Mary Poppins... It *must* (MUST) be another Vector object! NOTHING ELSE!')
-		
-	def __rsub__(self, other):
-		data = []
-		if len(self.data) == len(other):
-			for j in range(len(self.data)):
-				data.append(self.data[j] - other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
-
-	def __rmul__(self, other):
-		data = []
-		if type(other) == int:
-			for j in range(len(self.data)):
-				data.append(self.data[j] * other)
-			return self.__class__(data)
-		elif len(self.data) == len(other):
-			result = None
-			for j in range(len(self.data)):
-				data.append(self.data[j] * other.data[j])
-			for i in range(len(self.data)-1):
-				result = data[i] + data [i-1]
-			return self.__class__(result)
-		else:
-			raise MathError('Really? It *must* be a Vector of the same length or a plain old integer! Gosh, get it right...')
-	
-	def __rdiv__(self, other):
-		data = []
-		if type(other) == int:
-			for j in range(len(self.data)):
-				data.append(self.data[j] / other)
-			return self.__class__(data)
-		elif len(self.data) == len(other):
-			for j in range(len(self.data)):
-				data.append(self.data[j] / other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('Really? It *must* be a Vector of the same length or a plain old integer! Gosh, get it right...')
-		
-	def __rpow__(self, other):
-		data = []
-		if type(other) == int:
-			for j in range(len(self.data)):
-				data.append(self.data[j] ** other)
-			return self.__class__(data)
-		elif len(self.data) == len(other):
-			for j in range(len(self.data)):
-				data.append(self.data[j] ** other.data[j])
-			return self.__class__(data)
-		else:
-			raise MathError('Really? It *must* be a Vector of the same length or a plain old integer! Gosh, get it right...')
-	
-	def insert(self, where, what):
-		self.data.insert(where, what)
-	
-	def append(self, what):
-		self.data.append(what)
-		
-	def pop(self, where):
-		return self.data.pop(where)
-		
-	def average(self):
-		avg_undiv = 0
-		for w in range(len(self.data)):
-			avg_undiv =+ self.data[w]
-		avg = avg_undiv/(len(self.data)+1)
-		return avg
-		
-#Start main web.py app:
-
-db = web.database(dbn='mysql', user='root', pw='speeddyy5', db='barcode')
-        
-urls = (
-	'/', 'index',
-	'/product/(.*)/info/', 'info',
-	'/product/(.*)/delete/', 'delete',
-	'/product/(.*)/(.*)/(.*)/(.*)/add/', 'add',
-	'/product/(.*)/(.*)/(.*)/(.*)/update/', 'update',
-	'/product/(.*)/(.*)/order/', 'order',
-	'/product/', 'total',
-	'/product/names/', 'names',
-	'/product/(.*)/log/', 'log',
-	'/product/(.*)/stats/', 'stats'
-)
-
-render = web.template.render('/srv/http/template/')
 
 class index:        
 	'''
@@ -418,6 +220,10 @@ class stats:
 		#This first will be a rolling list of the last five guesses, the second will be a list of every one made for reference purposes.
 		#The reason for standardizing them is because the units then become how many days per one unit, which makes it easy to just take the average of the last
 		#5 guesses to try and make a better guess. It'll also learn from everytime the stock reaches zero.
+		
+		These next few lines are all very messy, however they work well. The goal is to simply make a few calculations to get the standard rate and the guessed rate, and store everything into the table, 
+		if there is not enough data thennnnn simply state that, and continue on with nothing.
+		It makes it nice because the rolling list goes across peaks, and without errors the come up. if there is a 0 rate, it simply gets ignoerd (I think... hopefully)
 		'''
 		
 		#take the partial deriv of each part of the vector to gain the total deriv or gradient...

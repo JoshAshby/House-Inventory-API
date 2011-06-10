@@ -9,16 +9,30 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 """
-
 #Don't ask... this error is just better than a standard raise
 class MathError(Exception):
+	'''
+	class documentation
+	MathError for use by the Vector
+	'''
 	def __init__(self, value):
 		self.value = value
 
 	def __str__(self):
 		return repr(self.value)
-		
+
+#just something I found online that works well so far...
+def polyderiv(a):
+	b = []
+	for i in range(1, len(a)):
+		b.append(i * a[i])
+	return b
+
 class thorVector(object):
+	'''
+	class documentation
+	Creates a Vector type for Python. More coming soon.
+	'''
 	#Even though it's not that powerful...
 	def __init__(self, data=[]):
 		self.data = data
@@ -48,7 +62,7 @@ class thorVector(object):
 				data.append(self.data[j] - other.data[j])
 			return self.__class__(data)
 		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
+			raise MathError('Spiderman can do better... It *must* (MUST) be another Vector object! NOTHING ELSE!')
 
 	def __mul__(self, other):
 		data = []
@@ -99,7 +113,7 @@ class thorVector(object):
 				data.append(self.data[j] + other.data[j])
 			return self.__class__(data)
 		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
+			raise MathError('So can Mary Poppins... It *must* (MUST) be another Vector object! NOTHING ELSE!')
 		
 	def __rsub__(self, other):
 		data = []
@@ -160,3 +174,10 @@ class thorVector(object):
 		
 	def pop(self, where):
 		return self.data.pop(where)
+		
+	def average(self):
+		avg_undiv = 0
+		for w in range(len(self.data)):
+			avg_undiv =+ self.data[w]
+		avg = avg_undiv/(len(self.data)+1)
+		return avg
