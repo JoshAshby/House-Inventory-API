@@ -68,54 +68,59 @@ class total:
 class add:
 	'''
 	class documentation
-	Adds the given product.
+	Adds the given product from the POST data.
 	'''
-	def GET(self, barcode, name, quantity, description):
-		p = re.compile('\+')
-		found = p.sub( ' ', description)
-		db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`) VALUES ($name, $description, $barcode, $quantity)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode})
-		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		inform = name[0]
-		inform['added'] = 'true'
-		db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-		db.query('INSERT INTO `stats` (`barcode`) VALUES ($barcode)', vars={'barcode': barcode})
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps(inform)
+	def POST(self):
+		bobbins= web.input()
 		
+		if bobbins:
+			name = bobbins['name']
+			barcode = bobbins['barcode']
+			description = bobbins['description']
+			quantity = bobbins['quantity']
+			picture = bobbins['picture']
+		
+			p = re.compile('\+')
+			found = p.sub( ' ', description)
+			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':picture})
+			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+			inform = name[0]
+			inform['added'] = 'true'
+			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+			db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, "[]", "[]")', vars={'barcode': barcode})
+			if spam:
+				web.header('Content-Type', 'application/json')
+			return json.dumps(inform)
+		else:
+			return json.dumps(['Nothing submitted'])
+
 class update:
 	'''
-	class documentation
-	Updates the given product.
+	#class documentation
+	#Updates the given product from the post data.
 	'''
-	def GET(self, barcode, name, quantity, description):
-		p = re.compile('\+')
-		found = p.sub( ' ', description)
-		db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity WHERE `barcode` = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode})
-		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		inform = name[0]
-		inform['updated'] = 'true'
-		db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps(inform)
-
-class order:
-	'''
-	class documentation
-	More coming soon, since this is pretty worthless right now...
-	'''
-	def GET(self, barcode, quantity):
-		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		inform = name[0]
-		quant = inform['quantity']
-		quantity = quant - quantity
-		db.query('UPDATE `products` SET `quantity` = $quantity WHERE `barcode` = $barcode', vars={'quantity': quantity , 'barcode': barcode})
-		inform['ordered'] = 'true'
-		db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps(inform)
+	def POST(self):
+		bobbins= web.input()
+		
+		if bobbins:
+			name = bobbins['name']
+			barcode = bobbins['barcode']
+			description = bobbins['description']
+			quantity = bobbins['quantity']
+			picture = bobbins['picture']
+		
+			p = re.compile('\+')
+			found = p.sub( ' ', description)
+			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture': picture})
+			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+			inform = name[0]
+			inform['updated'] = 'true'
+			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+			if spam:
+				web.header('Content-Type', 'application/json')
+			return json.dumps(inform)
+		else:
+			return json.dumps(['Nothing submitted'])
 
 class delete:
 	'''

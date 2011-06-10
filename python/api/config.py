@@ -19,13 +19,12 @@ urls = (
 	'/', 'index',
 	'/product/(.*)/info/', 'info',
 	'/product/(.*)/delete/', 'delete',
-	'/product/(.*)/(.*)/(.*)/(.*)/add/', 'add',
-	'/product/(.*)/(.*)/(.*)/(.*)/update/', 'update',
-	'/product/(.*)/(.*)/order/', 'order',
-	'/product/', 'total',
-	'/product/names/', 'names',
 	'/product/(.*)/log/', 'log',
-	'/product/(.*)/stats/', 'stats'
+	'/product/(.*)/stats/', 'stats',
+	'/product/add/', 'add',
+	'/product/update/', 'update',
+	'/product/', 'total',
+	'/product/names/', 'names'
 )
 
 render = web.template.render('/srv/http/template/')
