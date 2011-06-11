@@ -71,18 +71,30 @@ class add:
 	Adds the given product from the POST data.
 	'''
 	def POST(self):
-		bobbins= web.input()
+		bobbins= web.input(picture={})
 		
+		#if there is data in the Post go through the stuff to add it to the table if not, then let the client know there was no data sent...
 		if bobbins:
 			name = bobbins['name']
 			barcode = bobbins['barcode']
 			description = bobbins['description']
 			quantity = bobbins['quantity']
-			picture = bobbins['picture']
-		
+			picture = bobbins.picture
+			
+			frodo = picture.filename
+			
+			f = open(abspath + '/pictures/' + frodo, "wb")
+
+			while 1:
+				chunk = picture.file.read(10000)
+				if not chunk:
+					break
+				f.write( chunk )
+			f.close()
+			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
-			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':picture})
+			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo})
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['added'] = 'true'
@@ -100,18 +112,29 @@ class update:
 	#Updates the given product from the post data.
 	'''
 	def POST(self):
-		bobbins= web.input()
+		bobbins= web.input(picture={})
 		
 		if bobbins:
 			name = bobbins['name']
 			barcode = bobbins['barcode']
 			description = bobbins['description']
 			quantity = bobbins['quantity']
-			picture = bobbins['picture']
-		
+			picture = bobbins.picture
+			
+			frodo = picture.filename
+			
+			f = open(abspath + '/pictures/' + frodo, "wb")
+
+			while 1:
+				chunk = picture.file.read(10000)
+				if not chunk:
+					break
+				f.write( chunk )
+			f.close()
+			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
-			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture': picture})
+			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture': frodo})
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['updated'] = 'true'
