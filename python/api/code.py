@@ -81,16 +81,19 @@ class add:
 			quantity = bobbins['quantity']
 			picture = bobbins.picture
 			
-			frodo = picture.filename
+			if picture:
+				frodo = picture.filename
 			
-			f = open(abspath + '/pictures/' + frodo, "wb")
+				f = open(abspath + '/pictures/' + frodo, "wb")
 
-			while 1:
-				chunk = picture.file.read(10000)
-				if not chunk:
-					break
-				f.write( chunk )
-			f.close()
+				while 1:
+					chunk = picture.file.read(10000)
+					if not chunk:
+						break
+					f.write( chunk )
+				f.close()
+			else:
+				frodo = 'NULL'
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
@@ -119,22 +122,29 @@ class update:
 			barcode = bobbins['barcode']
 			description = bobbins['description']
 			quantity = bobbins['quantity']
+			
 			picture = bobbins.picture
 			
-			frodo = picture.filename
+			if picture:
+				frodo = picture.filename
 			
-			f = open(abspath + '/pictures/' + frodo, "wb")
+				f = open(abspath + '/pictures/' + frodo, "wb")
 
-			while 1:
-				chunk = picture.file.read(10000)
-				if not chunk:
-					break
-				f.write( chunk )
-			f.close()
+				while 1:
+					chunk = picture.file.read(10000)
+					if not chunk:
+						break
+					f.write( chunk )
+				f.close()
+			else:
+				bilbo = db.query('SELECT `picture` FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+				frodo = bilbo[0]['picture']
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
+			
 			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture': frodo})
+			
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['updated'] = 'true'
@@ -213,7 +223,11 @@ class stats:
 		m = len(query)
 		
 		for i in range(m):
-			if (query[i]['quantity'] < query[i+1]['quantity']):
+			if (i+1) == m:
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((query[0]['date'] - query[i]['date']).days))
+				break
+			elif (query[i]['quantity'] < query[i+1]['quantity']):
 				quantity.append(float(query[i]['quantity']))
 				date.append(float((query[0]['date'] - query[i]['date']).days))
 			else:
@@ -261,9 +275,9 @@ class stats:
 		#if there is a rate to convert
 		if frank[len(frank)-1][0]:
 			#make the standard rate...
-			yoyo = sara[len(sara)-1]/frank[len(frank)-1][0]
+			yoyo = sara[1]/frank[1][0]
 		else:
-			yoyo = 'Not Enough Data'
+			yoyo = 'NED'
 			
 		'''
 		These next few lines go through and do the rolling list and total rates for the product
@@ -312,21 +326,26 @@ class stats:
 		
 		#if you do have stuff to put into it...
 		#if you don't have anything to put into it, then don't put 'not enough data' into the table...
-		if yoyo != 'Not Enough Data':
+		if yoyo != 'NED':
 			#add the rates to the list...
 			last_5.append(yoyo)
 			all.append(yoyo)
 		
 		#if there is a rate...
-		if frank[len(frank)-1][0]:
+		if frank[1][0]:
 			try:
 				#take the average to try and make a better guess...
 				batman = reduce((lambda x, y: x + y), last_5)/5
 			except:
 				pass
 		else:
-			batman = 'Not Enough Data'
+			batman = 'NED'
 			#He's a ninja...
+		
+		if batman != 'NED':
+			spider = sara[1]/batman
+		else:
+			spider = 'NED'
 		
 		#and now I have the hic-ups...
 		db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
@@ -334,7 +353,7 @@ class stats:
 		#Yes, frank is also a raptor if called properly...
 		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
 		#Ie: Raptor eats everything... nom nom nom
-		raptor = {'rate': frank[len(frank)-1][0], 'standard rate':  yoyo, 'guessed rate': batman}
+		raptor = {'current': frank[1][0], 'standard':  yoyo, 'guess': batman, 'predicted': spider}
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
