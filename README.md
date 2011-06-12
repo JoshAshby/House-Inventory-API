@@ -65,7 +65,7 @@ print urllib2.urlopen(request).read()
 
 The following is what is typically returned from the API calls:
 
-	/product/dog987/info/ {"picture": "http://localhost/pictures/dog987.png", "description": "A Dog", "barcode": "dog987", "name": "Beagle", "flag": "L", "quantity": 3, "id": 23, "thumb": "http://localhost/thumb/dog987_thumb.png"}
+	/product/dog987/info/ {"picture": "dog987.png", "description": "A Dog", "barcode": "dog987", "name": "Beagle", "flag": "L", "quantity": 3, "id": 23, "thumb": "dog987_thumb.png"}
 	/product/dog987/delete/ {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
 	/product/add/ {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53, "thumb": "dog_thumb.png"}
 	/product/update/ {"picture": "dog.png", "updated": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "oldbarcode": "dog", "quantity": 3, "id": 53, "thumb": "dog_thumb.png"}
@@ -77,6 +77,8 @@ The following is what is typically returned from the API calls:
 Note that the reponses for ``[/product/add/][/product/update/][/product/delete/]`` returns an additional JSON object stating that the product has been updated, deleted or added.
 ``[/product/add/]`` may also return with ``{"COP": "dog"}`` should a copy of that products barcode already exsist in the table. in this example, '``dog`` is the barcode of the product that there is a copy of.
 Valid responses are ``[NED][NULL][NS][COP]`` ``[NED]`` meaning that there is Not Enough Data, ``[NULL]`` being maiinly for the picture and thumbnail group indicating no picture or thumbnail is available, and ``[NS]`` being for Nothing Submitted, `[COP]`` meaning Copy Of Product meaning that a copy of that products barcode already exsists in the table.
+
+All pictures can be accessed at either ``/pictures/barcode.fileextension`` or ``/thumb/barcode_thumb.fileextension``
 
 Database Info:
 --------------------------

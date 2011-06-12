@@ -42,16 +42,11 @@ class info:
 	class documentation
 	Info about the given product.
 	
-	returns: {"picture": "http://localhost/pictures/dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52, "thumb": "http://localhost/thumb/dog_thumb.png"}
+	returns: {"picture": "dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52, "thumb": "dog_thumb.png"}
 	'''
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
-		tweety = inform['picture']
-		inform['picture'] = swivel_mount +'pictures/' + tweety
-		
-		chester = inform['thumb']
-		inform['thumb'] = swivel_mount + 'thumb/' + chester
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
@@ -104,7 +99,7 @@ class add:
 				else:
 					pass
 
-			if picture != {}:
+			if picture is not {}:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
@@ -119,7 +114,7 @@ class add:
 					f.write( chunk )
 				f.close()
 				
-				goop = freyaPics(str(frodo))
+				goop = freyaPics(frodo)
 				goop.odinsThumb()
 			else:
 				frodo = 'NULL'
@@ -176,7 +171,7 @@ class update:
 			
 			picture = bobbins.picture
 			
-			if picture != {}:
+			if picture is not {}:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
@@ -191,7 +186,7 @@ class update:
 					f.write( chunk )
 				f.close()
 				
-				goop = freyaPics(str(frodo))
+				goop = freyaPics(frodo)
 				goop.odinsThumb()
 				
 			else:
