@@ -17,6 +17,7 @@ sys.path.append(abspath)
 os.chdir(abspath)
 from ashmath import *
 from config import *
+from ashpic import *
 
 
 """
@@ -47,6 +48,12 @@ class info:
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
+		tweety = inform['picture']
+		inform['picture'] = swivel_mount +'pictures/' + tweety
+		
+		chester = inform['thumb']
+		inform['thumb'] = swivel_mount + 'pictures/thumb/' + chester
+		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
@@ -98,10 +105,11 @@ class add:
 			if copy:
 				return json.dumps({'COP': barcode})
 			else:
-				if picture:
-					frodo = picture.filename
-			
-					f = open(abspath + '/pictures/' + frodo, "wb")
+				if picture != {}:
+					frodo = barcode + '.png'
+					pinky = barcode+ '_thumb.png'
+				
+					f = open(abspath + '/pictures/' + barcode + '.png', "wb")
 
 					while 1:
 						chunk = picture.file.read(10000)
@@ -109,12 +117,15 @@ class add:
 							break
 						f.write( chunk )
 					f.close()
+				
+					odinsThumb(barcode)
 				else:
 					frodo = 'NULL'
+					pinky = 'NULL'
 			
 				p = re.compile('\+')
 				found = p.sub( ' ', description)
-				db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo})
+				db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `thumb`) VALUES ($name, $description, $barcode, $quantity, $picture, $pinky)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'pinky':pinky})
 				name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 				inform = name[0]
 				inform['added'] = 'true'
@@ -128,25 +139,41 @@ class add:
 
 class update:
 	'''
-	#class documentation
-	#Updates the given product from the post data.
+	class documentation
+	Updates the given product from the post data.
 	'''
 	def POST(self):
 		bobbins= web.input(picture={})
 		
-		if bobbins:
-			oldbarcode = bobbins['oldbarcode']
-			name = bobbins['name']
+		if bobbins['barcode']:
+			the_ring = []
+			
 			barcode = bobbins['barcode']
-			description = bobbins['description']
-			quantity = bobbins['quantity']
+			
+			bilbo = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+			
+			for e in range(len(bilbo)):
+				the_ring.append(bilbo[e])
+			
+			if 'name' in bobbins: name = bobbins['name']
+			else: name = the_ring[0]['name']
+			
+			if 'newbarcode' in bobbins: oldbarcode = bobbins['newbarcode']
+			else: oldbarcode = the_ring[0]['barcode']
+			
+			if 'description' in bobbins: description = bobbins['description']
+			else: description = the_ring[0]['description']
+			
+			if 'quantity' in bobbins: quantity = bobbins['quantity']
+			else: quantity = the_ring[0]['quantity']
 			
 			picture = bobbins.picture
 			
-			if picture:
-				frodo = picture.filename
+			if picture != {}:
+				frodo = barcode + '.png'
+				pinky = barcode+ '_thumb.png'
 			
-				f = open(abspath + '/pictures/' + frodo, "wb")
+				f = open(abspath + '/pictures/' + barcode + '.png', "wb")
 
 				while 1:
 					chunk = picture.file.read(10000)
@@ -154,23 +181,25 @@ class update:
 						break
 					f.write( chunk )
 				f.close()
+				
+				odinsThumb(barcode)
 			else:
-				bilbo = db.query('SELECT `picture` FROM `products` WHERE `barcode` = $barcode', vars={'barcode':oldbarcode})
-				print len(bilbo)
-				frodo = bilbo[0]['picture']
+				frodo = the_ring[0]['picture']
+				pinky = the_ring[0]['thumb']
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
 			
-			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture': frodo, 'oldbarcode': oldbarcode})
-			db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'oldbarcode': oldbarcode, 'barcode': barcode})
-			db.query('UPDATE `usage` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'oldbarcode': oldbarcode, 'barcode': barcode})
+			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `thumb` = $pinky WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'pinky': pinky})
+			db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
+			db.query('UPDATE `usage` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
+			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': oldbarcode})
+			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode': oldbarcode})
 			
-			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['updated'] = 'true'
-			inform['oldBarcode'] = oldbarcode
-			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+			inform['oldbarcode'] = barcode
+			inform['barcode'] = oldbarcode
 			if spam:
 				web.header('Content-Type', 'application/json')
 			return json.dumps(inform)
