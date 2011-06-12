@@ -84,14 +84,16 @@ class add:
 			query = []
 			copy = 0
 			
-			names = db.query('SELECT `name`, `barcode` FROM `products`')
+			names = db.query('SELECT `barcode` FROM `products`')
 			for i in range(len(names)):
 				query.append(names[i])
 			
 			for k in range(len(query)):
-				if ((str(query[k]['name']) == name) or (str(query[k]['barcode'] == barcode))):
+				if (query[k]['barcode'] == barcode):
 					copy = 1
 					break
+				else:
+					copy = 0
 			
 			if copy:
 				return json.dumps({'COP': barcode})
@@ -133,6 +135,7 @@ class update:
 		bobbins= web.input(picture={})
 		
 		if bobbins:
+			oldbarcode = bobbins['oldbarcode']
 			name = bobbins['name']
 			barcode = bobbins['barcode']
 			description = bobbins['description']
@@ -152,17 +155,21 @@ class update:
 					f.write( chunk )
 				f.close()
 			else:
-				bilbo = db.query('SELECT `picture` FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+				bilbo = db.query('SELECT `picture` FROM `products` WHERE `barcode` = $barcode', vars={'barcode':oldbarcode})
+				print len(bilbo)
 				frodo = bilbo[0]['picture']
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
 			
-			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $barcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture': frodo})
+			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture': frodo, 'oldbarcode': oldbarcode})
+			db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'oldbarcode': oldbarcode, 'barcode': barcode})
+			db.query('UPDATE `usage` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'oldbarcode': oldbarcode, 'barcode': barcode})
 			
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['updated'] = 'true'
+			inform['oldBarcode'] = oldbarcode
 			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
 			if spam:
 				web.header('Content-Type', 'application/json')
