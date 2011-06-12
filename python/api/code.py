@@ -100,47 +100,42 @@ class add:
 			
 			for k in range(len(query)):
 				if (query[k]['barcode'] == barcode):
-					copy = 1
-					break
+					return json.dumps({'COP': barcode})
 				else:
-					copy = 0
-			
-			if copy:
-				return json.dumps({'COP': barcode})
-			else:
-				if picture != {}:
-					
-					cat = re.search('(\..*)', picture.filename).group()
-					
-					frodo = barcode + cat
-					pinky = barcode+ '_thumb' + cat
-				
-					f = open(abspath + '/pictures/' + frodo, "wb")
+					pass
 
-					while 1:
-						chunk = picture.file.read(10000)
-						if not chunk:
-							break
-						f.write( chunk )
-					f.close()
+			if picture != {}:
+				cat = re.search('(\..*)', picture.filename).group()
 				
-					goop = freyaPics(str(frodo))
-					goop.odinsThumb()
-				else:
-					frodo = 'NULL'
-					pinky = 'NULL'
+				frodo = barcode + cat
+				pinky = barcode+ '_thumb' + cat
+				
+				f = open(abspath + '/pictures/' + frodo, "wb")
+
+				while 1:
+					chunk = picture.file.read(10000)
+					if not chunk:
+						break
+					f.write( chunk )
+				f.close()
+				
+				goop = freyaPics(str(frodo))
+				goop.odinsThumb()
+			else:
+				frodo = 'NULL'
+				pinky = 'NULL'
 			
-				p = re.compile('\+')
-				found = p.sub( ' ', description)
-				db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `thumb`) VALUES ($name, $description, $barcode, $quantity, $picture, $pinky)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'pinky':pinky})
-				name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-				inform = name[0]
-				inform['added'] = 'true'
-				db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-				db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, "[]", "[]")', vars={'barcode': barcode})
-				if spam:
-					web.header('Content-Type', 'application/json')
-				return json.dumps(inform)
+			p = re.compile('\+')
+			found = p.sub( ' ', description)
+			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `thumb`) VALUES ($name, $description, $barcode, $quantity, $picture, $pinky)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'pinky':pinky})
+			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+			inform = name[0]
+			inform['added'] = 'true'
+			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+			db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, "[]", "[]")', vars={'barcode': barcode})
+			if spam:
+				web.header('Content-Type', 'application/json')
+			return json.dumps(inform)
 		else:
 			return json.dumps(['NS'])
 
