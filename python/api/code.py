@@ -42,7 +42,7 @@ class info:
 	class documentation
 	Info about the given product.
 	
-	Returns a JSON string like such: {"picture": "http://localhost/pictures/dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52, "thumb": "http://localhost/thumb/dog_thumb.png"}
+	returns: {"picture": "http://localhost/pictures/dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52, "thumb": "http://localhost/thumb/dog_thumb.png"}
 	'''
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
@@ -61,6 +61,8 @@ class total:
 	'''
 	class documentation
 	Returns all the product info. Used for product info tables in the main client
+	
+	returns: [{"picture": "718103025027.png", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "barcode": "718103025027", "name": "Green Graph Composition", "flag": "M", "quantity": 1, "id": 3, "thumb": "718103025027_thumb.png"}, {"picture": "3037921120217.png", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "barcode": "3037921120217", "name": "Orange Graph Notebook", "flag": "L", "quantity": 1, "id": 4, "thumb": "3037921120217_thumb.png"}]
 	'''
 	def GET(self):
 		query = []
@@ -75,6 +77,8 @@ class add:
 	'''
 	class documentation
 	Adds the given product from the POST data.
+	
+	returns: {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53, "thumb": "dog_thumb.png"}
 	'''
 	def POST(self):
 		bobbins= web.input(picture={})
@@ -105,10 +109,13 @@ class add:
 				return json.dumps({'COP': barcode})
 			else:
 				if picture != {}:
-					frodo = barcode + '.png'
-					pinky = barcode+ '_thumb.png'
+					
+					cat = re.search('(\..*)', picture.filename).group()
+					
+					frodo = barcode + cat
+					pinky = barcode+ '_thumb' + cat
 				
-					f = open(abspath + '/pictures/' + barcode + '.png', "wb")
+					f = open(abspath + '/pictures/' + frodo, "wb")
 
 					while 1:
 						chunk = picture.file.read(10000)
@@ -117,7 +124,8 @@ class add:
 						f.write( chunk )
 					f.close()
 				
-					odinsThumb(barcode)
+					goop = freyaPics(str(frodo))
+					goop.odinsThumb()
 				else:
 					frodo = 'NULL'
 					pinky = 'NULL'
@@ -139,7 +147,12 @@ class add:
 class update:
 	'''
 	class documentation
-	Updates the given product from the post data.
+	Updates the given product from the POST data.
+	
+	returns: {"picture": "dog.png", "updated": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "oldbarcode": "dog", "quantity": 3, "id": 53, "thumb": "dog_thumb.png"}
+	
+	Where:
+		oldbarcode = the previous barcode incase the barcode was changed
 	'''
 	def POST(self):
 		bobbins= web.input(picture={})
@@ -169,10 +182,12 @@ class update:
 			picture = bobbins.picture
 			
 			if picture != {}:
-				frodo = barcode + '.png'
-				pinky = barcode+ '_thumb.png'
-			
-				f = open(abspath + '/pictures/' + barcode + '.png', "wb")
+				cat = re.search('(\..*)', picture.filename).group()
+				
+				frodo = barcode + cat
+				pinky = barcode+ '_thumb' + cat
+				
+				f = open(abspath + '/pictures/' + frodo, "wb")
 
 				while 1:
 					chunk = picture.file.read(10000)
@@ -181,7 +196,9 @@ class update:
 					f.write( chunk )
 				f.close()
 				
-				odinsThumb(barcode)
+				goop = freyaPics(str(frodo))
+				goop.odinsThumb()
+				
 			else:
 				frodo = the_ring[0]['picture']
 				pinky = the_ring[0]['thumb']
@@ -212,6 +229,8 @@ class delete:
 	'''
 	class documentation
 	Deletes the given product.
+	
+	returns: {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
 	'''
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
@@ -226,6 +245,8 @@ class names:
 	'''
 	class documentation
 	Generates a list of names and barcodes for auto complete
+	
+	returns: [{"barcode": "718103025027", "name": "Green Graph Composition"}, {"barcode": "3037921120217", "name": "Orange Graph Notebook"}, {"barcode": "043396366268", "name": "the social network"}, {"barcode": "dog987", "name": "Beagle"}]
 	'''
 	def GET(self):
 		query = []
@@ -240,6 +261,8 @@ class log:
 	'''
 	class documentation
 	Generates the use log about the given product.
+	
+	returns: [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]
 	'''
 	def GET(self, barcode):
 		query = []
@@ -262,8 +285,11 @@ class stats:
 	returns a JSON string like: {"current": -28.0, "guess": -0.07142857142857142, "predictedNF": -28, "predicted": -28.0, "standard": -0.07142857142857142}
 	
 	Where:
-		Current = current rate at which the product will run out
-		
+		current = current rate at which the product will run out based off of the current log
+		guess: = standard form rate of the predicted time
+		predictedNF = int form of the predicted value
+		predicted = the predicted rate for when the product will run out, as guessed by the last_5 guesses
+		standard = standard form of current
 	'''
 	def GET(self, barcode):
 		query = []
