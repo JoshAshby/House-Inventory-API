@@ -21,7 +21,6 @@ from ashpic import *
 
 
 """
-module documentation
 Project Blue Ring
 A scalable inventory control and management system based in the cloud.
 
@@ -86,7 +85,7 @@ class add:
 		bobbins= web.input(picture={})
 		
 		#if there is data in the Post go through the stuff to add it to the table if not, then let the client know there was no data sent...
-		if bobbins:
+		if bobbins['barcode'] and bobbins['name'] and bobbins['description'] and bobbins['quantity']:
 			name = bobbins['name']
 			barcode = bobbins['barcode']
 			description = bobbins['description']
@@ -140,7 +139,7 @@ class add:
 					web.header('Content-Type', 'application/json')
 				return json.dumps(inform)
 		else:
-			return json.dumps(['Nothing submitted'])
+			return json.dumps(['NS'])
 
 class update:
 	'''
@@ -212,7 +211,7 @@ class update:
 				web.header('Content-Type', 'application/json')
 			return json.dumps(inform)
 		else:
-			return json.dumps(['Nothing submitted'])
+			return json.dumps(['NS'])
 
 class delete:
 	'''

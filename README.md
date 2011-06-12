@@ -22,9 +22,8 @@ Abstract:
 -------------
 A simple API written in Python which handles all the nasty stuff for keeping a basic inventory
 
-This branch of the API uses web.py, MySQL and mod_wsgi instead of Perl for the API, however the client and the webinterface 
-will remain the same across all branches (however the code base will have to change due to url scheme changes). If this ends up working better, it may be adopted as the master branch, and the Perl-OO 
-branch (the main API branch currently) will be left behind. (Which has already happened.)
+This branch of the API uses web.py, MySQL and mod_wsgi instead of Perl for the API, however the client and the web interface 
+will remain the same across all branches (however the code base will have to change due to url scheme changes (hasn't happened yet due to API work)).
 
 This branch may also intergrate R as the main statistics generation for the products. (It does but it doesn't, because rpy2 doesn't like to run in a web.py session,
 and makes the program hang without any errors...) as a result, This branch includes a copy of linear.py (known as ashmath.py in this branch), my own Vector math type for Python which is used for the
@@ -48,7 +47,7 @@ The following return JSON formated data:
 	/product/dog987/stats/ returns the predicted time of when the current stock will run out.
 
 ``/product/add/`` and ``/product/update/`` Both take POST requests only, unlike the rest of the functions which only take GET requests.
-As a result, ``/product/add/`` takes the ``[barcode,][name][description][quantity]`` and optionally, a ``[picture]`` file to be uploaded and linked to the product.
+As a result, ``/product/add/`` takes the ``[barcode][name][description][quantity]`` and optionally, a ``[picture]`` file to be uploaded and linked to the product.
 
 One can use the Python poster library to easily do this:
 
@@ -76,6 +75,8 @@ The following is what is typically returned from the API calls:
 	/product/dog987/stats/ {"current": -28.0, "guess": -0.07142857142857142, "predictedNF": -28, "predicted": -28.0, "standard": -0.07142857142857142}
 
 Note that the reponses for ``[/product/add/][/product/update/][/product/delete/]`` returns an additional JSON object stating that the product has been updated, deleted or added.
+``[/product/add/]`` may also return with ``{"COP": "dog"}`` should a copy of that products barcode already exsist in the table. in this example, '``dog`` is the barcode of the product that there is a copy of.
+Valid responses are ``[NED][NULL][NS][COP]`` ``[NED]`` meaning that there is Not Enough Data, ``[NULL]`` being maiinly for the picture and thumbnail group indicating no picture or thumbnail is available, and ``[NS]`` being for Nothing Submitted, `[COP]`` meaning Copy Of Product meaning that a copy of that products barcode already exsists in the table.
 
 Database Info:
 --------------------------
