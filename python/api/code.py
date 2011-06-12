@@ -52,7 +52,7 @@ class info:
 		inform['picture'] = swivel_mount +'pictures/' + tweety
 		
 		chester = inform['thumb']
-		inform['thumb'] = swivel_mount + 'pictures/thumb/' + chester
+		inform['thumb'] = swivel_mount + 'thumb/' + chester
 		
 		if spam:
 			web.header('Content-Type', 'application/json')

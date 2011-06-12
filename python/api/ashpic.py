@@ -22,6 +22,6 @@ def odinsThumb(barcode):
 
 	monkey = open(abspath + '/pictures/thumb/' + barcode + '_thumb.png', 'wb')
 
-	baggins = Image.open(abspath + '/pictures/' + barcode + '.png', 'rb')
+	baggins = Image.open(abspath + '/pictures/' + barcode + '.png')
 	baggins.thumbnail(size)
 	baggins.save(monkey)
