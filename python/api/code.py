@@ -81,31 +81,46 @@ class add:
 			quantity = bobbins['quantity']
 			picture = bobbins.picture
 			
-			if picture:
-				frodo = picture.filename
+			query = []
+			copy = 0
 			
-				f = open(abspath + '/pictures/' + frodo, "wb")
-
-				while 1:
-					chunk = picture.file.read(10000)
-					if not chunk:
-						break
-					f.write( chunk )
-				f.close()
+			names = db.query('SELECT `name`, `barcode` FROM `products`')
+			for i in range(len(names)):
+				query.append(names[i])
+			
+			for k in range(len(query)):
+				if ((str(query[k]['name']) == name) or (str(query[k]['barcode'] == barcode))):
+					copy = 1
+					break
+			
+			if copy:
+				return json.dumps({'COP': barcode})
 			else:
-				frodo = 'NULL'
+				if picture:
+					frodo = picture.filename
 			
-			p = re.compile('\+')
-			found = p.sub( ' ', description)
-			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo})
-			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-			inform = name[0]
-			inform['added'] = 'true'
-			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-			db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, "[]", "[]")', vars={'barcode': barcode})
-			if spam:
-				web.header('Content-Type', 'application/json')
-			return json.dumps(inform)
+					f = open(abspath + '/pictures/' + frodo, "wb")
+
+					while 1:
+						chunk = picture.file.read(10000)
+						if not chunk:
+							break
+						f.write( chunk )
+					f.close()
+				else:
+					frodo = 'NULL'
+			
+				p = re.compile('\+')
+				found = p.sub( ' ', description)
+				db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo})
+				name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+				inform = name[0]
+				inform['added'] = 'true'
+				db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
+				db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, "[]", "[]")', vars={'barcode': barcode})
+				if spam:
+					web.header('Content-Type', 'application/json')
+				return json.dumps(inform)
 		else:
 			return json.dumps(['Nothing submitted'])
 
@@ -176,12 +191,9 @@ class names:
 	'''
 	def GET(self):
 		query = []
-		name = db.query('SELECT * FROM `products`')
-		for i in range(len(name)):
-			query.append(name[i]['name'])
-		name = db.query('SELECT * FROM `products`')
-		for i in range(len(name)):
-			query.append(name[i]['barcode'])
+		names = db.query('SELECT `name`, `barcode` FROM `products`')
+		for i in range(len(names)):
+			query.append(names[i])
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(query)
@@ -264,8 +276,8 @@ class stats:
 		#5 guesses to try and make a better guess. It'll also learn from everytime the stock reaches zero.
 		
 		These next few lines are all very messy, however they work well. The goal is to simply make a few calculations to get the standard rate and the guessed rate, and store everything into the table, 
-		if there is not enough data thennnnn simply state that, and continue on with nothing.
-		It makes it nice because the rolling list goes across peaks, and without errors the come up. if there is a 0 rate, it simply gets ignoerd (I think... hopefully)
+		if there is not enough data then simply state that, and continue on with nothing.
+		It makes it nice because the rolling list goes across peaks, and without errors the come up. if there is a 0 rate, it simply gets ignored (I think... hopefully)
 		'''
 		
 		#take the partial deriv of each part of the vector to gain the total deriv or gradient...
@@ -332,28 +344,45 @@ class stats:
 			all.append(yoyo)
 		
 		#if there is a rate...
-		if frank[1][0]:
-			try:
-				#take the average to try and make a better guess...
-				batman = reduce((lambda x, y: x + y), last_5)/5
-			except:
-				pass
-		else:
+		try:
+			if frank[1][0]:
+				try:
+					#take the average to try and make a better guess...
+					batman = reduce((lambda x, y: x + y), last_5)/5
+				except:
+					pass
+			else:
+				batman = 'NED'
+				#He's a ninja...
+		except:
 			batman = 'NED'
-			#He's a ninja...
 		
-		if batman != 'NED':
-			spider = sara[1]/batman
-		else:
+		try:
+			if batman != 'NED':
+				spider = sara[1]/batman
+				intSpider = int(spider)
+			else:
+				spider = 'NED'
+				intSpider = 'NED'
+		except:
 			spider = 'NED'
+			intSpider = 'NED'
 		
 		#and now I have the hic-ups...
 		db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
-			
+		
+		try:
+			if frank[1][0]:
+				current = frank[1][0]
+			else:
+				current = 'NED'
+		except:
+			current = 'NED'
+		
 		#Yes, frank is also a raptor if called properly...
 		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
 		#Ie: Raptor eats everything... nom nom nom
-		raptor = {'current': frank[1][0], 'standard':  yoyo, 'guess': batman, 'predicted': spider}
+		raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
