@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import web
-
 """
 Project Blue Ring
 A scalable inventory control and management system based in the cloud.
@@ -12,6 +10,7 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 """
+import web
 
 db = web.database(dbn='mysql', user='root', pw='speeddyy5', db='barcode')
         
@@ -28,6 +27,8 @@ urls = (
 )
 
 render = web.template.render('/srv/http/template/')
+
+swivel_mount = 'http://localhost/'
 
 #debug setter
 spamandeggs = 0

@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import Image
-
 '''
 Basic image stuff using PIL
 
@@ -12,6 +10,7 @@ http://joshashby.com
 joshuaashby@joshashby.com
 '''
 
+import Image
 import sys, os
 abspath = os.path.dirname(__file__)
 sys.path.append(abspath)

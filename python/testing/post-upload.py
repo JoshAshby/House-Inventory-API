@@ -1,3 +1,14 @@
+#!/usr/bin env python
+'''
+Simple test script for adding a product to the database, including uploading a picture.
+
+http://xkcd.com/353/
+
+Josh Ashby
+2011
+http://joshashby.com
+joshuaashby@joshashby.com
+'''
 from poster.encode import multipart_encode
 from poster.streaminghttp import register_openers
 import urllib2

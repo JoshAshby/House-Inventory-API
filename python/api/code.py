@@ -1,25 +1,4 @@
 #!/usr/bin/env python
-import web
-import json
-import re
-import time
-
-'''
-From: http://webpy.org/install
-and 
-http://code.google.com/p/modwsgi/wiki/ApplicationIssues
-
-This must be done to avoid the import errors which come up with having linear.py and config.py
-'''
-import sys, os
-abspath = os.path.dirname(__file__)
-sys.path.append(abspath)
-os.chdir(abspath)
-from ashmath import *
-from config import *
-from ashpic import *
-
-
 """
 Project Blue Ring
 A scalable inventory control and management system based in the cloud.
@@ -31,6 +10,22 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 """
+import web
+import json
+import re
+import time
+
+'''
+From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
+This must be done to avoid the import errors which come up with having linear.py and config.py
+'''
+import sys, os
+abspath = os.path.dirname(__file__)
+sys.path.append(abspath)
+os.chdir(abspath)
+from ashmath import *
+from config import *
+from ashpic import *
 
 class index:        
 	'''
