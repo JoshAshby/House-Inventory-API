@@ -21,6 +21,7 @@ from ashpic import *
 
 
 """
+module documentation
 Project Blue Ring
 A scalable inventory control and management system based in the cloud.
 
@@ -36,6 +37,8 @@ class index:
 	'''
 	class documentation
 	Base Index...
+	
+	The page that is displayed if the root of the server is accessed, Currently just displays the template index.html
 	'''
 	def GET(self):
 		return render.index()
@@ -44,6 +47,8 @@ class info:
 	'''
 	class documentation
 	Info about the given product.
+	
+	Returns a JSON string like such: {"picture": "http://localhost/pictures/dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52, "thumb": "http://localhost/thumb/dog_thumb.png"}
 	'''
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
@@ -191,8 +196,11 @@ class update:
 			found = p.sub( ' ', description)
 			
 			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `thumb` = $pinky WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'pinky': pinky})
-			db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
-			db.query('UPDATE `usage` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
+			
+			if oldbarcode is not barcode:
+				db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
+				db.query('UPDATE `usage` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
+				
 			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': oldbarcode})
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode': oldbarcode})
 			
@@ -256,7 +264,12 @@ class stats:
 	'''
 	class documentation
 	Generates stats about the given product.
-	Currently this just replies with the intercept of the slope of the line formed by the datapoints from the stats table. This is the predicted time when the current amount of food will run out.
+	
+	returns a JSON string like: {"current": -28.0, "guess": -0.07142857142857142, "predictedNF": -28, "predicted": -28.0, "standard": -0.07142857142857142}
+	
+	Where:
+		Current = current rate at which the product will run out
+		
 	'''
 	def GET(self, barcode):
 		query = []
