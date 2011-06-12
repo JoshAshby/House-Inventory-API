@@ -53,7 +53,7 @@ class thorVector(object):
 				data.append(self.data[j] + other.data[j])
 			return self.__class__(data)
 		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
+			raise MathError('Thor should hammer you... It *must* (MUST) be another Vector object! NOTHING ELSE!')
 		
 	def __sub__(self, other):
 		data = []
@@ -122,7 +122,7 @@ class thorVector(object):
 				data.append(self.data[j] - other.data[j])
 			return self.__class__(data)
 		else:
-			raise MathError('What the hell? It *must* (MUST) be another Vector object! NOTHING ELSE!')
+			raise MathError('The norse gods are getting angry... It *must* (MUST) be another Vector object! NOTHING ELSE!')
 
 	def __rmul__(self, other):
 		data = []
