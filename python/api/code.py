@@ -99,7 +99,7 @@ class add:
 				else:
 					pass
 
-			if picture is not {}:
+			if picture != {}:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
@@ -171,7 +171,7 @@ class update:
 			
 			picture = bobbins.picture
 			
-			if picture is not {}:
+			if picture  != {}:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
