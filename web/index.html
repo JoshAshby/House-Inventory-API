@@ -3,11 +3,11 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<title></title>
-	<meta name="description" content="">
+	<title>Blue Ring Web Admin Panel</title>
+	<meta name="description" content="Admin panel for Project Blue Ring">
 	<meta name="author" content="Joshua Ashby">
 	<link rel="stylesheet/less" href="css/style.less">
-	<link type="text/css" media="screen, projection" rel="stylesheet" href="css/Aristo/jquery-ui-1.8.7.custom.css" /> 
+	<link type="text/css" media="screen, projection" rel="stylesheet" href="css/Aristo/jquery-ui-1.8.7.custom.css" />
 	<script src="http://lesscss.googlecode.com/files/less-1.0.18.min.js"></script>
 	<script type="text/javascript" charset="utf-8">
 		less.env = "development";
@@ -16,28 +16,107 @@
 </head>
 
 <body>
-	<div class="container">
+	<div class="container ui-widget" style="text-align: center">
+		<div id='dialog_del' title='Delete it?'>
+			<p>Are you sure? No second thoughts this time cause this can't be undone...</p>
+			<p class='small'>Really, really, positivly sure about that?</p>
+		</div>
+		<h3 class="bold_fancy">Project <b id='o'>Blue</b> Ring Web Admin Panel</h3>
 		<div id="tabs">
 			<ul>
-				<li><a href="#tabs-1"></a></li>
-				<li><a href="#tabs-2"></a></li>
+				<li><a href="#tabs-1">Stock</a></li>
+				<li><a href="#tabs-2">Additional Info</a></li>
+				<li><a href="#tabs-3">Add a Product</a></li>
 			</ul>
 			<div id="tabs-1">
+			Woops... Looks like something bad happened and your data didn't load...
 			</div>
 			<div id="tabs-2">
+			Nothing to see here, move along...
+			</div>
+			<div id="tabs-3">
+			These arn't the droids your looking for...
 			</div>
 		</div>
+		<p class='small' id='o'>A project by <a href='http://joshashby.com'>JoshAshby</a> 2011 | <a href='https://github.com/JoshAshby/House-Inventory-API'>Source code</a></p>
 	</div>
 
 	<script type="text/coffeescript">
+	spam = 0
 	
+	$.ajaxSetup
+		cache: false
 	
+	base = 'http://localhost/'
 	
-	$('#tabs').tabs()
+	nut = base + 'product/'
 	
+	fredrick = {
+		'picture': ( base + 'picture/'),
+		'thumb': ( base + 'thumb/'),
+		'add': ( base + 'add/'),
+		'update': ( base + 'update/'),
+		'delete': '/delete/',
+		'log': '/log/',
+		'info': '/info/',
+		'stats': '/stats/'
+	}
+		
+	update = ->
+		$.getJSON nut, (data) ->
+			$('#total').html ''
+			(if i%2 == 0
+				b = 'shade'
+			else
+				b = ''
+			$('#total').append '<tr id="total_pro" class="' + b + '"><td><img src="' + fredrick['thumb'] + data[i]['picture']+ '" alt="' + data[i]['picture'] + '" width="64px"/></td><td>' + data[i]['barcode'] + '</td><td>' + data[i]['name'] + '</td><td>' + data[i]['quantity'] + '</td><td><span id="toolbar"><span id="action' + data[i]['barcode'] + '"><input type="radio" id="info' + data[i]['barcode'] + '" name="action' + data[i]['barcode'] + '" checked="checked" /><label for="info' + data[i]['barcode'] + '">Info</label><input type="radio" id="delete' + data[i]['barcode'] + '" name="action' + data[i]['barcode'] + '" /><label for="delete' + data[i]['barcode'] + '">Delete</label></span><button id="punch_it' + data[i]['barcode'] + '" bar=' +  data[i]['barcode'] + '>Do it!</button></span></td></tr>' 
+			$('#punch_it' + data[i]['barcode']).button().click ->
+				goo = $(this).attr 'bar'
+				if $("label[for='info#{goo}']").attr('aria-pressed') == 'true'
+					e(goo)
+				else
+					$('#dialog_del').dialog 'open'
+			$('#action' + data[i]['barcode']).buttonset()) for i in [0..data.length-1]
+			if spam
+				setTimeout update, 5000
+			
+	a = ->
+		$(this).dialog 'close'
+	
+	c = ->
+		$(this).dialog 'close'
+	
+	e = (secret_mess) ->
+		$('#tabs').tabs 'select',  1
+		$('#tabs-2').html ''
+		$.getJSON nut + secret_mess + fredrick['info'], (data) ->
+			$('#tabs-2').append "<h2 class='bold_fancy'>#{ data['name'] }</h2><p>Click on a field to edit it then press submit</p><table id='clean'><tr><td>Barcode:</td><td>#{ data['barcode']} </td></tr><tr class='small'><td width='200px'>Quantity:</td><td>#{ data['quantity'] }</td></tr><tr height='20px'></tr><tr><td colspan='3'>#{ data['description'] }</td></tr></table>"
+		
+	$ ->
+		$('#tabs').tabs()
+		$('#tabs-1').html '<table><h3 class="bold_fancy">Total Stock</h3><p>Click on either Do it! or change the seletion to delete toview the info or delete a product</p><thead><tr id="total_pro"><th>Picture</th><th>Barcode</th><th>Name</th><th>Quantity</th><th>Action</th></tr></thead><tbody id="total"></tbody></table>'
+		update()
+		$('#dialog_del').dialog {
+			autoOpen: false
+			width: 600
+			buttons: {
+				'Delete': a
+				'Cancel':  a
+			}
+			modal: true
+		}
+		$('#dialog_del').dialog {
+			autoOpen: false
+			width: 600
+			buttons: {
+				'Delete': a
+				'Cancel':  c
+			}
+			modal: true
+		}
 	</script>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
 	<script src="js/coffee-script.js"></script>
 </body>
 </html>

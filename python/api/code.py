@@ -42,7 +42,7 @@ class info:
 	class documentation
 	Info about the given product.
 	
-	returns: {"picture": "dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52, "thumb": "dog_thumb.png"}
+	returns: {"picture": "dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52}
 	'''
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
@@ -73,7 +73,7 @@ class add:
 	class documentation
 	Adds the given product from the POST data.
 	
-	returns: {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53, "thumb": "dog_thumb.png"}
+	returns: {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53}
 	'''
 	def POST(self):
 		bobbins= web.input(picture={})
@@ -103,7 +103,6 @@ class add:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
-				pinky = barcode+ '_thumb' + cat
 				
 				f = open(abspath + '/pictures/' + frodo, "wb")
 
@@ -118,11 +117,10 @@ class add:
 				goop.odinsThumb()
 			else:
 				frodo = 'NULL'
-				pinky = 'NULL'
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
-			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `thumb`) VALUES ($name, $description, $barcode, $quantity, $picture, $pinky)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'pinky':pinky})
+			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo})
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['added'] = 'true'
@@ -139,7 +137,7 @@ class update:
 	class documentation
 	Updates the given product from the POST data.
 	
-	returns: {"picture": "dog.png", "updated": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "oldbarcode": "dog", "quantity": 3, "id": 53, "thumb": "dog_thumb.png"}
+	returns: {"picture": "dog.png", "updated": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "oldbarcode": "dog", "quantity": 3, "id": 53}
 	
 	Where:
 		oldbarcode = the previous barcode incase the barcode was changed
@@ -175,7 +173,6 @@ class update:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
-				pinky = barcode+ '_thumb' + cat
 				
 				f = open(abspath + '/pictures/' + frodo, "wb")
 
@@ -191,12 +188,11 @@ class update:
 				
 			else:
 				frodo = the_ring[0]['picture']
-				pinky = the_ring[0]['thumb']
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
 			
-			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `thumb` = $pinky WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'pinky': pinky})
+			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode})
 			
 			if oldbarcode is not barcode:
 				db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
