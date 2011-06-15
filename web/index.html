@@ -20,6 +20,11 @@
 		<div id='dialog_del' title='Delete it?'>
 			<p>Are you sure? No second thoughts this time cause this can't be undone...</p>
 			<p class='small'>Really, really, positivly sure about that?</p>
+			<p>Barcode: <b id="yeller"> </b></p>
+		</div>
+		<div id='dialog_add' title="It's Added!">
+			<p>Sweet! Another product to munch on!</p>
+			<p>Barcode: <b id="old"> </b></p>
 		</div>
 		<h3 class="bold_fancy">Project <b id='o'>Blue</b> Ring Web Admin Panel</h3>
 		<div id="tabs">
@@ -35,7 +40,16 @@
 			Nothing to see here, move along...
 			</div>
 			<div id="tabs-3">
-			These arn't the droids your looking for...
+			These arn't the droids your looking for...<br>
+				<form id="file_upload_form" method="post" enctype="multipart/form-data" action="http://localhost/product/add/" onsubmit="upload_target">
+					<input type="text" name="barcode" placeholder="Barcode" id="barcode"/><br>
+					<input type="text" name="name" placeholder="Name" id="name"/><br>
+					<input type="text" name="quantity" placeholder="Quantity" id="quantity"/><br>
+					<input type="text" name="description" placeholder="Description" id="description"/><br>
+					<input name="picture" id="picture" size="27" type="file" /><br />
+					<input type="submit" name="action" value="Upload" id="enter_if_you_dare" /><br />
+					<iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
+				</form>
 			</div>
 		</div>
 		<p class='small' id='o'>A project by <a href='http://joshashby.com'>JoshAshby</a> 2011 | <a href='https://github.com/JoshAshby/House-Inventory-API'>Source code</a></p>
@@ -54,8 +68,8 @@
 	fredrick = {
 		'picture': ( base + 'picture/'),
 		'thumb': ( base + 'thumb/'),
-		'add': ( base + 'add/'),
-		'update': ( base + 'update/'),
+		'add': ( nut + 'add/'),
+		'update': ( nut + 'update/'),
 		'delete': '/delete/',
 		'log': '/log/',
 		'info': '/info/',
@@ -75,23 +89,41 @@
 				if $("label[for='info#{goo}']").attr('aria-pressed') == 'true'
 					e(goo)
 				else
+					$('#yeller').html goo
 					$('#dialog_del').dialog 'open'
 			$('#action' + data[i]['barcode']).buttonset()) for i in [0..data.length-1]
 			if spam
 				setTimeout update, 5000
 			
 	a = ->
+		bar_soap = $('#yeller').html()
+		$.get nut + bar_soap + fredrick['delete'], (data) ->
+			update()
 		$(this).dialog 'close'
 	
 	c = ->
 		$(this).dialog 'close'
+		update()
+		$('#barcode').val ''
+		$('#name').val ''
+		$('#description').val ''
+		$('#quantity').val ''
+		$('#picture').val ''
+		$('#tabs').tabs 'select',  0
 	
 	e = (secret_mess) ->
 		$('#tabs').tabs 'select',  1
 		$('#tabs-2').html ''
 		$.getJSON nut + secret_mess + fredrick['info'], (data) ->
 			$('#tabs-2').append "<h2 class='bold_fancy'>#{ data['name'] }</h2><p>Click on a field to edit it then press submit</p><table id='clean'><tr><td>Barcode:</td><td>#{ data['barcode']} </td></tr><tr class='small'><td width='200px'>Quantity:</td><td>#{ data['quantity'] }</td></tr><tr height='20px'></tr><tr><td colspan='3'>#{ data['description'] }</td></tr></table>"
+	
+	troll = ->
+		barcode = $('#barcode').val()
+		$('#old').html barcode
+		$('#dialog_add').dialog 'open'
 		
+			
+				
 	$ ->
 		$('#tabs').tabs()
 		$('#tabs-1').html '<table><h3 class="bold_fancy">Total Stock</h3><p>Click on either Do it! or change the seletion to delete toview the info or delete a product</p><thead><tr id="total_pro"><th>Picture</th><th>Barcode</th><th>Name</th><th>Quantity</th><th>Action</th></tr></thead><tbody id="total"></tbody></table>'
@@ -101,19 +133,30 @@
 			width: 600
 			buttons: {
 				'Delete': a
-				'Cancel':  a
-			}
-			modal: true
-		}
-		$('#dialog_del').dialog {
-			autoOpen: false
-			width: 600
-			buttons: {
-				'Delete': a
 				'Cancel':  c
 			}
 			modal: true
 		}
+		$('#dialog_add').dialog {
+			autoOpen: false
+			width: 600
+			buttons: {
+				'Great!': c
+			}
+			modal: true
+		}
+			
+		$('#enter_if_you_dare').button().click ->
+			troll()
+			
+	</script>
+	<script>
+	function init() {
+		document.getElementById('file_upload_form').onsubmit=function() {
+			document.getElementById('file_upload_form').target = 'upload_target';
+		}
+	}
+	window.onload=init
 	</script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
