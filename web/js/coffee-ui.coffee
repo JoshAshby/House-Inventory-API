@@ -58,9 +58,13 @@ e = (secret_mess) ->
 	$('#tabs').tabs 'select',  1
 	$.getJSON nut + secret_mess + fredrick['info'], (data) ->
 		$('#name_info').html data['name']
+		$('#update_name').attr 'value', data['name']
 		$('#barcode_info').html data['barcode']
+		$('#update_barcode_old').attr 'value', data['barcode']
 		$('#quantity_info').html data['quantity']
+		$('#update_quantity').attr 'value', data['quantity']
 		$('#description_info').html data['description']
+		$('#update_description').attr 'value', data['description']
 		$('#picture_info').html "<img src='#{ fredrick['thumb'] + data['picture'] }' alt='#{ data['picture'] }' width='128px'/>"
 		$('#large_picture_info').html "<img src='#{ fredrick['picture'] + data['picture'] }' alt='#{ data['picture'] }' width='100%'/>"
 	$.getJSON nut + secret_mess + fredrick['stats'], (data) ->
@@ -86,6 +90,7 @@ troll = ->
 			
 $ ->
 	$('#info').hide()
+	$('#update_form').hide()
 	$( "#accordion_info" ).accordion {
 		autoHeight: false
 	}
@@ -111,3 +116,45 @@ $ ->
 		
 	$('#enter_if_you_dare').button().click ->
 		troll()
+	
+	$('#you_entered_didnt_you').button().click ->
+		$(this).hide()
+		$('#update_form').show()
+		
+		$('#name_info').edit('init')
+		$('#barcode_info').edit()
+		$('#quantity_info').edit()
+		$('#description_info').edit()
+	
+	$('#you_entered_didnt_you_submit').button().click ->
+		$('#update_form').hide()
+		$('#you_entered_didnt_you').show()
+		
+		$('#name_info').edit('destroy')
+		$('#barcode_info').edit('destroy')
+		$('#quantity_info').edit('destroy')
+		$('#description_info').edit('destroy')
+		
+		if $('#name_info').hasClass 'changed'
+			$(this).removeClass 'changed'
+		if $('#barcode_info').hasClass 'changed'
+			$(this).removeClass 'changed'
+		if $('#quantity_info') .hasClass 'changed'
+			$(this).removeClass 'changed'
+		if $('#description_info') .hasClass 'changed'
+			$(this).removeClass 'changed'
+	
+	$('#barcode_info').focusout ->
+		val = $('#barcode_info').html()
+		$('#update_form').append "<input type='hidden' name='newbarcode' id='update_barcode' value='#{ val }'/>"
+	$('#name_info').focusout ->
+		val = $('#name_info').html()
+		$('#update_form').append  "<input type='hidden' name='name' id='update_name' value='#{ val }'/>"
+	$('#quantity_info').focusout ->
+		val = $('#quantity_info').html()
+		$('#update_form').append  "<input type='hidden' name='quantity' id='update_quantity' value='#{ val }'/>"
+	$('#description_info').focusout ->
+		val = $('#description_info').html()
+		$('#update_form').append  "<input type='hidden' name='description' id='update_description' value='#{ val }'/>"
+	
+	

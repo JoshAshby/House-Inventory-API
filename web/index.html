@@ -19,12 +19,12 @@
 	<div class="container ui-widget" style="text-align: center">
 		<div id='dialog_del' title='Delete it?'>
 			<p>Are you sure? No second thoughts this time cause this can't be undone...</p>
-			<p class='small'>Really, really, positivly sure about that?</p>
+			<p class='small'>Really, really, positivly sure about that?</p><br>
 			<p>Barcode: <b id="yeller"> </b></p>
 		</div>
 		<div id='dialog_add' title="It's Added!">
 			<p>Sweet! Another product to munch on!</p>
-			<p>Barcode: <b id="old"> </b></p>
+			<p>Barcode: <b id="old"> </b></p><br>
 		</div>
 		<h3 class="bold_fancy">Project <b class='o'>Blue</b> Ring Web Admin Panel</h3>
 		<div id="tabs">
@@ -35,7 +35,7 @@
 			</ul>
 			<div id="tabs-1">
 				<h3 class='bold_fancy'>Total Stock</h3>
-				<p class='med'>Click on either Do it! or change the seletion to delete toview the info or delete a product</p><br>
+				<p class='med'>Click on either Do it! or change the action to delete to view the info or delete a product</p><br>
 				<table width='100%'>
 					<thead>
 						<tr class='pro'>
@@ -57,6 +57,12 @@
 				Nothing to see here, move along...<br>
 				<br>
 				<div id="info">
+					<form id="update_form" method="post" enctype="multipart/form-data" action="http://localhost/product/update/" onsubmit="update_target">
+						<input type="hidden" name="barcode" id="update_barcode_old"/>
+						<iframe id="update_target" name="update_target" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
+						<label for='action'>That looks better...</label><input type="submit" name="action" value="done" id="you_entered_didnt_you_submit" /><br />
+					</form>
+					<button id='you_entered_didnt_you'>Somethings not right...</button>
 					<h2 class='bold_fancy'>
 						<div id='name_info' style='float:left'>
 						</div>
@@ -148,11 +154,15 @@
 		document.getElementById('file_upload_form').onsubmit=function() {
 			document.getElementById('file_upload_form').target = 'upload_target';
 		}
+		document.getElementById('update_form').onsubmit=function() {
+			document.getElementById('update_form').target = 'update_target';
+		}
 	}
 	window.onload=init
 	</script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
 	<script src="js/coffee-script.js"></script>
+	<script src="js/josh.js"></script>
 </body>
 </html>
