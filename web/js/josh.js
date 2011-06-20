@@ -1,22 +1,23 @@
 (function($) {
 
-	var methods = {
-		init : function() {
-			return function () {$(this).attr('contenteditable', 'true');
+	$.fn.edit = function(method) {
+		if (method ==='init') {
+			$(this).attr('contenteditable', 'true');
 			var old_val;
 			old_val = $(this).html();
 			
-			$(this).hover( function() {
+			$(this).bind('mouseover.edit', function() {
 				$(this).addClass("hover");
-			}, function () {
+			});
+			$(this).bind('mouseout.edit',  function () {
 				$(this).removeClass("hover");
 			});
 			
-			$(this).focusin( function() {
+			$(this).bind('focusin.edit', function() {
 				$(this).addClass("edit");
 			});
 			
-			$(this).focusout( function (event) {
+			$(this).bind('focusout.edit', function (event) {
 				$(this).removeClass("edit");
 				var new_val;
 				new_val = $(this).html();
@@ -24,18 +25,15 @@
 					$(this).addClass('changed');
 				}
 			});
-		};
-		}, destroy : function( ) {
-			return this.each(function(){
-				$(this).attr('contenteditable', 'false');
-				$(window).unbind('.edit');
-			});
-		}
-	};
-
-	$.fn.edit = function(method) {
-		 if ( methods[method] ) {
-			return methods[method];
+		} else if (method === 'destroy') {
+			$(this).attr('contenteditable', 'false');
+			$(this).unbind('mouseover.edit');
+			$(this).unbind('mouseout.edit');
+			$(this).unbind('focusin.edit');
+			$(this).unbind('focusout.edit');
+			if ($(this).hasClass('changed')) {
+				$(this).removeClass('changed');
+			}
 		}
 	};
 })(jQuery);

@@ -122,9 +122,9 @@ $ ->
 		$('#update_form').show()
 		
 		$('#name_info').edit('init')
-		$('#barcode_info').edit()
-		$('#quantity_info').edit()
-		$('#description_info').edit()
+		$('#barcode_info').edit('init')
+		$('#quantity_info').edit('init')
+		$('#description_info').edit('init')
 	
 	$('#you_entered_didnt_you_submit').button().click ->
 		$('#update_form').hide()
@@ -135,14 +135,7 @@ $ ->
 		$('#quantity_info').edit('destroy')
 		$('#description_info').edit('destroy')
 		
-		if $('#name_info').hasClass 'changed'
-			$(this).removeClass 'changed'
-		if $('#barcode_info').hasClass 'changed'
-			$(this).removeClass 'changed'
-		if $('#quantity_info') .hasClass 'changed'
-			$(this).removeClass 'changed'
-		if $('#description_info') .hasClass 'changed'
-			$(this).removeClass 'changed'
+		setTimeout update, 1000
 	
 	$('#barcode_info').focusout ->
 		val = $('#barcode_info').html()

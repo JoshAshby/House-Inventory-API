@@ -60,7 +60,7 @@
 					<form id="update_form" method="post" enctype="multipart/form-data" action="http://localhost/product/update/" onsubmit="update_target">
 						<input type="hidden" name="barcode" id="update_barcode_old"/>
 						<iframe id="update_target" name="update_target" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
-						<label for='action'>That looks better...</label><input type="submit" name="action" value="done" id="you_entered_didnt_you_submit" /><br />
+						<input type="submit" name="action" value="That looks a bit better..." id="you_entered_didnt_you_submit" /><br />
 					</form>
 					<button id='you_entered_didnt_you'>Somethings not right...</button>
 					<h2 class='bold_fancy'>
@@ -147,8 +147,6 @@
 		</div>
 		<p class='small o'>A project by <a href='http://joshashby.com'>JoshAshby</a> 2011 | <a href='https://github.com/JoshAshby/House-Inventory-API'>Source code</a></p>
 	</div>
-
-	<script type="text/coffeescript"  src="js/coffee-ui.coffee"></script>
 	<script>
 	function init() {
 		document.getElementById('file_upload_form').onsubmit=function() {
@@ -160,6 +158,7 @@
 	}
 	window.onload=init
 	</script>
+	<script type="text/coffeescript"  src="js/coffee-ui.coffee"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js"></script>
 	<script src="js/coffee-script.js"></script>
