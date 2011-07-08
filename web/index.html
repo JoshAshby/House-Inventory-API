@@ -16,7 +16,7 @@
 </head>
 
 <body>
-	<div class="container ui-widget" style="text-align: center">
+	<div class="container ui-widget">
 		<div id='dialog_del' title='Delete it?'>
 			<p>Are you sure? No second thoughts this time cause this can't be undone...</p>
 			<p class='small'>Really, really, positivly sure about that?</p><br>
@@ -32,10 +32,11 @@
 				<li><a href="#tabs-1">Stock</a></li>
 				<li><a href="#tabs-2">Additional Info</a></li>
 				<li><a href="#tabs-3">Add a Product</a></li>
+				<li><a href="#tabs-4">Help</a></li>
 			</ul>
 			<div id="tabs-1">
 				<h3 class='bold_fancy'>Total Stock</h3>
-				<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">Click on either Do it! to view the info or change the action button to delete and click Do it! to delete that product</p><br></div><br>
+				<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">Click on either Do it! to view the info or change the action button to delete and click Do it! to delete that product.</p><br></div><br>
 				<table width='100%'>
 					<thead>
 						<tr class='pro'>
@@ -50,7 +51,7 @@
 					</tbody>
 				</table>
 				<br>
-				<div class="ui-state-error"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span><p class="med" style="float: left;"><b>In case you don't see anything here:</b><br>Woops... Looks like something bad happened, want to go grab Chewbaca from IT to fix it?</p><br><br><br></div>
+				<div id="total_error" class="ui-state-error"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span><p class="med" style="float: left;"><b>In case you don't see anything here:</b><br>Woops... Looks like something bad happened, want to go grab Chewbaca from IT to fix it?</p><br><br><br></div>
 			</div>
 			<div id="tabs-2">
 				<div id="info">
@@ -93,7 +94,7 @@
 						</div>
 						<h3><a href="#">Stats</a></h3>
 						<div>
-							<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">"NED" means <u>N</u>ot <u>E</u>nough <u>D</u>ata<br>Meaning it might take some time for enough data to be collected to calculate this data.<br>Why don't you check back tomorrow?</p><br><br><br></div><br>
+							<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">"NED" means <u>N</u>ot <u>E</u>nough <u>D</u>ata.<br>Meaning it might take some time for enough data to be collected to calculate this data.<br>Why don't you check back tomorrow?</p><br><br><br></div><br>
 							<table width='100%'>
 								<thead>
 									<tr class='pro'>
@@ -119,7 +120,7 @@
 						</div>
 						<h3><a href="#">Usage Log</a></h3>
 						<div>
-							<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">Dates are sorted in ascending order, most recent dates are at the top</p><br></div><br>
+							<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">Dates are sorted in ascending order, most recent dates are at the top.</p><br></div><br>
 							<table width='100%'>
 								<thead>
 									<tr class='pro'>
@@ -149,10 +150,32 @@
 					<label for='quantity'>Quantity:</label><input type="text" name="quantity" placeholder="Quantity" id="quantity"/><br>
 					<label for='description'>Description:</label><input type="text" name="description" placeholder="Description" id="description"/><br>
 					<label for='picture'>Picture:</label><input name="picture" id="picture" size="27" type="file" /><br />
+					<input type='hidden' name='picTrue' id='picTrue'>
 					<br />
 					<label for='action'>Done? Great, want to add it now?</label><input type="submit" name="action" value="Yeah! Lets add it!" id="enter_if_you_dare" /><br />
 					<iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 				</form>
+			</div>
+			<div id="tabs-4">
+				<div id='accordion_help'>
+					<h3><a href="#">Total Inventory View</a></h3>
+					<div id='total_help'>
+						<p class="med">
+							The total
+						</p>
+					</div>
+					<h3><a href="#">Single Product Info View</a></h3>
+					<div id='single_help'>
+						<p class="med">
+						
+						</p>
+					</div>
+					<h3><a href="#">Add a Product View</a></h3>
+					<div id='add_help'>
+						<p class="med">
+						
+						</p>
+					</div>
 			</div>
 		</div>
 		<p class='small blue'>A project by <a href='http://joshashby.com'>JoshAshby</a> 2011 | <a href='https://github.com/JoshAshby/House-Inventory-API'>Source code</a></p>

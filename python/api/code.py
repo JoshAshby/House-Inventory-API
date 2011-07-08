@@ -84,6 +84,7 @@ class add:
 			barcode = bobbins['barcode']
 			description = bobbins['description']
 			quantity = bobbins['quantity']
+			pictureTrue = int(bobbins['picTrue'])
 			picture = bobbins.picture
 			
 			query = []
@@ -99,7 +100,7 @@ class add:
 				else:
 					pass
 
-			if picture != {}:
+			if pictureTrue == 1:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
@@ -167,9 +168,10 @@ class update:
 			if 'quantity' in bobbins: quantity = bobbins['quantity']
 			else: quantity = the_ring[0]['quantity']
 			
+			if 'picTrue' in bobbins: pictureTrue = int(bobbins['picTrue'])
 			picture = bobbins.picture
 			
-			if picture  != {}:
+			if pictureTrue == 1:
 				cat = re.search('(\..*)', picture.filename).group()
 				
 				frodo = barcode + cat
@@ -214,14 +216,33 @@ class update:
 class delete:
 	'''
 	class documentation
-	Deletes the given product.
+	Deletes the given product. And moves it's information into the backup table for reference later or restoration.
 	
 	returns: {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
 	'''
 	def GET(self, barcode):
+		log = []
+		vallog = []
+		
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
+		
+		stated = db.query('SELECT * FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+		stat = stated[0]
+			
+		loged = db.query('SELECT `date`, `quantity` FROM `usage` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+		for x in range(len(loged)):
+			vallog.append(loged[x])
+			val = {'date': vallog[x]['date'].isoformat(' '), 'quantity': vallog[x]['quantity']}
+			log.append(val)
+		
+		logSON = json.dumps(log)
+		
+		db.query('INSERT INTO `backup` (`id`, `barcode`, `name`, `description`, `picture`, `flag`, `last_5`, `all`, `log`) VALUES ($id, $barcode, $name, $description, $picture, $flag, $last_5, $all, $log) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'picture': inform['picture'], 'flag': inform['flag'], 'last_5': stat['last_5'], 'all': stat['all'], 'log': logSON})
+		
 		db.query('DELETE FROM `products` WHERE `barcode` = $barcode', vars={'barcode': barcode})
+		db.query('DELETE FROM `stats` WHERE `barcode` = $barcode', vars={'barcode': barcode})
+		db.query('DELETE FROM `usage` WHERE `barcode` = $barcode', vars={'barcode': barcode})
 		inform['deleted'] = 'true'
 		if spam:
 			web.header('Content-Type', 'application/json')

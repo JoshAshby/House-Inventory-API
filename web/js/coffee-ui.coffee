@@ -20,22 +20,28 @@ fredrick = {
 		
 update = ->
 	$.getJSON nut, (data) ->
-		$('#total').html ''
-		(if i%2 == 0
-			b = 'shade'
-		else
-			b = ''
-		$('#total').append "<tr class='pro #{ b }'><td><img src='#{ fredrick['thumb'] + data[i]['picture'] }' alt='#{ data[i]['picture'] }' width='64px'/></td><td>#{ data[i]['barcode'] }</td><td>#{ data[i]['name'] }</td><td>#{ data[i]['quantity'] }</td><td><span id='toolbar'><span id='action#{ data[i]['barcode'] }'><input type='radio' id='info#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' checked='checked' /><label for='info#{ data[i]['barcode'] }'>Info</label><input type='radio' id='delete#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' /><label for='delete#{ data[i]['barcode'] }'>Delete</label></span><button id='punch_it#{ data[i]['barcode'] }' bar='#{ data[i]['barcode'] }'>Do it!</button></span></td></tr>"
-		$('#punch_it' + data[i]['barcode']).button().click ->
-			goo = $(this).attr 'bar'
-			if $("label[for='info#{goo}']").attr('aria-pressed') == 'true'
-				e(goo)
+		if data
+			$('#total').show()
+			$('#total_error').hide()
+			$('#total').html ''
+			(if i%2 == 0
+				b = 'shade'
 			else
-				$('#yeller').html goo
-				$('#dialog_del').dialog 'open'
-		$('#action' + data[i]['barcode']).buttonset()) for i in [0..data.length-1]
-		if spam
-			setTimeout update, 5000
+				b = ''
+			$('#total').append "<tr class='pro #{ b }'><td><img src='#{ fredrick['thumb'] + data[i]['picture'] }' alt='#{ data[i]['picture'] }' width='64px'/></td><td>#{ data[i]['barcode'] }</td><td>#{ data[i]['name'] }</td><td>#{ data[i]['quantity'] }</td><td><span id='toolbar'><span id='action#{ data[i]['barcode'] }'><input type='radio' id='info#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' checked='checked' /><label for='info#{ data[i]['barcode'] }'>Info</label><input type='radio' id='delete#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' /><label for='delete#{ data[i]['barcode'] }'>Delete</label></span><button id='punch_it#{ data[i]['barcode'] }' bar='#{ data[i]['barcode'] }'>Do it!</button></span></td></tr>"
+			$('#punch_it' + data[i]['barcode']).button().click ->
+				goo = $(this).attr 'bar'
+				if $("label[for='info#{goo}']").attr('aria-pressed') == 'true'
+					e(goo)
+				else
+					$('#yeller').html goo
+					$('#dialog_del').dialog 'open'
+			$('#action' + data[i]['barcode']).buttonset()) for i in [0..data.length-1]
+			if spam
+				setTimeout update, 5000
+		else
+			$("#total").hide()
+			$('#total_error').show()
 		
 a = ->
 	bar_soap = $('#yeller').html()
@@ -89,15 +95,31 @@ troll = ->
 	barcode = $('#barcode').val()
 	$('#old').html barcode
 	$('#dialog_add').dialog 'open'
+
+check = ->
+	val = $('#picture').val()
+	if val
+		$('#picTrue').val '1'
+	else
+		$('#picTrue').val '0'
+	setTimeout check, 100
+	
 			
 $ ->
 	$('#info').hide()
 	$('#update_form').hide()
+
 	$( "#accordion_info" ).accordion {
 		autoHeight: false
 	}
+
+	$( "#accordion_help" ).accordion {
+		autoHeight: false
+	}
+
 	$('#tabs').tabs()
 	update()
+
 	$('#dialog_del').dialog {
 		autoOpen: false
 		width: 600
@@ -107,6 +129,7 @@ $ ->
 		}
 		modal: true
 	}
+
 	$('#dialog_add').dialog {
 		autoOpen: false
 		width: 600
@@ -151,5 +174,4 @@ $ ->
 	$('#description_info').focusout ->
 		val = $('#description_info').html()
 		$('#update_form').append  "<input type='hidden' name='description' id='update_description' value='#{ val }'/>"
-	
-	
+	check()
