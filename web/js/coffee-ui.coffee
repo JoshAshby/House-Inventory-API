@@ -69,6 +69,8 @@ e = (secret_mess) ->
 		$('#large_picture_info').html "<img src='#{ fredrick['picture'] + data['picture'] }' alt='#{ data['picture'] }' width='100%'/>"
 	$.getJSON nut + secret_mess + fredrick['stats'], (data) ->
 		$('#stat_info').html data['predicted']
+		$('#rank_info').html data['rank']
+		$('#pop_info').html data['popularity']
 	$.getJSON nut + secret_mess + fredrick['log'], (data) ->
 		$('#log_info').html ''
 		for elk in [0..data.length-1]

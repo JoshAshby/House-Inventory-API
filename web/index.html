@@ -7,7 +7,7 @@
 	<meta name="description" content="Admin panel for Project Blue Ring">
 	<meta name="author" content="Joshua Ashby">
 	<link rel="stylesheet/less" href="css/style.less">
-	<link type="text/css" media="screen, projection" rel="stylesheet" href="css/Aristo/jquery-ui-1.8.7.custom.css" />
+	<link type="text/css" media="screen, projection" rel="stylesheet" href="css/josh/josh.css" />
 	<script src="http://lesscss.googlecode.com/files/less-1.0.18.min.js"></script>
 	<script type="text/javascript" charset="utf-8">
 		less.env = "development";
@@ -26,7 +26,7 @@
 			<p>Sweet! Another product to munch on!</p>
 			<p>Barcode: <b id="old"> </b></p><br>
 		</div>
-		<h3 class="bold_fancy">Project <b class='o'>Blue</b> Ring Web Admin Panel</h3>
+		<h3 class="bold_fancy">Project <b class='blue'>Blue</b> Ring Web Admin Panel</h3>
 		<div id="tabs">
 			<ul>
 				<li><a href="#tabs-1">Stock</a></li>
@@ -35,7 +35,7 @@
 			</ul>
 			<div id="tabs-1">
 				<h3 class='bold_fancy'>Total Stock</h3>
-				<p class='med'>Click on either Do it! or change the action to delete to view the info or delete a product</p><br>
+				<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">Click on either Do it! to view the info or change the action button to delete and click Do it! to delete that product</p><br></div><br>
 				<table width='100%'>
 					<thead>
 						<tr class='pro'>
@@ -50,31 +50,29 @@
 					</tbody>
 				</table>
 				<br>
-				In case you don't see anything here:<br>
-				Woops... Looks like something bad happened, want to go grab Chewbaca from IT to fix it?
+				<div class="ui-state-error"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span><p class="med" style="float: left;"><b>In case you don't see anything here:</b><br>Woops... Looks like something bad happened, want to go grab Chewbaca from IT to fix it?</p><br><br><br></div>
 			</div>
 			<div id="tabs-2">
-				Nothing to see here, move along...<br>
-				<br>
 				<div id="info">
 					<form id="update_form" method="post" enctype="multipart/form-data" action="http://localhost/product/update/" onsubmit="update_target">
 						<input type="hidden" name="barcode" id="update_barcode_old"/>
 						<iframe id="update_target" name="update_target" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
-						<input type="submit" name="action" value="That looks a bit better..." id="you_entered_didnt_you_submit" /><br />
+						<input type="submit" name="action" value="That looks a bit better..." id="you_entered_didnt_you_submit" />
 					</form>
-					<button id='you_entered_didnt_you'>Somethings not right...</button>
+					<button id='you_entered_didnt_you'>Somethings not right...</button><br><br>
+					<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class="med" style="float:left;">Click on the "Somethings not right..." button above to be able to edit the fields.<br>When done, press enter and click "That looks a bit better..." to update the product.</p><br><br></div><br>
 					<h2 class='bold_fancy'>
 						<div id='name_info' style='float:left'>
 						</div>
 						<div id='picture_info' style='float:right'>
 						</div>
-					</h2>
-					<p class='med'>Click on a field to edit it then press submit</p><br>
+					</h2><br>
+					<br>
 					<table>
 						<tr>
 							<td>Barcode:</td>
 							<td>
-								<div class='o' id='barcode_info'>
+								<div class='blue' id='barcode_info'>
 								</div>
 								<br>
 							</td>
@@ -82,7 +80,7 @@
 						<tr class='med'>
 							<td width='200px'>Quantity:</td>
 							<td>
-								<div class='o' id='quantity_info'>
+								<div class='blue' id='quantity_info'>
 								</div>
 							</td>
 						</tr>
@@ -95,6 +93,7 @@
 						</div>
 						<h3><a href="#">Stats</a></h3>
 						<div>
+							<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">"NED" means <u>N</u>ot <u>E</u>nough <u>D</u>ata<br>Meaning it might take some time for enough data to be collected to calculate this data.<br>Why don't you check back tomorrow?</p><br><br><br></div><br>
 							<table width='100%'>
 								<thead>
 									<tr class='pro'>
@@ -107,11 +106,20 @@
 										<td>Days till zero:</td>
 										<td id='stat_info'></td>
 									</tr>
+									<tr class='pro'>
+										<td>Rank:</td>
+										<td id='rank_info'></td>
+									</tr>
+									<tr class='pro shade'>
+										<td>Popularity:</td>
+										<td id='pop_info'></td>
+									</tr>
 								</tbody>
 							</table>
 						</div>
 						<h3><a href="#">Usage Log</a></h3>
 						<div>
+							<div class="ui-state-highlight"><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span><p class='med' style="float:left;">Dates are sorted in ascending order, most recent dates are at the top</p><br></div><br>
 							<table width='100%'>
 								<thead>
 									<tr class='pro'>
@@ -129,7 +137,8 @@
 						</div>
 						</div>
 					</div>
-				</div>
+				</div><br>
+				Nothing to see here, move along...<br>
 			</div>
 			<div id="tabs-3">
 				These arn't the fields your looking for...<br>
@@ -140,12 +149,13 @@
 					<label for='quantity'>Quantity:</label><input type="text" name="quantity" placeholder="Quantity" id="quantity"/><br>
 					<label for='description'>Description:</label><input type="text" name="description" placeholder="Description" id="description"/><br>
 					<label for='picture'>Picture:</label><input name="picture" id="picture" size="27" type="file" /><br />
+					<br />
 					<label for='action'>Done? Great, want to add it now?</label><input type="submit" name="action" value="Yeah! Lets add it!" id="enter_if_you_dare" /><br />
 					<iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 				</form>
 			</div>
 		</div>
-		<p class='small o'>A project by <a href='http://joshashby.com'>JoshAshby</a> 2011 | <a href='https://github.com/JoshAshby/House-Inventory-API'>Source code</a></p>
+		<p class='small blue'>A project by <a href='http://joshashby.com'>JoshAshby</a> 2011 | <a href='https://github.com/JoshAshby/House-Inventory-API'>Source code</a></p>
 	</div>
 	<script>
 	function init() {

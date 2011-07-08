@@ -433,11 +433,48 @@ class stats:
 				current = 'NED'
 		except:
 			current = 'NED'
+			
+		#next bit here calculates the popularity compared to other products, based off of the last predicted standard...
+		'''
+		What we need to do, is look at all the standard rates, and see which are the lowest, and make a comparison between
+		all the rates. IE: product x is ranked lower than product y, and place all the products into an array (this may later need to be cut up by
+		product type (which is coming soon sometime)).
+		'''
+		blowing = []
+		soda = 5
 		
-		#Yes, frank is also a raptor if called properly...
+		bubble = db.query('SELECT `barcode`, `last_5` FROM `stats`')
+		
+		for q in range(len(bubble)):
+			blowing.append(bubble[q])
+			
+		#insert programming joke here....
+		bubble_sort = sorted(blowing, key=lambda bubbles: bubbles['last_5'][0])
+		
+		for h in range(len(bubble_sort)):
+			bubble_sort[h]['rank'] = h
+		
+		for k in range(len(bubble_sort)):
+			if bubble_sort[k]['barcode'] == str(barcode):
+				soda = bubble_sort[k]['rank']
+		
+		pop = float(soda)/float(len(bubble_sort))
+		
+		ran = (float(bubble_sort[len(bubble_sort)-1]['rank'])/float(len(bubble_sort)))/3
+		
+		if pop <= ran:
+			ger = 'high'
+		elif pop <= (ran*2):
+			ger = 'med'
+		elif pop >= (ran*2):
+			ger = 'low'
+		else:
+			ger = 'NED'
+		
 		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
 		#Ie: Raptor eats everything... nom nom nom
-		raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
+		#raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
+		raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
