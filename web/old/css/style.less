@@ -5,13 +5,8 @@
 
 /* JoshAshby's Colors :D */
 @khaki: #C4B3A4;
-@black: #dbdbdb; /* thats not quiet black... */
-@charcoal: #36454F; /* blue dark grey */
+@black: #dbdbdb;
 @grey: #848482;
-@light-grey: #B2BEB5;
-@really-light-grey: #E5E4E2;
-@anti-flash-white: #F2F3F4;
-@eggshell: #F0EAD6;
 @blue: #0067A5;
 @orange: #CC5500;
 @red: #B22222;
@@ -23,79 +18,6 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 
 html {
 	font-family: "Liberation Sans", Helvetica, Arial, sans-serif;
-	text-align: center;
-}
-
-header {
-	background: -moz-linear-gradient(top, rgba(119,119,118,1) 0%, rgba(232,232,232,1) 83%, rgba(255,255,255,0) 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(119,119,118,1)), color-stop(83%,rgba(232,232,232,1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, rgba(119,119,118,1) 0%,rgba(232,232,232,1) 83%,rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, rgba(119,119,118,1) 0%,rgba(232,232,232,1) 83%,rgba(255,255,255,0) 100%); /* Opera11.10+ */
-	background: -ms-linear-gradient(top, rgba(119,119,118,1) 0%,rgba(232,232,232,1) 83%,rgba(255,255,255,0) 100%); /* IE10+ */
-	background: linear-gradient(top, rgba(119,119,118,1) 0%,rgba(232,232,232,1) 83%,rgba(255,255,255,0) 100%); /* W3C */
-	height: 6em;
-	width: 100%;
-}
-
-
-#main {
-	text-align: left;
-	float: left;
-	padding: 1em 0em 1em .5em;
-	text-indent: 1em;
-	height: 100%;
-	border-right: 5px solid @blue;
-	.span-16;
-	.last;
-}
-
-#sidebar {
-	text-align: left;
-	float: right;
-	padding: 1em 0em 1em .5em;
-	height: 100%;
-	.span-7;
-	.last;
-}
-
-footer {
-	background: @blue;
-	background-image: -webkit-gradient(
-		linear,
-		left bottom,
-		left top,
-		color-stop(0.27, rgb(54,69,79)),
-		color-stop(0.73, rgb(0,102,165)),
-		color-stop(0.71, rgb(0,102,165))
-	);
-	background-image: -moz-linear-gradient(
-		center bottom,
-		rgb(54,69,79) 27%,
-		rgb(0,102,165) 73%,
-		rgb(0,102,165) 71%
-	);
-	height: 2em;
-	width: 100%;
-	color: @anti-flash-white;
-	border-top: 5px solid (@blue + 50);
-}
-
-
-
-#logo-line {
-	display: inline-block;
-	.span-24
-}
-
-#logo {
-	padding: 0em 2em;
-	float: left;
-}
-
-#title {
-	padding: 1em;
-	float: right;
-	color: @charcoal;
 }
 
 .ui-state-highlight {
@@ -158,20 +80,9 @@ input[type='text'] {
 	font-family: "Liberation Sans", Helvetica, Arial, sans-serif;
 }
 
-.container {margin:0 auto; text-align: center;}
-
-.container #content {
-	background: @really-light-grey;
-	width: @width;
-	text-align: center;
-	display:inline-block;
-	margin: 1em 0em 1em 0em;
-	padding: .5em 0 .5em 0;
-	border-radius: 2em 1em 2em 1em;
-	.boxShadow
-}
-
+.container {width:@width;margin:0 auto; text-align: center;}
 .showgrid {background:url(images/grid.png);}
+body {margin:1.5em 0;}
 .span-1, .span-2, .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-9, .span-10, .span-11, .span-12, .span-13, .span-14, .span-15, .span-16, .span-17, .span-18, .span-19, .span-20, .span-21, .span-22, .span-23 {float:left; margin-right: @margin;}
 .span-24 {float:left;}
 .last {margin-right:0;}
@@ -206,7 +117,7 @@ hr {
 	float:none;
 	width:100%;
 	height:.1em;
-	margin: .5em 0 .5em 0;
+	margin:0 0 1.45em;
 	border:none;
 }
 
