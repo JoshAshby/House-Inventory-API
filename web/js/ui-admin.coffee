@@ -3,7 +3,7 @@ spam = 0
 $.ajaxSetup
 	cache: false
 
-base = '../'
+base = 'http://localhost/'
 	
 nut = base + 'product/'
 	
@@ -28,7 +28,7 @@ update = ->
 				b = 'shade'
 			else
 				b = ''
-			$('#total').append "<tr class='pro #{ b }'><td><img src='#{ fredrick['thumb'] + data[i]['picture'] }' alt='#{ data[i]['picture'] }' width='64px'/></td><td>#{ data[i]['barcode'] }</td><td>#{ data[i]['name'] }</td><td>#{ data[i]['quantity'] }</td><td><span id='toolbar'><span id='action#{ data[i]['barcode'] }'><input type='radio' id='info#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' checked='checked' /><label for='info#{ data[i]['barcode'] }'>Info</label><input type='radio' id='delete#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' /><label for='delete#{ data[i]['barcode'] }'>Delete</label></span><button id='punch_it#{ data[i]['barcode'] }' bar='#{ data[i]['barcode'] }'>Do it!</button></span></td></tr>"
+			$('#total').append "<tr class='pro #{ b }'><td><img src='#{ fredrick['thumb'] + data[i]['picture'] }' alt='#{ data[i]['picture'] }' width='64px'/></td><td>#{ data[i]['barcode'] }</td><td>#{ data[i]['name'] }</td><td>#{ data[i]['cat'] }</td><td>#{ data[i]['quantity'] }</td><td><span id='toolbar'><span id='action#{ data[i]['barcode'] }'><input type='radio' id='info#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' checked='checked' /><label for='info#{ data[i]['barcode'] }'>Info</label><input type='radio' id='delete#{ data[i]['barcode'] }' name='action#{ data[i]['barcode'] }' /><label for='delete#{ data[i]['barcode'] }'>Delete</label></span><button id='punch_it#{ data[i]['barcode'] }' bar='#{ data[i]['barcode'] }'>Do it!</button></span></td></tr>"
 			$('#punch_it' + data[i]['barcode']).button().click ->
 				goo = $(this).attr 'bar'
 				if $("label[for='info#{goo}']").attr('aria-pressed') == 'true'
@@ -69,6 +69,8 @@ e = (secret_mess) ->
 		$('#update_barcode_old').attr 'value', data['barcode']
 		$('#quantity_info').html data['quantity']
 		$('#update_quantity').attr 'value', data['quantity']
+		$('#category_info').html data['cat']
+		$('#update_category').attr 'value', data['cat']
 		$('#description_info').html data['description']
 		$('#update_description').attr 'value', data['description']
 		$('#picture_info').html "<img src='#{ fredrick['thumb'] + data['picture'] }' alt='#{ data['picture'] }' width='128px'/>"
@@ -149,6 +151,7 @@ $ ->
 		$('#name_info').edit('init')
 		$('#barcode_info').edit('init')
 		$('#quantity_info').edit('init')
+		$('#category_info').edit('init')
 		$('#description_info').edit('init')
 	
 	$('#you_entered_didnt_you_submit').button().click ->
@@ -158,6 +161,7 @@ $ ->
 		$('#name_info').edit('destroy')
 		$('#barcode_info').edit('destroy')
 		$('#quantity_info').edit('destroy')
+		$('#category_info').edit('destroy')
 		$('#description_info').edit('destroy')
 		
 		setTimeout update, 1000
@@ -171,7 +175,11 @@ $ ->
 	$('#quantity_info').focusout ->
 		val = $('#quantity_info').html()
 		$('#update_form').append  "<input type='hidden' name='quantity' id='update_quantity' value='#{ val }'/>"
+	$('#category_info').focusout ->
+		val = $('#category_info').html()
+		$('#update_form').append  "<input type='hidden' name='cat' id='update_category' value='#{ val }'/>"
 	$('#description_info').focusout ->
 		val = $('#description_info').html()
 		$('#update_form').append  "<input type='hidden' name='description' id='update_description' value='#{ val }'/>"
 	check()
+	

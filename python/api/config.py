@@ -18,12 +18,15 @@ urls = (
 	'/', 'index',
 	'/product/(.*)/info/', 'info',
 	'/product/(.*)/delete/', 'delete',
+	'/product/(.*)/restore/', 'restore',
 	'/product/(.*)/log/', 'log',
 	'/product/(.*)/stats/', 'stats',
 	'/product/add/', 'add',
 	'/product/update/', 'update',
 	'/product/', 'total',
-	'/product/names/', 'names'
+	'/product/names/', 'names',
+	'/category/(.*)/', 'cat_info',
+	'/category/', 'cat_total'
 )
 
 render = web.template.render('/srv/http/template/')

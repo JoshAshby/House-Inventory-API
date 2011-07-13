@@ -67,7 +67,59 @@ class total:
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(query)
-		
+
+class cat_info:
+	'''
+	class documentation
+	Returns all the products in a category
+	
+	returns: 
+	'''
+	def GET(self, cat):
+		query = []
+		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
+		for i in range(len(name)):
+			query.append(name[i])
+		if spam:
+			web.header('Content-Type', 'application/json')
+		return json.dumps({'products': query})
+
+class cat_total:
+	'''
+	class documentation
+	Returns all the categories
+	
+	returns: 
+	'''
+	def GET(self):
+		query = []
+		name = db.query('SELECT `cat` FROM `products`')
+		for i in range(len(name)):
+			query.append(name[i]['cat'])
+		queryFix = list(set(query))
+		if spam:
+			web.header('Content-Type', 'application/json')
+		return json.dumps({'categories': queryFix})
+
+class names:
+	'''
+	class documentation
+	Generates a list of names and barcodes for auto complete
+	
+	returns: [{"barcode": "718103025027", "name": "Green Graph Composition"}, {"barcode": "3037921120217", "name": "Orange Graph Notebook"}, {"barcode": "043396366268", "name": "the social network"}, {"barcode": "dog987", "name": "Beagle"}]
+	'''
+	def GET(self):
+		query = []
+		names = db.query('SELECT `name`, `barcode` FROM `products`')
+		for i in range(len(names)):
+			query.append(names[i])
+		if spam:
+			web.header('Content-Type', 'application/json')
+		return json.dumps(query)
+
+'''
+Now starts the Admin Panel functions for the API...
+'''
 class add:
 	'''
 	class documentation
@@ -84,6 +136,8 @@ class add:
 			barcode = bobbins['barcode']
 			description = bobbins['description']
 			quantity = bobbins['quantity']
+			if 'cat' in bobbins: quantity = bobbins['cat']
+			else: cat = 'None'
 			pictureTrue = int(bobbins['picTrue'])
 			picture = bobbins.picture
 			
@@ -101,9 +155,9 @@ class add:
 					pass
 
 			if pictureTrue == 1:
-				cat = re.search('(\..*)', picture.filename).group()
+				catdog = re.search('(\..*)', picture.filename).group()
 				
-				frodo = barcode + cat
+				frodo = barcode + catdog
 				
 				f = open(abspath + '/pictures/' + frodo, "wb")
 
@@ -121,7 +175,7 @@ class add:
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
-			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo})
+			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `cat`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'cat': cat})
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['added'] = 'true'
@@ -168,13 +222,16 @@ class update:
 			if 'quantity' in bobbins: quantity = bobbins['quantity']
 			else: quantity = the_ring[0]['quantity']
 			
+			if 'cat' in bobbins: cat = bobbins['cat']
+			else: cat = the_ring[0]['cat']
+			
 			if 'picTrue' in bobbins: pictureTrue = int(bobbins['picTrue'])
 			picture = bobbins.picture
 			
 			if pictureTrue == 1:
-				cat = re.search('(\..*)', picture.filename).group()
+				catdog = re.search('(\..*)', picture.filename).group()
 				
-				frodo = barcode + cat
+				frodo = barcode + catdog
 				
 				f = open(abspath + '/pictures/' + frodo, "wb")
 
@@ -194,7 +251,7 @@ class update:
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
 			
-			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode})
+			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `cat` = $cat WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'cat': cat})
 			
 			if oldbarcode is not barcode:
 				db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
@@ -238,7 +295,7 @@ class delete:
 		
 		logSON = json.dumps(log)
 		
-		db.query('INSERT INTO `backup` (`id`, `barcode`, `name`, `description`, `picture`, `flag`, `last_5`, `all`, `log`) VALUES ($id, $barcode, $name, $description, $picture, $flag, $last_5, $all, $log) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'picture': inform['picture'], 'flag': inform['flag'], 'last_5': stat['last_5'], 'all': stat['all'], 'log': logSON})
+		db.query('INSERT INTO `backup` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `picture`, `flag`, `last_5`, `all`, `log`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $picture, $flag, $last_5, $all, $log) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'quantity': inform['quantity'], 'cat': inform['cat'], 'picture': inform['picture'], 'flag': inform['flag'], 'last_5': stat['last_5'], 'all': stat['all'], 'log': logSON})
 		
 		db.query('DELETE FROM `products` WHERE `barcode` = $barcode', vars={'barcode': barcode})
 		db.query('DELETE FROM `stats` WHERE `barcode` = $barcode', vars={'barcode': barcode})
@@ -248,21 +305,36 @@ class delete:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
 
-class names:
+class restore:
 	'''
 	class documentation
-	Generates a list of names and barcodes for auto complete
+	Restores a product from the backup database, after that products been deleted
 	
-	returns: [{"barcode": "718103025027", "name": "Green Graph Composition"}, {"barcode": "3037921120217", "name": "Orange Graph Notebook"}, {"barcode": "043396366268", "name": "the social network"}, {"barcode": "dog987", "name": "Beagle"}]
+	returns:
 	'''
-	def GET(self):
-		query = []
-		names = db.query('SELECT `name`, `barcode` FROM `products`')
-		for i in range(len(names)):
-			query.append(names[i])
+	def GET(self, barcode):
+		name = db.query('SELECT * FROM `backup` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+		inform = name[0]
+		
+		db.query('INSERT INTO `products` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `picture`, `flag`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $picture, $flag) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'cat': inform['cat'], 'picture': inform['picture'], 'flag': inform['flag']})
+		
+		alpha = json.loads(inform['log'])
+		
+		for l in range(len(alpha)):
+			beta = alpha[l]['date']
+			coi = alpha[l]['quantity']
+			db.query('INSERT INTO `usage` (`barcode`, `date`, `quantity`) VALUES ($barcode, $date, $quantity) ', vars={'barcode': inform['barcode'],'date': beta, 'quantity': coi})
+		
+		db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, $last_5, $all) ', vars={'barcode': inform['barcode'], 'last_5': inform['last_5'], 'all': inform['all']})
+		
+		
+		db.query('DELETE FROM `backup` WHERE `barcode` = $barcode', vars={'barcode': barcode})
+
+		inform['restored'] = 'true'
+		inform['log'] = alpha
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps(query)
+		return json.dumps(inform)
 		
 class log:
 	'''
@@ -484,13 +556,21 @@ class stats:
 		ran = (float(bubble_sort[len(bubble_sort)-1]['rank'])/float(len(bubble_sort)))/3
 		
 		if pop <= ran:
-			ger = 'high'
+			ger = 'High'
+			flag = 'H'
+			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
 		elif pop <= (ran*2):
-			ger = 'med'
+			ger = 'Med'
+			flag = 'M'
+			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
 		elif pop >= (ran*2):
-			ger = 'low'
+			ger = 'Low'
+			flag = 'L'
+			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
 		else:
 			ger = 'NED'
+			flag = 'L'
+			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
 		
 		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
 		#Ie: Raptor eats everything... nom nom nom

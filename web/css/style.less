@@ -41,7 +41,7 @@ header {
 #main {
 	text-align: left;
 	float: left;
-	padding: 1em 0em 1em .5em;
+	padding: 1em .5em 1em .5em;
 	text-indent: 1em;
 	height: 100%;
 	border-right: 5px solid @blue;
@@ -50,9 +50,9 @@ header {
 }
 
 #sidebar {
-	text-align: left;
+	text-align: center;
 	float: right;
-	padding: 1em 0em 1em .5em;
+	padding: 1em .5em 1em .5em;
 	height: 100%;
 	.span-7;
 	.last;
@@ -104,10 +104,16 @@ footer {
 
 .ui-state-error {
 	text-align: left;
+	background: (@red * @really-light-grey);
 }
 
 #total {
 	font-size: (@big_font - 1.25em);
+}
+
+#peanut {
+	font-size: (@big_font - 1em);
+	margin: .5em .5em .5em .5em;
 }
 
 .hover {
@@ -135,10 +141,15 @@ footer {
 	padding: 10px 10px 10px 10px;
 	margin: 10px;
 	border-bottom: 2px solid @grey;
+	height: 2em;
 }
 
 .blue {
 	color: @blue;
+}
+
+.dblue {
+	color: @charcoal;
 }
 
 .shade {
@@ -151,6 +162,10 @@ footer {
 
 .med {
 	font-size: (@big_font - 1.25em);
+}
+
+.big {
+	font-size: @big_font;
 }
 
 input[type='text'] {
@@ -259,6 +274,7 @@ hr.space {
 	font-size: @big_font;
 	font-weight:bold;
 	.fancy;
+	.dblue;
 }
 
 .bold_caps {
