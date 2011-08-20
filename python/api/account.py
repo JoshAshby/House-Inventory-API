@@ -31,6 +31,7 @@ class account:
 	def findByKey(self, key):
 		alpha = db.select('pepper', where="shared=$key", limit=1, _test=False, vars = {'key': key})
 		if not alpha:
+			print "bettle"
 			raise web.unauthorized( USERERROR_MESSAGE )
 		beta = alpha[0]
 		return {'secret': beta['secret'], 'shared': beta['shared'], 'user': beta['user'], 'passwd': beta['passwd'], 'data': beta['data']}
@@ -38,6 +39,7 @@ class account:
 	def findByUser(self, user):
 		alpha = db.select('pepper', where="user=$user", limit=1, _test=False, vars = {'user': user})
 		if not alpha:
+			print "worst"
 			raise web.unauthorized( USERERROR_MESSAGE )
 		beta = alpha[0]
 		return {'secret': beta['secret'], 'shared': beta['shared'], 'user': beta['user'], 'passwd': beta['passwd'], 'data': beta['data']}
@@ -70,8 +72,10 @@ class account:
 		yepno = db.select('pepper', where="user=$user", limit=1, _test=False, vars = {'user': data['user']})
 		yn = yepno[0]
 		if not yn:
+			print "yes"
 			web.unauthorized( USERNO_MESSAGE )
 		if yn['passwd'] != data['passwd']:
+			print "think again"
 			web.unauthorized( USERNO_MESSAGE )
 		zygot = {}
 		zygot['time']=str(int(time.time()))

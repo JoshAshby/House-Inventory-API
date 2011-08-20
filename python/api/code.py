@@ -47,8 +47,10 @@ class test:
 		if act:
 			te = act.login(testUP)
 			if not te:
+				print "nope"
 				web.unauthorized( USER_MESSAGE )
 			plug['login']='true'
+			print json.dumps(wi)
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
@@ -155,6 +157,7 @@ class add:
 	
 	returns: {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53}
 	'''
+	@auth.oauth_protect
 	def POST(self):
 		bobbins= web.input(picture={})
 		
@@ -225,6 +228,7 @@ class update:
 	Where:
 		oldbarcode = the previous barcode incase the barcode was changed
 	'''
+	@auth.oauth_protect
 	def POST(self):
 		bobbins= web.input(picture={})
 		
@@ -305,6 +309,7 @@ class delete:
 	
 	returns: {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
 	'''
+	@auth.oauth_protect
 	def GET(self, barcode):
 		log = []
 		vallog = []
@@ -340,6 +345,7 @@ class restore:
 	
 	returns:
 	'''
+	@auth.oauth_protect
 	def GET(self, barcode):
 		name = db.query('SELECT * FROM `backup` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
@@ -371,6 +377,7 @@ class log:
 	
 	returns: [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]
 	'''
+	@auth.oauth_protect
 	def GET(self, barcode):
 		query = []
 		log = []
@@ -398,6 +405,7 @@ class stats:
 		predicted = the predicted rate for when the product will run out, as guessed by the last_5 guesses
 		standard = standard form of current
 	'''
+	@auth.oauth_protect
 	def GET(self, barcode):
 		query = []
 		quantity = []
