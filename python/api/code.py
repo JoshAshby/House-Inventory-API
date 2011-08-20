@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
 Project Blue Ring
-A scalable inventory control and management system based in the cloud.
+A scalable inventory control and management API that provides public and admin functions.
+Admin calls to the API must be POST and use OAUTH1 2-legged.
 
 http://xkcd.com/353/
 
@@ -31,31 +32,28 @@ import account
 
 USER_MESSAGE = "There was an error logging you in"
 
+def mol(user):
+	act = account.account()
+	te = act.isLoggedIn(user)
+	return te
+	
+
 class test:
 	'''
 	class documentation
 	Basic test to see if the "OAuth" snippet from: https://github.com/DaGoodBoy/webpy-example/blob/master/lib/wpauth.py works...
+	This is now just for testing to make sure OAuth is going right.
 	'''
 	@auth.oauth_protect
 	def POST(self):
 		wi = web.input()
-		plug = {"oauth": "success", 'user': wi['username'], 'passwd': wi['password']}
 		
-		act = account.account()
-		act.findByUser(wi['username'])
-		testUP = {'user': wi['username'], 'passwd': wi['password']}
-		if act:
-			te = act.login(testUP)
-			if not te:
-				print "nope"
-				web.unauthorized( USER_MESSAGE )
-			plug['login']='true'
-			print json.dumps(wi)
+		a = mol(wi['username'])
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		
-		return json.dumps(plug)
+		return json.dumps(a)
 
 class index:        
 	'''
@@ -65,6 +63,10 @@ class index:
 	The page that is displayed if the root of the server is accessed, Currently just displays the template index.html
 	'''
 	def GET(self):
+		endFunc()
+	def POST(self):
+		endFunc()
+	def endFunc(self):
 		return render.index()
 
 class info:
@@ -75,6 +77,10 @@ class info:
 	returns: {"picture": "dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52}
 	'''
 	def GET(self, barcode):
+		endFunc(barcode)
+	def POST(self, barcode):
+		endFunc(barcode)
+	def endFunc(self, barcode):
 		name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		
@@ -87,25 +93,33 @@ class total:
 	class documentation
 	Returns all the product info. Used for product info tables in the main client
 	
-	returns: [{"picture": "718103025027.png", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "barcode": "718103025027", "name": "Green Graph Composition", "flag": "M", "quantity": 1, "id": 3, "thumb": "718103025027_thumb.png"}, {"picture": "3037921120217.png", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "barcode": "3037921120217", "name": "Orange Graph Notebook", "flag": "L", "quantity": 1, "id": 4, "thumb": "3037921120217_thumb.png"}]
+	returns:{"total" : [{"picture": "718103025027.png", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "barcode": "718103025027", "name": "Green Graph Composition", "flag": "M", "quantity": 1, "id": 3, "thumb": "718103025027_thumb.png"}, {"picture": "3037921120217.png", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "barcode": "3037921120217", "name": "Orange Graph Notebook", "flag": "L", "quantity": 1, "id": 4, "thumb": "3037921120217_thumb.png"}]}
 	'''
 	def GET(self):
+		endFunc()
+	def POST(self):
+		endFunc()
+	def endFunc(self):
 		query = []
 		name = db.query('SELECT * FROM `products`')
 		for i in range(len(name)):
 			query.append(name[i])
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps(query)
+		return json.dumps({"total": query})
 
 class cat_info:
 	'''
 	class documentation
 	Returns all the products in a category
 	
-	returns: 
+	returns: {"products" : [{"barcode": "dog987", "name": "A dog", "picture": "dog.png"}]}
 	'''
 	def GET(self, cat):
+		endFunc(cat)
+	def POST(self, cat):
+		endFunc(cat)
+	def endFunc(self, cat):
 		query = []
 		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
 		for i in range(len(name)):
@@ -119,9 +133,13 @@ class cat_total:
 	class documentation
 	Returns all the categories
 	
-	returns: 
+	returns: {"categories" : ["abc", "def"]}
 	'''
 	def GET(self):
+		endFunc()
+	def POST(self):
+		endFunc()
+	def endFunc(self):
 		query = []
 		name = db.query('SELECT `cat` FROM `products`')
 		for i in range(len(name)):
@@ -136,19 +154,24 @@ class names:
 	class documentation
 	Generates a list of names and barcodes for auto complete
 	
-	returns: [{"barcode": "718103025027", "name": "Green Graph Composition"}, {"barcode": "3037921120217", "name": "Orange Graph Notebook"}, {"barcode": "043396366268", "name": "the social network"}, {"barcode": "dog987", "name": "Beagle"}]
+	returns: {"names" : [{"barcode": "718103025027", "name": "Green Graph Composition"}, {"barcode": "3037921120217", "name": "Orange Graph Notebook"}, {"barcode": "043396366268", "name": "the social network"}, {"barcode": "dog987", "name": "Beagle"}]}
 	'''
 	def GET(self):
+		endFunc()
+	def POST(self):
+		endFunc()
+	def endFunc(self):
 		query = []
 		names = db.query('SELECT `name`, `barcode` FROM `products`')
 		for i in range(len(names)):
 			query.append(names[i])
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps(query)
+		return json.dumps({"names": query})
 
 '''
 Now starts the Admin Panel functions for the API...
+These are all POST only requests to make it easier with the OAUTH right now since it didn't want to do a GET auth.
 '''
 class add:
 	'''
@@ -310,7 +333,7 @@ class delete:
 	returns: {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
 	'''
 	@auth.oauth_protect
-	def GET(self, barcode):
+	def POST(self, barcode):
 		log = []
 		vallog = []
 		
@@ -346,7 +369,7 @@ class restore:
 	returns:
 	'''
 	@auth.oauth_protect
-	def GET(self, barcode):
+	def POST(self, barcode):
 		name = db.query('SELECT * FROM `backup` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		
@@ -375,10 +398,11 @@ class log:
 	class documentation
 	Generates the use log about the given product.
 	
-	returns: [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]
-	'''
+	returns: {"names" : [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]}
+	'''		
 	@auth.oauth_protect
-	def GET(self, barcode):
+	def POST(self, barcode):
+		gaia = web.input()
 		query = []
 		log = []
 		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date` desc', vars={'barcode':barcode})
@@ -388,7 +412,7 @@ class log:
 			log.append([query[i]['date'].isoformat(' '), query[i]['quantity']])
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps(log)
+		return json.dumps({"log": log})
 
 
 class stats:
@@ -406,7 +430,7 @@ class stats:
 		standard = standard form of current
 	'''
 	@auth.oauth_protect
-	def GET(self, barcode):
+	def POST(self, barcode):
 		query = []
 		quantity = []
 		date = []

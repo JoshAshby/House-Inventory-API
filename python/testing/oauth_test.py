@@ -1,4 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin env python
+'''
+Simple test script for testing the oauth for the API
+
+http://xkcd.com/353/
+
+Josh Ashby
+2011
+http://joshashby.com
+joshuaashby@joshashby.com
+'''
 import os
 import sys
 import json
@@ -6,11 +16,13 @@ import time
 import oauth2
 import urllib2
 import datetime
-import cookielib
 
+account_inf = {}
+account_inf['username'] = sys.argv[1]
+account_inf['password'] = sys.argv[2]
+account_inf['barcode'] = sys.argv[3]
 
 BASE_URL = 'http://localhost/'
-COOKIE_FILE = '.cookies'
 
 KEY    = 'rGgkUYhqjNEtwZdhnnLZoBkXkdKCPJmI'
 SECRET = 'OSdTYJAeQJLLOHlOdmatRvEdBcuxuKGD'
@@ -20,16 +32,7 @@ HEADERS = {
   'Accept'        : 'application/json',
 }
 
-LOGIN_URL  = BASE_URL + 'auth/'
-LOGOUT_URL = BASE_URL + 'logout/'
-
-def load_cookies():
-	cj = cookielib.LWPCookieJar( COOKIE_FILE )
-	if os.path.isfile( COOKIE_FILE ):
-		cj.load( ignore_discard=True )
-	opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( cj ) )
-	urllib2.install_opener( opener )
-	return cj
+LOGIN_URL  = BASE_URL + 'product/' +account_inf['barcode'] + '/log/'
 
 def generate_oauth_request( method, url, parameters={} ):
 	# Generate our Consumer object
@@ -49,29 +52,16 @@ def generate_oauth_request( method, url, parameters={} ):
 	return req
   
 def passStuff( account_info ):
-	cj = load_cookies()
 	parameters = {
 		"username": account_info['username'],
-		"password": account_info['password'],
-		"random": "test",
-		"to": "see",
-		"if":"this",
-		"works": "well"
+		"password": account_info['password']
 	}
 	oauth = generate_oauth_request( 'POST', LOGIN_URL, parameters )
 	req = urllib2.Request( LOGIN_URL, oauth.to_postdata(), headers=HEADERS )
 	result = urllib2.urlopen( req ).read()
-	cj.save( ignore_discard=True ) 
 	json_result = json.loads( result )
 	return json_result
-
-account_inf = {}
-account_inf['username'] = sys.argv[1]
-account_inf['password'] = sys.argv[2]
-
+	
 if __name__ == "__main__":
 	json = passStuff( account_inf )
-	if json['oauth'] == 'success':
-		print json
-	else:
-		print "Error: %s" % json
+	print json\

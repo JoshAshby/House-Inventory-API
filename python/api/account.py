@@ -73,16 +73,40 @@ class account:
 		yn = yepno[0]
 		if not yn:
 			print "yes"
-			web.unauthorized( USERNO_MESSAGE )
+			raise web.unauthorized( USERNO_MESSAGE )
 		if yn['passwd'] != data['passwd']:
 			print "think again"
-			web.unauthorized( USERNO_MESSAGE )
+			raise web.unauthorized( USERNO_MESSAGE )
 		zygot = {}
 		zygot['time']=str(int(time.time()))
 		zygot['ip']=web.ctx.ip
+		zygot['logged']='true'
 		egg = json.dumps(zygot)
 		db.update('pepper', where="user=$user", _test=False, vars={'user':data['user']}, data=egg)
 		return {'status': 'success'}
-		'''for key, value in zygot:
-			value = str(value)
-			web.ctx.session[ key ] = ( value[:50] + '...' ) if len(value) > 50 else value'''
+	
+	def isLoggedIn(self, user):
+		yes = db.select('pepper', where="user=$user", limit=1, _test=False, vars = {'user': user})
+		no =yes[0]
+		tester = json.loads(no['data'])
+		if tester['logged'] == "false":
+			b = login({'user': tester['user'], 'passwd': tester['passwd']})
+			return b
+		return {'logged': tester['logged']}
+	
+	def logout(self, user):
+		'''
+		Not currently used in this API right now...
+		'''
+		yepno = db.select('pepper', where="user=$user", limit=1, _test=False, vars = {'user': user})
+		yn = yepno[0]
+		if not yn:
+			print "No such user..."
+			return {'status': 'failed'}
+		zygot = {}
+		zygot['time']=yn['time']
+		zygot['ip']=yn['ip']
+		zygot['logged']='false'
+		egg = json.dumps(zygot)
+		db.update('pepper', where="user=$user", _test=False, vars={'user':data['user']}, data=egg)
+		return {'status': 'success'}

@@ -43,7 +43,7 @@ def validate_two_leg_oauth():
 	Verify 2-legged oauth request using values in "Authorization" header.
 	"""
 	parameters = web.input()
-	print parameters
+	#print parameters
 	if web.ctx.env.has_key('HTTP_AUTHORIZATION') and web.ctx.env['HTTP_AUTHORIZATION'].startswith('OAuth '):
 		parameters = split_header( web.ctx.env['HTTP_AUTHORIZATION'] )
 
@@ -56,7 +56,7 @@ def validate_two_leg_oauth():
 	if not req.has_key('oauth_consumer_key'):
 		print "wrong"
 		raise web.unauthorized()
-	print req
+	#print req
 	# Verify the account referenced in the request is valid
 	accoun = acc.account()
 	account = accoun.findByKey(req['oauth_consumer_key'])
@@ -72,7 +72,7 @@ def validate_two_leg_oauth():
 	# Create our oauth2 Server and add hmac-sha1 signature method
 	server = oauth2.Server()
 	server.add_signature_method( oauth2.SignatureMethod_HMAC_SHA1() )
-
+	
 	# Attempt to verify the authorization request via oauth2
 	try:
 		server.verify_request( req, consumer, None )
