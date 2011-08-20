@@ -26,6 +26,34 @@ os.chdir(abspath)
 from ashmath import *
 from config import *
 from ashpic import *
+import auth
+import account
+
+USER_MESSAGE = "There was an error logging you in"
+
+class test:
+	'''
+	class documentation
+	Basic test to see if the "OAuth" snippet from: https://github.com/DaGoodBoy/webpy-example/blob/master/lib/wpauth.py works...
+	'''
+	@auth.oauth_protect
+	def POST(self):
+		wi = web.input()
+		plug = {"oauth": "success", 'user': wi['username'], 'passwd': wi['password']}
+		
+		act = account.account()
+		act.findByUser(wi['username'])
+		testUP = {'user': wi['username'], 'passwd': wi['password']}
+		if act:
+			te = act.login(testUP)
+			if not te:
+				web.unauthorized( USER_MESSAGE )
+			plug['login']='true'
+		
+		if spam:
+			web.header('Content-Type', 'application/json')
+		
+		return json.dumps(plug)
 
 class index:        
 	'''
@@ -580,6 +608,7 @@ class stats:
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(raptor)
+		
 		
 if __name__ == "__main__":
 	app.run()

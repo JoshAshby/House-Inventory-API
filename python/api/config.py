@@ -26,7 +26,8 @@ urls = (
 	'/product/', 'total',
 	'/product/names/', 'names',
 	'/category/(.*)/', 'cat_info',
-	'/category/', 'cat_total'
+	'/category/', 'cat_total',
+	'/auth/', 'test'
 )
 
 render = web.template.render('/srv/http/template/')

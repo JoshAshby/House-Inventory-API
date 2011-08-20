@@ -7,9 +7,9 @@ Project Blue Ring:
 * http://www.flickr.com/photos/joshashby/
 * https://github.com/JoshAshby
 
-Forword:
+Foreword:
 --------------
-Please note that this is a major work in progress, the API maybe broken at anytime, and the URL scheme may change without warning, should a btter solution present itself.
+Please note that this is a major work in progress, the API maybe broken at anytime, and the URL scheme may change without warning, should a better solution present itself.
 Also throughout the documentation, the word peak comes up. Peak referes to the stated interval on which a restock has just happened, till the next restock or the current day.
 
 Please note: The clients do not work on this branch. They are setup for the Perl API version's URL scheme and as a result are not compatable with this branch. They will be updated, after more work has been completed on the API.
@@ -123,6 +123,7 @@ Libraries used:
 
 Python:
 
+* oauth2
 * datetime
 * re
 * json
@@ -130,6 +131,8 @@ Python:
 * mod_wsgi
 * linear.py (aka: ashmath.py)
 * ashpic.py
+* auth.py
+* account.py
 * PIL (Python Image Library)
 
 Examples and testing scripts also use:
