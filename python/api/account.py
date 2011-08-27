@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Project Blue Ring
-A scalable inventory control and management system based in the cloud.
+An inventory control and management API
 User Account info retriver for use with auth.py
 
 http://xkcd.com/353/
@@ -22,7 +22,7 @@ import sys, os
 abspath = os.path.dirname(__file__)
 sys.path.append(abspath)
 os.chdir(abspath)
-from config import *
+from configSub import *
 
 USERERROR_MESSAGE = "There was a error with the USER"
 USERNO_MESSAGE = "The user and password do not match anyone in the database..."

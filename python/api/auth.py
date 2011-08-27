@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Project Blue Ring
-A scalable inventory control and management system based in the cloud.
+An inventory control and management API
 OAuth snippet
 
 http://xkcd.com/353/
@@ -11,7 +11,7 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 
-Snippet taken from: https://github.com/DaGoodBoy/webpy-example/blob/master/lib/wpauth.py
+Snippet taken from/adapted from: https://github.com/DaGoodBoy/webpy-example/blob/master/lib/wpauth.py
 """
 import web
 import oauth2
@@ -25,6 +25,7 @@ def split_header( header ):
 	"""
 	Turn Authorization: header into parameters.
 	"""
+	
 	params = {}
 	parts = header.split(',')
 	for param in parts:
@@ -38,10 +39,12 @@ def split_header( header ):
 		params[param_parts[0]] = urllib.unquote(param_parts[1].strip('\"'))
 	return params
 
+
 def validate_two_leg_oauth():
 	"""
 	Verify 2-legged oauth request using values in "Authorization" header.
 	"""
+	
 	parameters = web.input()
 	#print parameters
 	if web.ctx.env.has_key('HTTP_AUTHORIZATION') and web.ctx.env['HTTP_AUTHORIZATION'].startswith('OAuth '):
@@ -89,11 +92,18 @@ def validate_two_leg_oauth():
 
 	return True
 
+
 def oauth_protect(target):
 	"""
 	This is the decorator to validate oauth authentication
+	
+	Use by placing an
+		``@auth.oauth_protect``
+	before the function def.
 	"""
+	
 	def decorated_function( *args, **kwargs ):
 		validate_two_leg_oauth()
 		return target( *args, **kwargs )
+		
 	return decorated_function

@@ -35,6 +35,20 @@ HEADERS = {
 LOGIN_URL  = BASE_URL + 'product/' +account_inf['barcode'] + '/log/'
 
 def generate_oauth_request( method, url, parameters={} ):
+	"""
+	function documentation
+	
+	Generates an OAuth request to inclcude with the urllib2 requests for all admin functions.
+	
+	Args:
+		method - The http request method. Default is POST.
+		url - The URL to send the request to.
+		parameters - A dict of various other parameters to include in the URL encoding.
+	
+	Returns:
+		req - The signed OAuth request to use with urllib2
+	"""
+	
 	# Generate our Consumer object
 	consumer = oauth2.Consumer( key = KEY, secret = SECRET )
 
@@ -51,17 +65,36 @@ def generate_oauth_request( method, url, parameters={} ):
 
 	return req
   
+  
 def passStuff( account_info ):
+	"""
+	function documentation
+	
+	Passes the OAuth and Account info off to the server and API.
+	
+	Args:
+		account_info - A dictionary with the keys username and password.
+		
+	Returns:
+		json_result - The JSON result of the request if successful.
+		None - prints error to stdout if an error happens.
+	"""
+	
 	parameters = {
 		"username": account_info['username'],
 		"password": account_info['password']
 	}
 	oauth = generate_oauth_request( 'POST', LOGIN_URL, parameters )
 	req = urllib2.Request( LOGIN_URL, oauth.to_postdata(), headers=HEADERS )
-	result = urllib2.urlopen( req ).read()
-	json_result = json.loads( result )
-	return json_result
-	
+	try:
+		result = urllib2.urlopen( req ).read()
+		json_result = json.loads( result )
+		return json_result
+	except urllib2.HTTPError, e:
+		print "Error: %s" %e
+		return
+
+
 if __name__ == "__main__":
 	json = passStuff( account_inf )
-	print json\
+	print json
