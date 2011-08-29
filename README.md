@@ -9,6 +9,9 @@ Project Blue Ring:
 
 Foreword:
 --------------
+Please also note (before noting below) that this README, at this time, is not up to date with the repository. There was a recent call scheme change which effects all admin calls. There have also been a few added and removed functions. Don't trust this just yet.
+I will try to get it updated soon.
+
 Please note that this is a major work in progress, the API maybe broken at anytime, and the URL scheme may change without warning, should a better solution present itself.
 Also throughout the documentation, the word peak comes up. Peak referes to the stated interval on which a restock has just happened, till the next restock or the current day.
 
@@ -37,34 +40,19 @@ Coming soon after this Python branch of the API is finished.
 
 The following return JSON formated data:
 
+	*This is no longer up to date!*
 	/product/dog987/info/ Info for the product whos barcode comes after the /product/
-	/product/dog987/delete/ Delete said product with barcode stated
-	/product/add/ Add the given product according to the data in the POST sent to this url.
-	/product/update/ Update the given product according to the data in the POST sent to this url. Min needed in the POST is barcode
+	/admin/dog987/delete/ Delete said product with barcode stated
+	/admin/add/ Add the given product according to the data in the POST sent to this url.
+	/admin/update/ Update the given product according to the data in the POST sent to this url. Min needed in the POST is barcode
 	/product/ get the total products
 	/product/names/ only the names and barcodes of all the products for auto complete
 	/product/dog987/log/ display the quantity change log for the product
 	/product/dog987/stats/ returns the predicted time of when the current stock will run out.
 
-``/product/add/`` and ``/product/update/`` Both take POST requests only, unlike the rest of the functions which only take GET requests.
-As a result, ``/product/add/`` takes the ``[barcode][name][description][quantity]`` and optionally, a ``[picture]`` file to be uploaded and linked to the product.
-
-One can use the Python poster library to easily do this:
-
-```python
-from poster.encode import multipart_encode
-from poster.streaminghttp import register_openers
-import urllib2
-register_openers()
-datagen, headers = multipart_encode({"picture": open("add.png", "rb"), 'barcode': 'dog', 'name': 'god', 'description': 'dog', 'quantity': 5})
-request = urllib2.Request("http://localhost/product/add/", datagen, headers)
-print urllib2.urlopen(request).read()
-```
-
-``/product/update/`` takes a minimum of the products ``[barcode]``, but can optionally accept ``[name][description][newbarcode][quantity][picture]``
-
 The following is what is typically returned from the API calls:
 
+	*This is no longer up to date!*
 	/product/dog987/info/ {"picture": "dog987.png", "description": "A Dog", "barcode": "dog987", "name": "Beagle", "flag": "L", "quantity": 3, "id": 23}
 	/product/dog987/delete/ {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52}
 	/product/add/ {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53}
@@ -74,14 +62,14 @@ The following is what is typically returned from the API calls:
 	/product/dog987/log/ [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]
 	/product/dog987/stats/ {"current": -28.0, "guess": -0.07142857142857142, "predictedNF": -28, "predicted": -28.0, "standard": -0.07142857142857142}
 
-Note that the reponses for ``[/product/add/][/product/update/][/product/delete/]`` returns an additional JSON object stating that the product has been updated, deleted or added.
-``[/product/add/]`` may also return with ``{"COP": "dog"}`` should a copy of that products barcode already exsist in the table. in this example, '``dog`` is the barcode of the product that there is a copy of.
-Valid responses are ``[NED][NULL][NS][COP]`` ``[NED]`` meaning that there is Not Enough Data, ``[NULL]`` being maiinly for the picture and thumbnail group indicating no picture or thumbnail is available, and ``[NS]`` being for Nothing Submitted, `[COP]`` meaning Copy Of Product meaning that a copy of that products barcode already exsists in the table.
+Note that the reponses for the admin calls may also return with ``{"COP": "dog"}`` which should mean a copy of that products barcode already exsist in the table. in this example, '``dog`` is the barcode of the product that there is a copy of.
+Valid responses are ``[NED][NULL][NS][COP]`` ``[NED]`` meaning that there is Not Enough Data, ``[NULL]`` being mainly for the picture and thumbnail group indicating no picture or thumbnail is available, and ``[NS]`` being for Nothing Submitted, `[COP]`` meaning Copy Of Product meaning that a copy of that products barcode already exsists in the table.
 
 All pictures can be accessed at either ``/pictures/barcode.fileextension`` or ``/thumb/barcode_thumb.fileextension``
 
 Database Info:
 --------------------------
+This really needs to be updated!
 
 Products are stored in a MySQL database with the following columns:
 ``[id][name][description][barcode][quantity][picture][thumb][flag]``

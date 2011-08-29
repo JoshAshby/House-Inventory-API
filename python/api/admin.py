@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 """
 Project Blue Ring
-An inventory control and management API that provides public and admin functions.
-Admin calls to the API must be POST and use OAUTH1 2-legged.
-This is the main app, which calls upon other sub apps according to whats needed.
-This also holds useless test and index classes.
+An inventory control and management API
+Main admin functions
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -40,8 +38,12 @@ urls = (
 	'/(.*)/restore/', 'restore',
 	'/(.*)/log/', 'log',
 	'/(.*)/stats/', 'stats',
+	'/category/(.*)/groupstats/', 'catStats',
 	'/add/', 'add',
 	'/update/', 'update'
+	#'/(.*)/tag/add/', 'tagAdd',
+	#'/(.*)/tag/remove/', 'tagRemove',
+	#'/(.*)/tag/edit/', 'tagEdit'
 )
 
 class slash:
@@ -298,7 +300,7 @@ class log:
 	Generates the use log about the given product.
 	
 	Returns:
-		A JSON object like: {"names" : [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]}
+		A JSON object like: {"log" : [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]}
 	'''		
 	
 	def GET(self, barcode):
@@ -326,14 +328,9 @@ class stats:
 	
 	Returns:
 		A JSON object like: {"predicted": -28.0, "rank": 12, "popularity": "Low"}
-		#A JSON object like: {"current": -28.0, "guess": -0.07142857142857142, "predictedNF": -28, "predicted": -28.0, "standard": -0.07142857142857142}
 		
 		Where:
-			current = current rate at which the product will run out based off of the current log
-			guess: = standard form rate of the predicted time
-			predictedNF = int form of the predicted value
 			predicted = the predicted rate for when the product will run out, as guessed by the last_5 guesses
-			standard = standard form of current
 			rank = the over all numerical rank of the product.
 			popularity = High, Med, Low, or NED
 	'''
@@ -343,209 +340,183 @@ class stats:
 		
 	@auth.oauth_protect
 	def POST(self, barcode):
-		query = []
-		quantity = []
-		date = []
+		if spam:
+			web.header('Content-Type', 'application/json')
+		raptor = predict(barcode)
+		return json.dumps(raptor)
+
+class catStats:
+	'''
+	class documentation
+	Generates stats about the given product.
+	
+	Returns:
+		A JSON object like: {u'3037921120217': {u'popularity': u'High', u'predicted': u'NED', u'rank': 2}, u'043396366268': {u'popularity': u'Med', u'predicted': -35.0, u'rank': 3}, u'dog987': {u'popularity': u'High', u'predicted': -1.25, u'rank': 1}}
 		
-		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date` desc', vars={'barcode':barcode})
+		Where:
+			predicted = the predicted rate for when the product will run out, as guessed by the last_5 guesses
+			rank = the over all numerical rank of the product.
+			popularity = High, Med, Low, or NED
+	'''
+	def GET(self, barcode):
+		raise web.unauthorized(GET_UNAUTHORIZED_MESSAGE)
+		
+	@auth.oauth_protect
+	def POST(self, category):
+		query = []
+		name = db.query('SELECT `barcode` FROM `products` WHERE `cat` = $cat', vars = {'cat': category})
 		
 		for i in range(len(name)):
 			query.append(name[i])
 		
-		m = len(query)
+		raptop = {}
 		
-		#Here we have to get all the data points from the stats database (usage) so we can do fancy things to get some nice predictions.
-		for i in range(m):
-			if (i+1) == m:
-				quantity.append(float(query[i]['quantity']))
-				date.append(float((query[0]['date'] - query[i]['date']).days))
-				break
-			elif (query[i]['quantity'] < query[i+1]['quantity']):
-				quantity.append(float(query[i]['quantity']))
-				date.append(float((query[0]['date'] - query[i]['date']).days))
-			else:
-				quantity.append(float(query[i]['quantity']))
-				date.append(float((query[0]['date'] - query[i]['date']).days))
-				break
-		
-		#its 2am and I got bored with standard naming conventions...
-		bob = thorVector(date)
-		sara = thorVector(quantity)
-		frank = thorVector([])
-		raven = []
-
-		'''
-		This is what we need to solve for: it should give us the x intercept as being the number of days on average if the pattern was to continue at the given rate
-		sara = bob+bob^2
-		in R we do something like this: (in rpy2 format)
-		r['lm']('quantity_y ~cbind(date_x,(date_x)^2)')
-		which runs a linear regression on the dataset which now looks something like this (for one line of the vectors)
-		5 = 2+2**2+x
-		which is really just 5-2-2**2 = x and then the derivative of that...
-		so we just set that up in python also
-		Because it's all in Vector form already, it works just as if this was linear math (funny that...) so everything is solved for properly
-		at this point I need to take the derivative to get the slope at each point, at which time I'll be able to make the equation for the line which these points form
-		the intercept of this line is how many days the current stock will run out at. This will then be converted into a standard dataset, by dividing the quantity by this guess.
-		The machine learning bit will be using this standardized approximation and storie it each time in two columns of the product database. 
-		This first will be a rolling list of the last five guesses, the second will be a list of every one made for reference purposes.
-		The reason for standardizing them is because the units then become how many days per one unit, which makes it easy to just take the average of the last
-		5 guesses to try and make a better guess. It'll also learn from everytime the stock reaches zero.
-		
-		These next few lines are all very messy, however they work well. The goal is to simply make a few calculations to get the standard rate and the guessed rate, and store everything into the table, 
-		if there is not enough data then simply state that, and continue on with nothing.
-		It makes it nice because the rolling list goes across peaks, and without errors the come up. if there is a 0 rate, it simply gets ignored (I think... hopefully)
-		'''
-		
-		#take the partial deriv of each part of the vector to gain the total deriv or gradient...
-		for d in range(len(bob)):
-			frank.append(polyderiv([sara[d],-bob[d],-bob[d]**2]))
-		
-		#if there is a rate to convert
-		if frank[len(frank)-1][0]:
-			#make the standard rate...
-			yoyo = sara[1]/frank[1][0]
-		else:
-			yoyo = 'NED'
-			
-		'''
-		These next few lines go through and do the rolling list and total rates for the product
-		rates are the intercepts of the gradient.
-		These rates are stored in the database table 'stats' and are stored as json objects for ease of use and storage.
-		
-		Warning: they are messy, and everything is wrapped in a try: except block because most of this needs data, which
-		sometimes isn't there so you have to come up with other ways of working with the data, or return NED, or Not Enough Data.
-		'''
-		
-		stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		
-		for q in range(len(stat)):
-			raven.append(stat[q])
-		
-		try:
-			last_5Raw = raven[0]['last_5']
-		except:
-			lasat_5Raw = []
-			
-		try:
-			allRaw = raven[0]['all']
-		except:
-			allRaw = []
-		
-		try:
-			last_5 = json.loads(last_5Raw)
-		except:
-			last_5 = []
-		
-		try:
-			all = json.loads(allRaw)
-		except:
-			all = []
-		
-		try:
-			if len(last_5) == 5:
-				last_5.pop(0)
-			else:
-				pass
-		except:
-			pass
-		
-		if yoyo != 'NED':
-			last_5.append(yoyo)
-			all.append(yoyo)
-		
-		try:
-			if frank[1][0]:
-				try:
-					batman = reduce((lambda x, y: x + y), last_5)/5
-				except:
-					pass
-			else:
-				batman = 'NED'
-				#He's a ninja...
-		except:
-			batman = 'NED'
-		
-		try:
-			if batman != 'NED':
-				spider = sara[1]/batman
-				intSpider = int(spider)
-			else:
-				spider = 'NED'
-				intSpider = 'NED'
-		except:
-			spider = 'NED'
-			intSpider = 'NED'
-		
-		#and now I have the hic-ups...
-		db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
-		
-		try:
-			if frank[1][0]:
-				current = frank[1][0]
-			else:
-				current = 'NED'
-		except:
-			current = 'NED'
-			
-		'''
-		Next bit here calculates the popularity compared to other products, based off of the last predicted standard...
-		
-		What we need to do, is look at all the standard rates, and see which are the lowest, and make a comparison between
-		all the rates. IE: product x is ranked lower than product y, and place all the products into an array (this may later need to be cut up by
-		product type (which is coming soon sometime) to help ease processing time and power needed).
-		'''
-		blowing = []
-		soda = 5
-		
-		bubble = db.query('SELECT `barcode`, `last_5` FROM `stats`')
-		
-		for q in range(len(bubble)):
-			blowing.append(bubble[q])
-			
-		#insert programming joke here....
-		bubble_sort = sorted(blowing, key=lambda bubbles: bubbles['last_5'][0])
-		
-		for h in range(len(bubble_sort)):
-			bubble_sort[h]['rank'] = h
-		
-		for k in range(len(bubble_sort)):
-			if bubble_sort[k]['barcode'] == str(barcode):
-				soda = bubble_sort[k]['rank']
-		
-		pop = float(soda)/float(len(bubble_sort))
-		
-		ran = (float(bubble_sort[len(bubble_sort)-1]['rank'])/float(len(bubble_sort)))/3
-		
-		'''
-		Next we'll go through and set the flag for the called product, this again may later be the flags for the whole product group
-		so that even if a product hasn't been checked in years and years for popularity (it just isn't popular I guess) it will still have updated
-		stats. 
-		'''
-		if pop <= ran:
-			ger = 'High'
-			flag = 'H'
-			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
-		elif pop <= (ran*2):
-			ger = 'Med'
-			flag = 'M'
-			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
-		elif pop >= (ran*2):
-			ger = 'Low'
-			flag = 'L'
-			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
-		else:
-			ger = 'NED'
-			flag = 'L'
-			db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
-		
-		#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
-		#Ie: Raptor eats everything... nom nom nom
-		#raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
-		raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
+		for dino in range(len(query)):
+			raptop[query[dino]['barcode']] = predict(query[dino]['barcode'])
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps(raptor)
+		return json.dumps(raptop)
+		
+def predict(barcode):
+	query = []
+	quantity = []
+	date = []
+	
+	name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date` desc', vars={'barcode':barcode})
+	
+	for i in range(len(name)):
+		query.append(name[i])
+	
+	m = len(query)
+	
+	#Here we have to get all the data points from the stats database (usage) so we can do fancy things to get some nice predictions.
+	for i in range(m):
+		if (i+1) == m:
+			quantity.append(float(query[i]['quantity']))
+			date.append(float((query[0]['date'] - query[i]['date']).days))
+			break
+		elif (query[i]['quantity'] < query[i+1]['quantity']):
+			quantity.append(float(query[i]['quantity']))
+			date.append(float((query[0]['date'] - query[i]['date']).days))
+		else:
+			quantity.append(float(query[i]['quantity']))
+			date.append(float((query[0]['date'] - query[i]['date']).days))
+			break
+	
+	#its 2am and I got bored with standard naming conventions...
+	bob = thorVector(date)
+	sara = thorVector(quantity)
+	frank = thorVector([])
+	raven = []
+	
+	#take the partial deriv of each part of the vector to gain the total deriv or gradient...
+	for d in range(len(bob)):
+		frank.append(polyderiv([sara[d],-bob[d],-bob[d]**2]))
+	
+	stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+	
+	for q in range(len(stat)):
+		raven.append(stat[q])
+	
+	try:
+		last_5Raw = raven[0]['last_5']
+	except:
+		lasat_5Raw = []
+		
+	try:
+		allRaw = raven[0]['all']
+	except:
+		allRaw = []
+	
+	try:
+		last_5 = json.loads(last_5Raw)
+	except:
+		last_5 = []
+	
+	try:
+		all = json.loads(allRaw)
+	except:
+		all = []
+	
+	try:
+		if len(last_5) == 5:
+			last_5.pop(0)
+		else:
+			pass
+	except:
+		pass
+	
+	try:
+		if frank[1][0]:
+			try:
+				batman = reduce((lambda x, y: x + y), last_5)/5
+			except:
+				pass
+		else:
+			batman = 'NED'
+			#He's a ninja...
+	except:
+		batman = 'NED'
+	
+	try:
+		spider = sara[1]/batman
+	#	spider = 'NED'
+	except:
+		spider = 'NED'
+	
+	#and now I have the hic-ups...
+	db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
+	
+	blowing = []
+	soda = 5
+	
+	bubble = db.query('SELECT `barcode`, `last_5` FROM `stats`')
+	
+	for q in range(len(bubble)):
+		blowing.append(bubble[q])
+		
+	#insert programming joke here....
+	bubble_sort = sorted(blowing, key=lambda bubbles: bubbles['last_5'][0])
+	
+	for h in range(len(bubble_sort)):
+		bubble_sort[h]['rank'] = h
+	
+	for k in range(len(bubble_sort)):
+		if bubble_sort[k]['barcode'] == str(barcode):
+			soda = bubble_sort[k]['rank']
+	
+	pop = float(soda)/float(len(bubble_sort))
+	
+	ran = (float(bubble_sort[len(bubble_sort)-1]['rank'])/float(len(bubble_sort)))/3
+	
+	'''
+	Next we'll go through and set the flag for the called product, this again may later be the flags for the whole product group
+	so that even if a product hasn't been checked in years and years for popularity (it just isn't popular I guess) it will still have updated
+	stats. 
+	'''
+	if pop <= ran:
+		ger = 'High'
+		flag = 'H'
+		db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
+	elif pop <= (ran*2):
+		ger = 'Med'
+		flag = 'M'
+		db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
+	elif pop >= (ran*2):
+		ger = 'Low'
+		flag = 'L'
+		db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
+	else:
+		ger = 'NED'
+		flag = 'L'
+		db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
+	
+	#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
+	#Ie: Raptor eats everything... nom nom nom
+	raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
+	
+	return raptor
 
 
 app = web.application(urls, globals(), autoreload=False)

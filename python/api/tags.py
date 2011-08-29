@@ -2,7 +2,11 @@
 """
 Project Blue Ring
 An inventory control and management API
-Category sub-app for handeling all category API calls...
+Tags sub-app for handeling all tag API calls...
+
+Neat thing about tags is multiple tags can apply to a product, and it helps you narrow down with categories.
+Even though tags act a lot like categories at first, the fact that you can look at a category, then find only a certian tag with in that category is really
+powerful.
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -25,33 +29,36 @@ abspath = os.path.dirname(__file__)
 sys.path.append(abspath)
 os.chdir(abspath)
 from configSub import *
-#import adminCat
+#import adminTag
 
 urls = (
 	'', 'slash',
-	'/', 'cat_total',
-	'/(.*)/info/', 'cat_info',
-	'/(.*)/tags/', 'catTags'
-	#'/(.*)/stats/', adminCat.app
+	'/', 'tags_total',
+	'/(.*)/', 'tags_info'
+	#'/(.*)/stats/', adminTag.app
 )
 
 class slash:
 	def GET(self): raise web.seeother("/")
 
-class cat_info:
+class tags_info:
 	'''
 	class documentation
-	Returns all the products in a category.
+	Returns all the products in a tag
 	
 	Returns:
 		A JSON object like: {"products" : [{"barcode": "dog987", "name": "A dog", "picture": "dog.png"}]}
 	'''
 	
-	def endFunc(self, cat):
+	def endFunc(self, tags):
 		query = []
-		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
+		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `tags` LIKE "%'+ tags +'%"')
+		
 		for i in range(len(name)):
 			query.append(name[i])
+		
+		print query
+		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({'products': query})
@@ -63,46 +70,20 @@ class cat_info:
 		return self.endFunc(cat)
 
 
-class cat_total:
+class tags_total:
 	'''
 	class documentation
-	Returns all the categories.
-	
-	Returns:
-		A JSON object like: {"categories" : ["abc", "def"]}
-	'''
-		
-	def endFunc(self):
-		query = []
-		name = db.query('SELECT `cat` FROM `products`')
-		for i in range(len(name)):
-			query.append(name[i]['cat'])
-		queryFix = list(set(query))
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps({'categories': queryFix})
-	
-	def GET(self):
-		return self.endFunc()
-		
-	def POST(self):
-		return self.endFunc()
-
-
-class catTags:
-	'''
-	class documentation
-	Returns all the tags in a category.
+	Returns all the tags.
 	
 	Returns:
 		A JSON object like: {"tags" : ["abc", "def"]}
 	'''
 		
-	def endFunc(self, cat):
+	def endFunc(self):
 		query = []
 		dog = []
-		name = db.query('SELECT `tags` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
-		
+		woof = []
+		name = db.query('SELECT `tags` FROM `products`')
 		for i in range(len(name)):
 			query.append(json.loads(name[i]['tags']))
 		
@@ -116,12 +97,12 @@ class catTags:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({'tags': queryFix})
 	
-	def GET(self, cat):
-		return self.endFunc(cat)
+	def GET(self):
+		return self.endFunc()
 		
-	def POST(self, cat):
-		return self.endFunc(cat)
-		
+	def POST(self):
+		return self.endFunc()
+
 		
 app = web.application(urls, globals(), autoreload=False)
 application = app.wsgifunc()

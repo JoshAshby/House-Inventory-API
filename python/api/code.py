@@ -37,7 +37,10 @@ admin category Stats function that is like the normal admin.py stats however cal
 clean up admin.py Stats function
 make tag.py; sort of like cat.py but with tags instead. This way products can be grouped even better, you can look at a 
 	category but then also look at the tags within that category to really refine the search
-make a search function/search.py
+make a search function/search.py - not sure how I might go around doing this... Maybe this will involve machine learning also
+	to help make predictions...
+tags inside of categories: category/(.*)/tag/(.*)/
+
 """
 
 class index:        
@@ -56,6 +59,38 @@ class index:
 		
 	def POST(self):
 		return self.endFunc()
+
+class calls:
+	'''
+	class documentation
+	Simple doc call so apps can find out what is provided.
+	
+	Returns:
+	'''
+	def GET(self):
+		return self.endFunc()
+		
+	def POST(self):
+		return self.endFunc()
+		
+	def endFunc(self):
+		a = {'/product/': 'POST/GET/Returns list of all products and most of their info',
+		'/product/(.*)/info/': 'POST/GET/Returns info for single product whos barcode is the contents of (.*)',
+		'/product/names/': 'POST/GET/Returns the names and barcodes of all the products, good for auto complete',
+		'/category/': 'POST/GET/Returns the categories',
+		'/category/(.*)/': 'POST/GET/Returns the products inside of category (.*)',
+		'/admin/(.*)/add/': 'POST/OAuth/Adds the product',
+		'/admin/(.*)/delete/': 'POST/OAuth/Deletes the product',
+		'/admin/(.*)/restore/': 'POST/OAuth/Restores the product',
+		'/admin/(.*)/update/': 'POST/OAuth/Updates the products info',
+		'/admin/(.*)/log/': 'POST/OAuth/Returns the product use log',
+		'/admin/(.*)/stats/': 'POST/OAuth/Returns the products stats',
+		'/admin/category/(.*)/stats/': 'POST/OAuth/Returns the stats for every product in the category'}
+		
+		if spam:
+			web.header('Content-Type', 'application/json')
+		return json.dumps(a)
+		
 		
 		
 if __name__ == "__main__":

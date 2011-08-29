@@ -16,28 +16,20 @@ import testPage
 import cat
 import admin
 import product
-#import tag
+import tags
 #import search
 
 urls = (
 	'/', 'index',
+	#docu stuff...
+	'/services/', 'calls',
 	#admin stuff...
 	'/admin', admin.app,
-	#'/product/(.*)/delete/', 'delete',
-	#'/product/(.*)/restore/', 'restore',
-	#'/product/(.*)/log/', 'log',
-	#'/product/(.*)/stats/', 'stats',
-	#'/product/add/', 'add',
-	#'/product/update/', 'update',
 	#public stuff...
 	'/product', product.app,
-	#'/product/(.*)/info/', 'info'
-	#'/product/', 'total',
-	#'/product/names/', 'names',
 	'/category', cat.app,
-	#'/category/(.*)/', 'cat_info',
-	#'/category/', 'cat_total',
-	#'/tag', tag.app,
+	'/tags', tags.app,
 	#'/search', search.app,
+	#Test stuff...
 	'/test', testPage.app
 )

@@ -32,7 +32,7 @@ HEADERS = {
   'Accept'        : 'application/json',
 }
 
-LOGIN_URL  = BASE_URL + 'product/' +account_inf['barcode'] + '/log/'
+LOGIN_URL  = BASE_URL + 'admin/category/' + account_inf['barcode'] + '/groupstats/'
 
 def generate_oauth_request( method, url, parameters={} ):
 	"""
