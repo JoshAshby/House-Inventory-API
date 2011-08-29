@@ -31,7 +31,8 @@ urls = (
 	'', 'slash',
 	'/', 'cat_total',
 	'/(.*)/info/', 'cat_info',
-	'/(.*)/tags/', 'catTags'
+	'/(.*)/tag/', 'catTags',
+	'/(.*)/tag/(.*)/', 'catTagsInfo'
 	#'/(.*)/stats/', adminCat.app
 )
 
@@ -49,9 +50,12 @@ class cat_info:
 	
 	def endFunc(self, cat):
 		query = []
-		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
+		name = db.query('SELECT `barcode`, `name`, `picture`, `tags` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
 		for i in range(len(name)):
 			query.append(name[i])
+		
+		for s in range(len(query)):
+			query[s]['tags'] = json.loads(query[s]['tags'])
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({'products': query})
@@ -121,6 +125,44 @@ class catTags:
 		
 	def POST(self, cat):
 		return self.endFunc(cat)
+
+
+class catTagsInfo:
+	'''
+	class documentation
+	Returns all the tags in a category.
+	
+	Returns:
+		A JSON object like: {"tags" : ["abc", "def"]}
+	'''
+		
+	def endFunc(self, cat, tag):
+		query = []
+		dog = []
+		name = db.query('SELECT `tags`, `barcode`, `name`, `picture` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
+		
+		for i in range(len(name)):
+			query.append(name[i])
+		
+		for x in range(len(query)):
+			e = json.loads(query[x]['tags'])
+			for z in range(len(e)):
+				if e[z] == tag:
+					dog.append(query[x])
+				else: pass
+		
+		for f in range(len(dog)):
+			dog[f]['tags'] = json.loads(dog[f]['tags'])
+		
+		if spam:
+			web.header('Content-Type', 'application/json')
+		return json.dumps({'products': dog})
+	
+	def GET(self, cat, tag):
+		return self.endFunc(cat, tag)
+		
+	def POST(self, cat, tag):
+		return self.endFunc(cat, tag)
 		
 		
 app = web.application(urls, globals(), autoreload=False)

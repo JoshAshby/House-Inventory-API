@@ -41,9 +41,6 @@ urls = (
 	'/category/(.*)/groupstats/', 'catStats',
 	'/add/', 'add',
 	'/update/', 'update'
-	#'/(.*)/tag/add/', 'tagAdd',
-	#'/(.*)/tag/remove/', 'tagRemove',
-	#'/(.*)/tag/edit/', 'tagEdit'
 )
 
 class slash:
@@ -75,6 +72,8 @@ class add:
 			quantity = bobbins['quantity']
 			if 'cat' in bobbins: quantity = bobbins['cat']
 			else: cat = 'None'
+			if 'tags' in bobbins: quantity = bobbins['tags']
+			else: cat = '["None"]'
 			pictureTrue = int(bobbins['picTrue'])
 			picture = bobbins.picture
 			
@@ -112,7 +111,7 @@ class add:
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
-			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `cat`) VALUES ($name, $description, $barcode, $quantity, $picture)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'cat': cat})
+			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `cat`, `tags`) VALUES ($name, $description, $barcode, $quantity, $picture, $cat, $tags)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'cat': cat, 'tags': tags})
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 			inform = name[0]
 			inform['added'] = 'true'
@@ -169,6 +168,9 @@ class update:
 			if 'cat' in bobbins: cat = bobbins['cat']
 			else: cat = the_ring[0]['cat']
 			
+			if 'tags' in bobbins: quantity = bobbins['tags']
+			else: cat = '["None"]'
+			
 			if 'picTrue' in bobbins: pictureTrue = int(bobbins['picTrue'])
 			picture = bobbins.picture
 			
@@ -195,7 +197,7 @@ class update:
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
 			
-			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `cat` = $cat WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'cat': cat})
+			db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `cat` = $cat, `tags` = $tags WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'cat': cat, 'tags': tags})
 			
 			if oldbarcode is not barcode:
 				db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': barcode})
@@ -246,7 +248,7 @@ class delete:
 		
 		logSON = json.dumps(log)
 		
-		db.query('INSERT INTO `backup` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `picture`, `flag`, `last_5`, `all`, `log`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $picture, $flag, $last_5, $all, $log) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'quantity': inform['quantity'], 'cat': inform['cat'], 'picture': inform['picture'], 'flag': inform['flag'], 'last_5': stat['last_5'], 'all': stat['all'], 'log': logSON})
+		db.query('INSERT INTO `backup` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `tags`, `picture`, `flag`, `last_5`, `all`, `log`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $tags, $picture, $flag, $last_5, $all, $log) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'quantity': inform['quantity'], 'cat': inform['cat'], 'tags': inform['tags'], 'picture': inform['picture'], 'flag': inform['flag'], 'last_5': stat['last_5'], 'all': stat['all'], 'log': logSON})
 		
 		db.query('DELETE FROM `products` WHERE `barcode` = $barcode', vars={'barcode': barcode})
 		db.query('DELETE FROM `stats` WHERE `barcode` = $barcode', vars={'barcode': barcode})
@@ -274,7 +276,7 @@ class restore:
 		name = db.query('SELECT * FROM `backup` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		inform = name[0]
 		
-		db.query('INSERT INTO `products` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `picture`, `flag`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $picture, $flag) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'cat': inform['cat'], 'picture': inform['picture'], 'flag': inform['flag']})
+		db.query('INSERT INTO `products` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `tags`, `picture`, `flag`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $tags, $picture, $flag) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'cat': inform['cat'], 'tags': inform['tags'], 'picture': inform['picture'], 'flag': inform['flag']})
 		
 		alpha = json.loads(inform['log'])
 		
