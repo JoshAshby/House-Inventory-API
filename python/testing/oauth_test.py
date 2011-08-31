@@ -32,7 +32,7 @@ HEADERS = {
   'Accept'        : 'application/json',
 }
 
-LOGIN_URL  = BASE_URL + 'admin/category/' + account_inf['barcode'] + '/groupstats/'
+LOGIN_URL  = BASE_URL + 'test/'
 
 def generate_oauth_request( method, url, parameters={} ):
 	"""
@@ -82,10 +82,12 @@ def passStuff( account_info ):
 	
 	parameters = {
 		"username": account_info['username'],
-		"password": account_info['password']
+		"password": account_info['password'],
+		"barcode": account_info['barcode']
 	}
-	oauth = generate_oauth_request( 'POST', LOGIN_URL, parameters )
+	oauth = generate_oauth_request( 'PUT', LOGIN_URL, parameters )
 	req = urllib2.Request( LOGIN_URL, oauth.to_postdata(), headers=HEADERS )
+	req.get_method = lambda: 'PUT'
 	try:
 		result = urllib2.urlopen( req ).read()
 		json_result = json.loads( result )

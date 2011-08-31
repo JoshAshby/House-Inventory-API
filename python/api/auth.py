@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """
 Project Blue Ring
 An inventory control and management API

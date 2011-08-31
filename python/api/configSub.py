@@ -22,6 +22,8 @@ swivel_mount = 'http://localhost/'
 #debug setter
 spamandeggs = 0
 
+debug = 1
+
 '''
 firefox debug setter (this is because firefox seems to want to download the json text instead of display it)...
 set this to 1 for normal opperation, 0 for firefox...

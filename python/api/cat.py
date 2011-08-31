@@ -20,10 +20,11 @@ import json
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
 '''
-import sys, os
-abspath = os.path.dirname(__file__)
-sys.path.append(abspath)
-os.chdir(abspath)
+if not debug:
+	import sys, os
+	abspath = os.path.dirname(__file__)
+	sys.path.append(abspath)
+	os.chdir(abspath)
 from configSub import *
 #import adminCat
 
@@ -133,7 +134,7 @@ class catTagsInfo:
 	Returns all the tags in a category.
 	
 	Returns:
-		A JSON object like: {"tags" : ["abc", "def"]}
+		A JSON object like: {"products": [{"picture": "718103025027.png", "barcode": "718103025027", "name": "Green Graph Composition", "tags": ["paper", "notebook", "graph", "graph paper"]}]}
 	'''
 		
 	def endFunc(self, cat, tag):

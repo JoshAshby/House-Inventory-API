@@ -22,10 +22,11 @@ import json
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
 '''
-import sys, os
-abspath = os.path.dirname(__file__)
-sys.path.append(abspath)
-os.chdir(abspath)
+if not debug:
+	import sys, os
+	abspath = os.path.dirname(__file__)
+	sys.path.append(abspath)
+	os.chdir(abspath)
 from config import *
 from configSub import *
 
@@ -37,10 +38,9 @@ admin category Stats function that is like the normal admin.py stats however cal
 clean up admin.py Stats function
 make tag.py; sort of like cat.py but with tags instead. This way products can be grouped even better, you can look at a 
 	category but then also look at the tags within that category to really refine the search
-make a search function/search.py - not sure how I might go around doing this... Maybe this will involve machine learning also
-	to help make predictions...
 tags inside of categories: category/(.*)/tag/(.*)/
 
+Think about making this RESTful...
 """
 
 class index:        
