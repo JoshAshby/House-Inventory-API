@@ -17,6 +17,14 @@ Snippet taken from/adapted from: https://github.com/DaGoodBoy/webpy-example/blob
 import web
 import oauth2
 import string
+try:
+	from configSub import *
+except:
+	import sys, os
+	abspath = os.path.dirname(__file__)
+	sys.path.append(abspath)
+	os.chdir(abspath)
+from configSub import *
 import account as acc
 
 UNAUTHORIZED_MESSAGE = 'You are not authorized to access this content'

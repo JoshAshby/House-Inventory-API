@@ -11,25 +11,26 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 """
+try:
+	from configSub import *
+except:
+	import sys, os
+	abspath = os.path.dirname(__file__)
+	sys.path.append(abspath)
+	os.chdir(abspath)
+from configSub import *
 import web
 import testPage
 import cat
 import admin
 import product
 import tags
-#import search
 
 urls = (
 	'/', 'index',
-	#docu stuff...
-	'/services/', 'calls',
-	#admin stuff...
-	'/admin', admin.app,
-	#public stuff...
 	'/product', product.app,
 	'/category', cat.app,
-	'/tags', tags.app,
-	#'/search', search.app,
+	'/tag', tags.app,
 	#Test stuff...
 	'/test', testPage.app
 )

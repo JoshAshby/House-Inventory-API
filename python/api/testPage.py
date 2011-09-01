@@ -44,7 +44,7 @@ class test:
 	Testing page object. Functions include full REST with OAuth protection on the POST PUT DELETE calls.
 	Testing frameowrk for unittests included.
 	'''
-	def getFunc(self, *args):	
+	def getFunc(self, **kwargs):	
 		'''
 		function documentation
 		
@@ -54,10 +54,11 @@ class test:
 			whatever I tell it to since it's a testing page...
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		if debug: name = args[0]
-		else:
+		try:
 			wi = web.input()
 			name = wi['barcode']
+		except:
+			name = kwargs['barcode']
 		
 		reply = {
 			"barcode": name
@@ -67,7 +68,7 @@ class test:
 		
 		return answer
 	
-	def postFunc(self, *args):
+	def postFunc(self, **kwargs):
 		'''
 		function documentation
 		
@@ -76,9 +77,9 @@ class test:
 		Returns:
 			whatever I tell it to since it's a testing page...
 		'''
-		return self.getFunc(args[0])
+		return self.getFunc(barcode=kwargs['barcode'])
 	
-	def putFunc(self, *args):
+	def putFunc(self, **kwargs):
 		'''
 		function documentation
 		
@@ -87,9 +88,9 @@ class test:
 		Returns:
 			whatever I tell it to since it's a testing page...
 		'''
-		return self.getFunc(args[0])
+		return self.getFunc(barcode=kwargs['barcode'])
 	
-	def deleteFunc(self, *args):
+	def deleteFunc(self, **kwargs):
 		'''
 		function documentation
 		
@@ -98,7 +99,7 @@ class test:
 		Returns:
 			whatever I tell it to since it's a testing page...
 		'''
-		return self.getFunc(args[0])
+		return self.getFunc(barcode=kwargs['barcode'])
 	
 	def GET(self):
 		return self.getFunc()
@@ -124,24 +125,22 @@ class test:
 		Should probably figure out how to work with the unittest2 lib for Python...
 		Until then, this works fine...
 		"""
-		print kwargs
-		
 		print "Testing calls from: %s" % __name__
 		
-		barcode = kwargs['barcode']
+		bar = kwargs['barcode']
 		method = kwargs['method']
 		
 		print "Using method: ", method
-		print "Using barcode: ", barcode
+		print "Using barcode: ", bar
 		
 		if method == 'GET':
-			got = self.getFunc(barcode)
+			got = self.getFunc(barcode=bar)
 		if method == 'POST':
-			got = self.postFunc(barcode)
+			got = self.postFunc(barcode=bar)
 		if method == 'PUT':
-			got = self.putFunc(barcode)
+			got = self.putFunc(barcode=bar)
 		if method == 'DELETE':
-			got = self.deleteFunc(barcode)
+			got = self.deleteFunc(barcode=bar)
 			
 		answer_json = json.loads(got)
 		
@@ -150,7 +149,7 @@ class test:
 		print "Got back: ", got
 		
 		try:
-			if answer == barcode:
+			if answer == bar:
 				print "%s: Passed" % str(method)
 		except:
 			print "%s: FAILED" % str(method)

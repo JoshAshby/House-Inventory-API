@@ -22,7 +22,9 @@ import json
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
 '''
-if not debug:
+try:
+	from configSub import *
+except:
 	import sys, os
 	abspath = os.path.dirname(__file__)
 	sys.path.append(abspath)
