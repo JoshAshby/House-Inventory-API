@@ -33,8 +33,8 @@ import auth
 urls = (
 	'', 'slash',
 	'/', 'catTotal',
-	'/(.*)/', 'catInfo',
-	'/(.*)/tag/(.*)/', 'catTag'
+	'/(.*)/tag/(.*)/', 'catTag',
+	'/(.*)/', 'catInfo'
 )
 
 class catInfo:
@@ -120,46 +120,6 @@ class catInfo:
 	@auth.oauth_protect
 	def DELETE(self, cat):
 		return self.deleteFunc(category=cat)
-	
-	def testFunc(self, **kwargs):
-		"""
-		function documentation
-		
-		Testing framework for the class, simply pass the info needed for each call.
-		"""
-		print "Testing calls from: %s" % __name__
-		
-		cat = kwargs['category']
-		method = kwargs['method']
-		
-		print "Using method: ", method
-		print "Using category: ", cat
-		
-		if method == 'GET':
-			got = self.getFunc(category=cat)
-		if method == 'POST':
-			got = self.postFunc(category=cat)
-		if method == 'PUT':
-			got = self.putFunc(category=cat)
-		if method == 'DELETE':
-			got = self.deleteFunc(category=cat)
-		
-		answer_json = json.loads(got)
-		
-		#this is just a copy from the test class, needs to be updated for each method...
-		answer = answer_json['products']
-		
-		print "Got back: ", got
-		
-		print "#########################################################"
-		
-		try:
-			if answer:
-				print "%s: Passed" % str(method)
-		except:
-			print "%s: FAILED" % str(method)
-		
-		print "#########################################################"
 		
 		
 class catTotal:
@@ -236,44 +196,6 @@ class catTotal:
 	@auth.oauth_protect
 	def DELETE(self):
 		return self.deleteFunc()
-	
-	def testFunc(self, **kwargs):
-		"""
-		function documentation
-		
-		Testing framework for the class, simply pass the info needed for each call.
-		"""
-		print "Testing calls from: %s" % __name__
-		
-		method = kwargs['method']
-		
-		print "Using method: ", method
-		
-		if method == 'GET':
-			got = self.getFunc()
-		if method == 'POST':
-			got = self.postFunc()
-		if method == 'PUT':
-			got = self.putFunc()
-		if method == 'DELETE':
-			got = self.deleteFunc()
-		
-		answer_json = json.loads(got)
-		
-		#this is just a copy from the test class, needs to be updated for each method...
-		answer = answer_json['categories']
-		
-		print "Got back: ", got
-		
-		print "#########################################################"
-		
-		try:
-			if answer:
-				print "%s: Passed" % str(method)
-		except:
-			print "%s: FAILED" % str(method)
-		
-		print "#########################################################"
 		
 
 class catTag:
@@ -307,8 +229,6 @@ class catTag:
 		
 		for i in range(len(name)):
 			query.append(name[i])
-		
-		print query
 		
 		for x in range(len(query)):
 			e = json.loads(query[x]['tags'])
@@ -372,48 +292,6 @@ class catTag:
 	@auth.oauth_protect
 	def DELETE(self, cat, tags):
 		return self.deleteFunc(category=cat, tag=tags)
-	
-	def testFunc(self, **kwargs):
-		"""
-		function documentation
-		
-		Testing framework for the class, simply pass the info needed for each call.
-		"""
-		print "Testing calls from: %s" % __name__
-		
-		cat = kwargs['category']
-		tags = kwargs['tag']
-		method = kwargs['method']
-		
-		print "Using method: ", method
-		print "Using category: ", cat
-		print "Using tag: ", tags
-		
-		if method == 'GET':
-			got = self.getFunc(category=cat, tag=tags)
-		if method == 'POST':
-			got = self.postFunc(category=cat, tag=tags)
-		if method == 'PUT':
-			got = self.putFunc(category=cat, tag=tags)
-		if method == 'DELETE':
-			got = self.deleteFunc(category=cat, tag=tags)
-		
-		answer_json = json.loads(got)
-		
-		#this is just a copy from the test class, needs to be updated for each method...
-		answer = answer_json['products']
-		
-		print "Got back: ", got
-		
-		print "#########################################################"
-		
-		try:
-			if answer:
-				print "%s: Passed" % str(method)
-		except:
-			print "%s: FAILED" % str(method)
-		
-		print "#########################################################"
 		
 		
 app = web.application(urls, globals(), autoreload=False)

@@ -37,8 +37,8 @@ import account
 
 urls = (
 	'', 'slash',
-	'/(.*)/', 'info',
-	'/', 'total'
+	'/', 'total',
+	'/(.*)/', 'info'
 )
 
 #class slash:
@@ -89,7 +89,6 @@ class info:
 		Returns:
 		'''
 		pass
-		#return self.getFunc(args)
 	
 	def putFunc(self, **kwargs):
 		'''
@@ -220,7 +219,7 @@ class info:
 		stat = stated[0]
 			
 		#loged = db.query('SELECT `date`, `quantity` FROM `usage` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		loged = db.select('usage', where='barcode=$barcode', vars={'barcode':bar}, _test=False, what='date,quantity')
+		loged = db.select('usage', where='barcode=$barcode', vars={'barcode':bar}, _test=False, what='date, quantity')
 		for x in range(len(loged)):
 			vallog.append(loged[x])
 			val = {'date': vallog[x]['date'].isoformat(' '), 'quantity': vallog[x]['quantity']}
@@ -243,7 +242,7 @@ class info:
 	
 	@auth.oauth_protect
 	def POST(self, bar):
-		pass
+		return self.postFunc(barcode=bar)
 	
 	@auth.oauth_protect
 	def PUT(self, bar):
@@ -252,54 +251,6 @@ class info:
 	@auth.oauth_protect
 	def DELETE(self, bar):
 		return self.deleteFunc(barcode=bar)
-	
-	def testFunc(self, **kwargs):
-		"""
-		function documentation
-		
-		Testing framework for the class, simply pass the info needed for each call.
-		"""
-		print "Testing calls from: %s" % __name__
-		
-		bar = kwargs['barcode']
-		method = kwargs['method']
-		
-		print "Using method: ", method
-		print "Using barcode: ", bar
-		
-		if method == 'GET':
-			#We just need the barcode since we're getting info about the product.
-			got = self.getFunc(barcode=bar)
-		if method == 'POST':
-			#Doesn't do anything right now...
-			#got = self.postFunc(barcode)
-			print "Nothing to do, with FAIL"
-		if method == 'PUT':
-			#We have to get all the update info so make sure it's all passed...
-			desc = kwargs['description']
-			nam = kwargs['name']
-			tag = kwargs['tags']
-			ca = kwargs['cat']
-			quant = kwargs['quantity']
-			got = self.putFunc(barcode=bar, name=nam, description=desc, cat=ca, tags=tag, quantity=quant)
-		if method == 'DELETE':
-			#We just need the barcode for this one since it's just to delete the product...
-			got = self.deleteFunc(barcode=bar)
-			
-		answer_json = json.loads(got)
-		
-		#this is just a copy from the test class, needs to be updated for each method...
-		answer = answer_json['barcode']
-		
-		print "Got back: ", got
-		
-		print "#########################################################"
-		try:
-			if answer == bar:
-				print "%s: Passed" % str(method)
-		except:
-			print "%s: FAILED" % str(method)
-		print "#########################################################"
 		
 		
 class total:
@@ -458,7 +409,7 @@ class total:
 		
 		Returns:
 		'''
-		pass
+		return self.putFunc()
 	
 	@auth.oauth_protect
 	def DELETE(self):
@@ -469,55 +420,7 @@ class total:
 		
 		Returns: None
 		'''
-		pass
-	
-	def testFunc(self, **kwargs):
-		"""
-		function documentation
-		
-		Testing framework for the class, simply pass the info needed for each call.
-		"""
-		print "Testing calls from: %s" % __name__
-		
-		method = kwargs['method']
-		
-		print "Using method: ", method
-		
-		if method == 'GET':
-			got = self.getFunc()
-		if method == 'POST':
-			bar = kwargs['barcode']
-			desc = kwargs['description']
-			nam = kwargs['name']
-			newbar = kwargs['newbarcode']
-			tag = kwargs['tags']
-			ca = kwargs['cat']
-			got = self.putFunc(barcode=bar, name=nam, description=desc, newbarcode=newbar, cat=ca, tags=tag)
-		if method == 'PUT':
-			#got = self.putFunc(bar)
-			print "Not used in this call"
-		if method == 'DELETE':
-			#got = self.deleteFunc(bar)
-			print "Not used in this call"
-			
-		answer_json = json.loads(got)
-		
-		#this is just a copy from the test class, needs to be updated for each method...
-		try:
-			answer = answer_json['barcode']
-		except:
-			pass
-		
-		print "Got back: ", got
-		
-		print "#########################################################"
-		
-		if answer_json:
-			print "%s: Passed" % str(method)
-		else:
-			print "%s: FAILED" % str(method)
-		
-		print "#########################################################"
+		return self.deleteFunc()
 		
 
 app = web.application(urls, globals(), autoreload=False)

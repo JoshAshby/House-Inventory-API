@@ -2,7 +2,7 @@
 """
 Project Blue Ring
 An inventory control and management API
-A test sub app for messing around with new things and what not before I decide to use them or not.
+Main admin functions
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -15,6 +15,9 @@ joshuaashby@joshashby.com
 """
 import web
 import json
+import re
+import time
+
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
@@ -30,17 +33,15 @@ from configSub import *
 import auth
 
 urls = (
-	"", "slash",
-	"/", "test"
+	'', 'slash',
+	'/(.*)/', 'log'
 )
 
-class test:
+class log:
 	'''
 	class documentation
-	
-	Testing page object. Functions include full REST with OAuth protection on the POST PUT DELETE calls.
-	Testing frameowrk for unittests included.
-	'''
+	Generates the use log about the given product.
+	'''		
 	def getFunc(self, **kwargs):	
 		'''
 		function documentation
@@ -48,22 +49,26 @@ class test:
 		GET verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			A JSON object like: {"log" : [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]}
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		try:
 			wi = web.input()
-			name = wi['barcode']
+			bar = wi['barcode']
 		except:
-			name = kwargs['barcode']
-		
-		reply = {
-			"barcode": name
-		}
-		
-		answer = json.dumps(reply)
-		
-		return answer
+			bar = kwargs['barcode']
+			
+		query = []
+		log = []
+		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date` desc', vars={'barcode':bar})
+		#name = db.select('usage', where='barcode=$barcode', vars={'barcode':bar}, _test=False)
+		for i in range(len(name)):
+			query.append(name[i])
+		for i in range(len(query)):
+			log.append([query[i]['date'].isoformat(' '), query[i]['quantity']])
+		if spam:
+			web.header('Content-Type', 'application/json')
+		return json.dumps({"log": log})
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -72,9 +77,9 @@ class test:
 		POST verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+		
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def putFunc(self, **kwargs):
 		'''
@@ -83,9 +88,9 @@ class test:
 		PUT verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+		
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def deleteFunc(self, **kwargs):
 		'''
@@ -94,25 +99,25 @@ class test:
 		DELETE verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+		
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
-	def GET(self):
-		return self.getFunc()
-	
-	@auth.oauth_protect
-	def POST(self):
-		return self.postFunc()
+	def GET(self, bar):
+		return self.getFunc(barcode=bar)
 	
 	@auth.oauth_protect
-	def PUT(self):
-		return self.putFunc()
+	def POST(self, bar):
+		return self.postFunc(barcode=bar)
 	
 	@auth.oauth_protect
-	def DELETE(self):
-		return self.deleteFunc()
-
+	def PUT(self, bar):
+		return self.putFunc(barcode=bar)
+	
+	@auth.oauth_protect
+	def DELETE(self, bar):
+		return self.deleteFunc(barcode=bar)
+			
 
 app = web.application(urls, globals(), autoreload=False)
 application = app.wsgifunc()

@@ -19,38 +19,47 @@ joshuaashby@joshashby.com
 """
 import web
 import json
-
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
 '''
-import sys, os
-abspath = os.path.dirname(__file__)
-sys.path.append(abspath)
-os.chdir(abspath)
+try:
+	from configSub import *
+except:
+	import sys, os
+	abspath = os.path.dirname(__file__)
+	sys.path.append(abspath)
+	os.chdir(abspath)
 from configSub import *
-#import adminTag
+import auth
 
 urls = (
 	'', 'slash',
-	'/', 'tags_total',
-	'/(.*)/', 'tags_info'
-	#'/(.*)/stats/', adminTag.app
+	'/', 'tagsTotal',
+	'/(.*)/', 'tagsInfo'
 )
 
-class slash:
-	def GET(self): raise web.seeother("/")
-
-class tags_info:
+class tagsInfo:
 	'''
 	class documentation
+	
 	Returns all the products in a tag
-	
-	Returns:
-		A JSON object like: {"products" : [{"barcode": "dog987", "name": "A dog", "picture": "dog.png"}]}
 	'''
-	
-	def endFunc(self, tags):
+	def getFunc(self, **kwargs):	
+		'''
+		function documentation
+		
+		GET verb call
+		
+		Returns:
+		'''
+		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
+		try:
+			wi = web.input()
+			tags = wi['tag']
+		except:
+			tags = kwargs['tag']
+		
 		query = []
 		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `tags` LIKE "%'+ tags +'%"')
 		
@@ -62,24 +71,67 @@ class tags_info:
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({'products': query})
+	
+	def postFunc(self, **kwargs):
+		'''
+		function documentation
 		
-	def GET(self, cat):
-		return self.endFunc(cat)
+		POST verb call
 		
-	def POST(self, cat):
-		return self.endFunc(cat)
+		Returns:
+		'''
+		pass
+	
+	def putFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		PUT verb call
+		
+		Returns:
+		'''
+		pass
+	
+	def deleteFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		DELETE verb call
+		
+		Returns:
+		'''
+	
+	def GET(self, ta):
+		return self.getFunc(tag=ta)
+	
+	@auth.oauth_protect
+	def POST(self, ta):
+		return self.postFunc(tag=ta)
+	
+	@auth.oauth_protect
+	def PUT(self, ta):
+		return self.putFunc(tag=ta)
+	
+	@auth.oauth_protect
+	def DELETE(self, ta):
+		return self.deleteFunc(tag=ta)
 
 
-class tags_total:
+class tagsTotal:
 	'''
 	class documentation
-	Returns all the tags.
 	
-	Returns:
-		A JSON object like: {"tags" : ["abc", "def"]}
+	Returns all the tags.
 	'''
+	def getFunc(self, **kwargs):	
+		'''
+		function documentation
 		
-	def endFunc(self):
+		GET verb call
+		
+		Returns:
+			A JSON object like: {"tags" : ["abc", "def"]}
+		'''
 		query = []
 		dog = []
 		woof = []
@@ -97,11 +149,49 @@ class tags_total:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({'tags': queryFix})
 	
-	def GET(self):
-		return self.endFunc()
+	def postFunc(self, **kwargs):
+		'''
+		function documentation
 		
+		POST verb call
+		
+		Returns:
+		'''
+		pass
+	
+	def putFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		PUT verb call
+		
+		Returns:
+		'''
+		pass
+	
+	def deleteFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		DELETE verb call
+		
+		Returns:
+		'''
+	
+	def GET(self):
+		return self.getFunc()
+	
+	@auth.oauth_protect
 	def POST(self):
-		return self.endFunc()
+		return self.postFunc()
+	
+	@auth.oauth_protect
+	def PUT(self):
+		return self.putFunc()
+	
+	@auth.oauth_protect
+	def DELETE(self):
+		return self.deleteFunc()
 
 		
 app = web.application(urls, globals(), autoreload=False)

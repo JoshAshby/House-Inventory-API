@@ -22,15 +22,18 @@ from configSub import *
 import web
 import testPage
 import cat
-import admin
 import product
 import tags
+import log
+import stats
 
 urls = (
 	'/', 'index',
 	'/product', product.app,
 	'/category', cat.app,
 	'/tag', tags.app,
+	'/log', log.app,
+	'/stat', stats.app,
 	#Test stuff...
 	'/test', testPage.app
 )
