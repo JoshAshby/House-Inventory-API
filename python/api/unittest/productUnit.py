@@ -69,10 +69,10 @@ class totalTester(product.total):
 			bar = kwargs['barcode']
 			desc = kwargs['description']
 			nam = kwargs['name']
-			newbar = kwargs['newbarcode']
 			tag = kwargs['tags']
 			ca = kwargs['cat']
-			got = self.putFunc(barcode=bar, name=nam, description=desc, newbarcode=newbar, cat=ca, tags=tag)
+			quan = kwargs['quantity']
+			got = self.postFunc(barcode=bar, name=nam, description=desc, cat=ca, tags=tag, quantity=quan)
 		if method == 'PUT':
 			got = self.putFunc()
 		if method == 'DELETE':
@@ -84,7 +84,14 @@ class totalTester(product.total):
 		try:
 			answer = answer_json['total']
 		except:
-			pass
+			try:
+				answer = answer_json['barcode']
+			except:
+				pass
+			try:
+				answer = answer_json['COP']
+			except:
+				pass
 		
 		print "Got back: ", got
 		
@@ -107,3 +114,7 @@ unittestInfo.testFunc(method='GET', barcode='dog987')
 unittestInfo.testFunc(method='PUT', barcode='dog987', name='Dog', description='A dog of god', cat='Animal', tags='["Pet", "beagle"]', quantity='2')
 
 unittestTotal.testFunc(method='GET')
+
+unittestTotal.testFunc(method='POST', barcode='tv9', name='tv', description='A tv', cat='Electronics', tags='["tv", "electronics"]', quantity='6')
+
+unittestInfo.testFunc(method='DELETE', barcode='tv9')

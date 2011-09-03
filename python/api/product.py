@@ -185,13 +185,15 @@ class info:
 			inform['updated'] = 'true'
 			inform['oldbarcode'] = bar
 			inform['barcode'] = oldbarcode
+			inform['tags'] = json.loads(inform['tags'])
+			
 			if spam:
 				web.header('Content-Type', 'application/json')
 			return json.dumps(inform)
 		else:
 			return json.dumps(['NS'])
 		
-	def deleteFun(self, **kwargs):
+	def deleteFunc(self, **kwargs):
 		'''
 		function documentation
 		
@@ -218,8 +220,8 @@ class info:
 		stated = db.select('stats', where='barcode=$barcode', vars={'barcode':bar}, _test=False)
 		stat = stated[0]
 			
-		#loged = db.query('SELECT `date`, `quantity` FROM `usage` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		loged = db.select('usage', where='barcode=$barcode', vars={'barcode':bar}, _test=False, what='date, quantity')
+		loged = db.query('SELECT `date`, `quantity` FROM `usage` WHERE `barcode` = $barcode', vars={'barcode':bar})
+		#loged = db.select('usage', where='barcode=$barcode', vars={'barcode':bar}, _test=False, what='date, quantity')
 		for x in range(len(loged)):
 			vallog.append(loged[x])
 			val = {'date': vallog[x]['date'].isoformat(' '), 'quantity': vallog[x]['quantity']}
@@ -229,10 +231,13 @@ class info:
 		
 		db.query('INSERT INTO `backup` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `tags`, `picture`, `flag`, `last_5`, `all`, `log`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $tags, $picture, $flag, $last_5, $all, $log) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'quantity': inform['quantity'], 'cat': inform['cat'], 'tags': inform['tags'], 'picture': inform['picture'], 'flag': inform['flag'], 'last_5': stat['last_5'], 'all': stat['all'], 'log': logSON})
 		
-		db.query('DELETE FROM `products` WHERE `barcode` = $barcode', vars={'barcode': barcode})
-		db.query('DELETE FROM `stats` WHERE `barcode` = $barcode', vars={'barcode': barcode})
-		db.query('DELETE FROM `usage` WHERE `barcode` = $barcode', vars={'barcode': barcode})
+		db.query('DELETE FROM `products` WHERE `barcode` = $barcode', vars={'barcode': bar})
+		db.query('DELETE FROM `stats` WHERE `barcode` = $barcode', vars={'barcode': bar})
+		db.query('DELETE FROM `usage` WHERE `barcode` = $barcode', vars={'barcode': bar})
+		
 		inform['deleted'] = 'true'
+		inform['tags'] = json.loads(inform['tags'])
+		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps(inform)
@@ -308,12 +313,15 @@ class total:
 			barcode = bobbins['barcode']
 			description = bobbins['description']
 			quantity = bobbins['quantity']
-			if 'cat' in bobbins: quantity = bobbins['cat']
+			if 'cat' in bobbins: cat = bobbins['cat']
 			else: cat = 'None'
-			if 'tags' in bobbins: quantity = bobbins['tags']
-			else: cat = '["None"]'
-			pictureTrue = int(bobbins['picTrue'])
-			picture = bobbins.picture
+			if 'tags' in bobbins: tags = bobbins['tags']
+			else: tags = '["None"]'
+			try:
+				pictureTrue = int(bobbins['picTrue'])
+				picture = bobbins.picture
+			except:
+				pictureTrue = 0
 			
 			query = []
 			copy = 0
@@ -349,12 +357,16 @@ class total:
 			
 			p = re.compile('\+')
 			found = p.sub( ' ', description)
+			
 			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `cat`, `tags`) VALUES ($name, $description, $barcode, $quantity, $picture, $cat, $tags)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'cat': cat, 'tags': tags})
 			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-			inform = name[0]
-			inform['added'] = 'true'
 			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
 			db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, "[]", "[]")', vars={'barcode': barcode})
+			
+			inform = name[0]
+			inform['added'] = 'true'
+			inform['tags'] = json.loads(inform['tags'])
+			
 			if spam:
 				web.header('Content-Type', 'application/json')
 			return json.dumps(inform)
