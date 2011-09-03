@@ -9,13 +9,8 @@ Project Blue Ring:
 
 Foreword:
 --------------
-Please also note (before noting below) that this README, at this time, is not up to date with the repository. There was a recent call scheme change which effects all admin calls. There have also been a few added and removed functions. Don't trust this just yet.
-I will try to get it updated soon.
-
 Please note that this is a major work in progress, the API maybe broken at anytime, and the URL scheme may change without warning, should a better solution present itself.
 Also throughout the documentation, the word peak comes up. Peak referes to the stated interval on which a restock has just happened, till the next restock or the current day.
-
-Please note: The clients do not work on this branch. They are setup for the Perl API version's URL scheme and as a result are not compatable with this branch. They will be updated, after more work has been completed on the API.
 
 License:
 -------------
@@ -23,14 +18,7 @@ This work is licensed under the Creative Commons Attribution-NonCommercial-Share
 
 Abstract:
 -------------
-A simple API written in Python which handles all the nasty stuff for keeping a basic inventory
-
-This branch of the API uses web.py, MySQL and mod_wsgi instead of Perl for the API, however the client and the web interface 
-will remain the same across all branches (however the code base will have to change due to url scheme changes (hasn't happened yet due to API work)).
-
-This branch may also intergrate R as the main statistics generation for the products. (It does but it doesn't, because rpy2 doesn't like to run in a web.py session,
-and makes the program hang without any errors...) as a result, This branch includes a copy of linear.py (known as ashmath.py in this branch), my own Vector math type for Python which is used for the
-linear math done in the stats function.
+A RESTful API written in Python with web.py which handles all the nasty stuff for keeping a basic inventory
 
 API Info:
 --------------
@@ -38,29 +26,53 @@ Coming soon after this Python branch of the API is finished.
 
 	/ General home page currently, It will eventually be the web front address... I think
 
-The following return JSON formated data:
+The following return JSON formated data (all POST/PUT/DELETE calls are OAuth protected)
 
-	*This is no longer up to date!*
-	/product/dog987/info/ Info for the product whos barcode comes after the /product/
-	/admin/dog987/delete/ Delete said product with barcode stated
-	/admin/add/ Add the given product according to the data in the POST sent to this url.
-	/admin/update/ Update the given product according to the data in the POST sent to this url. Min needed in the POST is barcode
-	/product/ get the total products
-	/product/names/ only the names and barcodes of all the products for auto complete
-	/product/dog987/log/ display the quantity change log for the product
-	/product/dog987/stats/ returns the predicted time of when the current stock will run out.
-
-The following is what is typically returned from the API calls:
-
-	*This is no longer up to date!*
-	/product/dog987/info/ {"picture": "dog987.png", "description": "A Dog", "barcode": "dog987", "name": "Beagle", "flag": "L", "quantity": 3, "id": 23}
-	/product/dog987/delete/ {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52}
-	/product/add/ {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53}
-	/product/update/ {"picture": "dog.png", "updated": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "oldbarcode": "dog", "quantity": 3, "id": 53}
-	/product/ [{"picture": "718103025027.png", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "barcode": "718103025027", "name": "Green Graph Composition", "flag": "M", "quantity": 1, "id": 3}, {"picture": "3037921120217.png", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "barcode": "3037921120217", "name": "Orange Graph Notebook", "flag": "L", "quantity": 1, "id": 4}]
-	/product/names/ [{"barcode": "718103025027", "name": "Green Graph Composition"}, {"barcode": "3037921120217", "name": "Orange Graph Notebook"}, {"barcode": "043396366268", "name": "the social network"}, {"barcode": "dog987", "name": "Beagle"}]
-	/product/dog987/log/ [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]
-	/product/dog987/stats/ {"current": -28.0, "guess": -0.07142857142857142, "predictedNF": -28, "predicted": -28.0, "standard": -0.07142857142857142}
+	/product/
+		GET - Returns the total list of products
+		POST - Places a new product into the database.
+		PUT - 
+		DELETE - 
+	/product/<barcode>/
+		GET - Returns the info for the specified product
+		POST - 
+		PUT - Updated the current product
+		DELETE - Deletes the current product
+	/category/ 
+		GET - Lists the total categories
+		POST - 
+		PUT - 
+		DELETE - 
+	/category/<category _name>/
+		GET - Lists the products inside of the category. 
+		POST - 
+		PUT - 
+		DELETE - 
+	/category/<category _name>/tag/<tag_name>/
+		GET - Lists the products which have the matching tags inside of the listed category
+		POST - 
+		PUT - 
+		DELETE - 
+	/tag/
+		GET - Lists the total tags in the database
+		POST - 
+		PUT - 
+		DELETE - 
+	/tag/<tag_name>/
+		GET - Lists all the products in the given tag
+		POST - 
+		PUT - 
+		DELETE - 
+	/stat/<barcode>/
+		GET - Lists the popularity, the rank and the predicted time till 0 units for the given product
+		POST - 
+		PUT - 
+		DELETE - 
+	/log/<barcode>/
+		GET - Lists the usage log for the given product
+		POST - 
+		PUT - 
+		DELETE - 
 
 Note that the reponses for the admin calls may also return with ``{"COP": "dog"}`` which should mean a copy of that products barcode already exsist in the table. in this example, '``dog`` is the barcode of the product that there is a copy of.
 Valid responses are ``[NED][NULL][NS][COP]`` ``[NED]`` meaning that there is Not Enough Data, ``[NULL]`` being mainly for the picture and thumbnail group indicating no picture or thumbnail is available, and ``[NS]`` being for Nothing Submitted, `[COP]`` meaning Copy Of Product meaning that a copy of that products barcode already exsists in the table.
@@ -71,8 +83,8 @@ Database Info:
 --------------------------
 This really needs to be updated!
 
-Products are stored in a MySQL database with the following columns:
-``[id][name][description][barcode][quantity][picture][thumb][flag]``
+Products are stored in a MySQL table: `products`
+``[id][name][description][barcode][quantity][picture][flag][cat][tags]``
 
 	[id] is just an arbitrary id number
 	[name] is the name of the product
@@ -80,23 +92,38 @@ Products are stored in a MySQL database with the following columns:
 	[barcode] is the barcode
 	[quantity] is the current quantity
 	[picture] storage of the main picture name
-	[thumb] Storage of the thumbnail name
 	[flag] is also reserved but can be manually set as it's just H,M or L for high priority, medium priority, and low priority, in terms of the quantity left. This will be used for shopping list generation later on when thats added to the API.
+	[cat] the category
+	[tags] a JSON array of tags
 
-Product use is stored in a second MySQL table which is formated like so:
+Product use is stored in a second MySQL table: `usage`
 ``[barcode][quantity][date]``
 
 	[barcode] is the product barcode
 	[quantity] is the products new quantity at the time the entry was added (after a change has happened to the quantity)
 	[date] name says it all
 	
-Product stats are stored in a third table:
+Product stats are stored in a third table: `stats`
 ``[barcode][last_5][all]``
 
 	[barcode] product barcode
 	[last_5] rolling list of the last 5 standard rates which have been calculated
 	[all] the total list of the standard rates which have been calculated
-	
+
+`pepper` contains the user and the OAuth:
+``[user][passwd][secret][shared][data]``
+
+		
+	[user] The user's name
+	[passwd] The users password, currently stored in plain text since user auth isn't implimented yet
+	[secret] The users OAuth Secert key, if they have one.
+	[shared] The users OAuth shared key, if they have one.
+	[data] A JSON object containing info about the ip, time last logged in, and if the user is logged in.
+		Sort of like a session, just a lot more barbaric.
+
+`salt` is the same as `pepper` and currently is not used yet (haven't had the time).
+`salt` is for backing up a deleted user, much like the backup database.
+
 Other info:
 -----------------
 

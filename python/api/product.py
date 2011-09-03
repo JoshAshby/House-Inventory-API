@@ -41,9 +41,6 @@ urls = (
 	'/(.*)/', 'info'
 )
 
-#class slash:
-#	def GET(self): raise web.seeother("/")
-
 class info:
 	'''
 	class documentation
@@ -74,6 +71,9 @@ class info:
 		#name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 		name = db.select('products', where="barcode=$barcode", vars = {'barcode': barcode}, limit=1, _test=False)
 		inform = name[0]
+		
+		#for s in range(len(inform)):
+		inform['tags'] = json.loads(inform['tags'])
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
@@ -276,6 +276,10 @@ class total:
 		name = db.query('SELECT * FROM `products`')
 		for i in range(len(name)):
 			query.append(name[i])
+		
+		for f in range(len(query)):
+			query[f]['tags'] = json.loads(query[f]['tags'])
+		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({"total": query})
