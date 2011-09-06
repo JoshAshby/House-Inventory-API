@@ -1,3 +1,12 @@
+if __name__=="__main__":
+	import os
+	os.chdir('../')
+
+	import sys
+	abspath = os.getcwd()
+	sys.path.append(abspath)
+	os.chdir(abspath)
+	
 import testPage
 import json
 
@@ -46,4 +55,4 @@ class tester(testPage.test):
 
 #testUnit = testPage.test()
 testUnit = tester()
-testUnit.testFunc(method='PUT', barcode='12')
+testUnit.testFunc(method='GET', barcode='718103025027')

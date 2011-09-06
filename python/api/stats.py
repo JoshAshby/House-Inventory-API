@@ -17,6 +17,7 @@ import web
 import json
 import re
 import time
+import math
 
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
@@ -131,14 +132,20 @@ def predict(barcode):
 		if (i+1) == m:
 			quantity.append(float(query[i]['quantity']))
 			date.append(float((query[0]['date'] - query[i]['date']).days))
+			print "+1"
 			break
-		elif (query[i]['quantity'] < query[i+1]['quantity']):
+		elif (query[i]['quantity'] > query[i+1]['quantity']):
 			quantity.append(float(query[i]['quantity']))
 			date.append(float((query[0]['date'] - query[i]['date']).days))
+			print "going"
+			break
 		else:
 			quantity.append(float(query[i]['quantity']))
 			date.append(float((query[0]['date'] - query[i]['date']).days))
-			break
+			print "woops"
+	
+	print date
+	print quantity
 	
 	#its 2am and I got bored with standard naming conventions...
 	bob = thorVector(date)
@@ -148,10 +155,23 @@ def predict(barcode):
 	
 	#take the partial deriv of each part of the vector to gain the total deriv or gradient...
 	for d in range(len(bob)):
-		frank.append(polyderiv([sara[d],-bob[d],-bob[d]**2]))
+		frank.append(polyderiv([sara[d],-bob[d],math.pow(-bob[d], 2)]))
 	
+	if frank[len(frank)-1][0]:
+		yoyo = sara[1]/frank[1][0]
+	else:
+		yoyo = 'NED'
+
+	'''
+	These next few lines go through and do the rolling list and total rates for the product
+	rates are the intercepts of the gradient.
+	These rates are stored in the database table 'stats' and are stored as json objects for ease of use and storage.
+	'''
+	
+	#load the stats info
 	stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 	
+	#error prevention stuff...
 	for q in range(len(stat)):
 		raven.append(stat[q])
 	
@@ -164,51 +184,42 @@ def predict(barcode):
 		allRaw = raven[0]['all']
 	except:
 		allRaw = []
-	
-	try:
-		last_5 = json.loads(last_5Raw)
-	except:
-		last_5 = []
-	
-	try:
-		all = json.loads(allRaw)
-	except:
-		all = []
-		
-	#print len(last_5)
-	
+
+	last_5 = json.loads(last_5Raw)
+
+	all = json.loads(allRaw)
+
 	if len(last_5) == 5:
 		last_5.pop(0)
 	else:
 		pass
-	
-	#print frank[0][0]
-	#print last_5
-	
+
+	if yoyo != 'NED':
+		last_5.append(yoyo)
+		all.append(yoyo)
+		
 	try:
-		if frank[0][0] != '':
-			try:
-				batman = reduce((lambda x, y: x + y), last_5)/5
-			except:
-				pass
-		else:
-			batman = 'NED'
-			#He's a ninja...
+		batman = reduce((lambda x, y: x + y), last_5)/5
+		#He's a ninja...
 	except:
 		batman = 'NED'
-	
-	#print sara[0]
-	#print batman
-	
-	try:
-		spider = sara[0]/batman
-	#	spider = 'NED'
-	except:
+
+	if batman != 'NED':
+		spider = sara[1]/batman
+		intSpider = int(spider)
+	else:
 		spider = 'NED'
-	
+		intSpider = 'NED'
+
 	#and now I have the hic-ups...
 	db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
+
+	try:
+		current = frank[1][0]
+	except:
+		current = 'NED'
 	
+	#these next few lines set up the rank to the rest of the products.
 	blowing = []
 	soda = 5
 	
@@ -255,7 +266,9 @@ def predict(barcode):
 	
 	#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
 	#Ie: Raptor eats everything... nom nom nom
-	raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
+	#raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
+	#raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
+	raptor = {'guess': batman, 'predictedNF': intSpider, 'rank': soda, 'popularity': ger}
 	
 	return raptor
 	
