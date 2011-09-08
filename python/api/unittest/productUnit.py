@@ -1,3 +1,12 @@
+if __name__=="__main__":
+	import os
+	os.chdir('../')
+
+	import sys
+	abspath = os.getcwd()
+	sys.path.append(abspath)
+	os.chdir(abspath)
+	
 import json
 import product
 
@@ -34,16 +43,20 @@ class infoTester(product.info):
 			#We just need the barcode for this one since it's just to delete the product...
 			got = self.deleteFunc(barcode=bar)
 			
-		answer_json = json.loads(got)
+		#answer_json = json.loads(got)
 		
 		#this is just a copy from the test class, needs to be updated for each method...
-		answer = answer_json['barcode']
+		#answer = answer_json['barcode']
+		
+		answer = got
+		
+		print json.dumps(got)
 		
 		print "Got back: ", got
 		
 		print "#########################################################"
 		
-		if answer == bar:
+		if answer:
 			print "%s: Passed" % str(method)
 		else:
 			print "%s: FAILED" % str(method)
@@ -109,12 +122,12 @@ class totalTester(product.total):
 unittestInfo = infoTester()
 unittestTotal = totalTester()
 
-unittestInfo.testFunc(method='GET', barcode='dog987')
+unittestInfo.testFunc(method='GET', barcode='718103025027')
 
-unittestInfo.testFunc(method='PUT', barcode='dog987', name='Dog', description='A dog of god', cat='Animal', tags='["Pet", "beagle"]', quantity='2')
+#unittestInfo.testFunc(method='PUT', barcode='dog987', name='Dog', description='A dog of god', cat='Animal', tags='["Pet", "beagle"]', quantity='2')
 
-unittestTotal.testFunc(method='GET')
+#unittestTotal.testFunc(method='GET')
 
-unittestTotal.testFunc(method='POST', barcode='tv9', name='tv', description='A tv', cat='Electronics', tags='["tv", "electronics"]', quantity='6')
+#unittestTotal.testFunc(method='POST', barcode='tv9', name='tv', description='A tv', cat='Electronics', tags='["tv", "electronics"]', quantity='6')
 
-unittestInfo.testFunc(method='DELETE', barcode='tv9')
+#unittestInfo.testFunc(method='DELETE', barcode='tv9')

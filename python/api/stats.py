@@ -13,11 +13,11 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 """
-import web
 import json
 import re
 import time
 import math
+from datetime import datetime
 
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
@@ -32,90 +32,100 @@ except:
 	os.chdir(abspath)
 from configSub import *
 from ashmath import *
-import auth
 
-urls = (
-	'', 'slash',
-	'/(.*)/', 'stats'
-)
+def stat(bar):
+	query=[]
+	
+	name = db.select('stats', where='barcode=$barcode', vars={'barcode': bar}, _test=False)
 
-class stats:
-	'''
-	class documentation
+	for i in range(len(name)):
+		query.append(name[i])
 	
-	Generates stats about the given product.
-	'''
-	def getFunc(self, **kwargs):	
-		'''
-		function documentation
-		
-		GET verb call
-		
-		Returns:
-		
-		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		try:
-			wi = web.input()
-			bar = wi['barcode']
-		except:
-			bar = kwargs['barcode']
-		
-		if spam:
-			web.header('Content-Type', 'application/json')
-		raptor = predict(bar)
-		return json.dumps(raptor)
+	#all = json.loads(query[0]['all'])
+	#last_5 = json.loads(query[0]['last_5'])
+	dataRaw = json.loads(query[0]['data'])
+	all = dataRaw['all']
+	last_5 = dataRaw['last5']
+	allDay = dataRaw['allDay']
+	last5Day = dataRaw['last5Day']
+	setAllDay = list(set(allDay))
+	lengDay = len(setAllDay)
+	set_all = list(set(all))
+	leng = len(set_all)
 	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-		
-		'''
-		pass
+	ans = predict(bar, 1)
+	rankPro = json.loads(rank(bar))
 	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
+	#
+	added = 0
+	for q in range(leng):
+		added += set_all[q]
 		
-		PUT verb call
-		
-		Returns:
-		
-		'''
-		pass
+	avg = added/(leng)
 	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-		
-		'''
-		pass
+	prestd = 0
+	for s in range(leng):
+		setr = math.pow((set_all[s] - avg), 2)
+		prestd += setr
 	
-	def GET(self, bar):
-		return self.getFunc(barcode=bar)
+	stddv = math.sqrt(prestd/leng)
 	
-	@auth.oauth_protect
-	def POST(self, bar):
-		return self.postFunc(barcode=bar)
-	
-	@auth.oauth_protect
-	def PUT(self, bar):
-		return self.putFunc(barcode=bar)
-	
-	@auth.oauth_protect
-	def DELETE(self, bar):
-		return self.deleteFunc(barcode=bar)
-			
+	#now days instead of rates
+	added = 0
+	for q in range(lengDay):
+		added += setAllDay[q]
 		
-def predict(barcode):
+	avg = added/(leng)
+	
+	prestd = 0
+	for s in range(lengDay):
+		setr = math.pow((setAllDay[s] - avg), 2)
+		prestd += setr
+	
+	stddvDay = math.sqrt(prestd/lengDay)
+	
+	reply = {
+		'barcode': bar,
+		'stddv': stddv,
+		'stddvDay': stddvDay,
+		'guess': ans['guess'],
+		'predicted': ans['predicted'],
+		'rank': rankPro['rank'],
+		'last5': last_5,
+		'all': all,
+		'last5Day': last5Day,
+		'allDay': allDay
+	}
+	
+	try:
+		product = productDoc(barcode=bar).get(bar)
+	except:
+		product = productDoc(barcode=bar)
+		
+	product.stddv = reply['stddv']
+	product.guess = reply['guess']
+	product.predicted = reply['predicted']
+	product.stddvDay = reply['stddvDay']
+	product.last5 = reply['last5']
+	product.last5Day = reply['last5Day']
+	product.all = reply['all']
+	product.allDay = reply['allDay']
+	product.rank = reply['rank']
+	
+	product._id = bar
+	product.save()
+	
+	replyson = {
+		'barcode': bar,
+		'guess': ans['guess'],
+		'predicted': ans['predicted'],
+		'rank': rankPro['rank']
+	}
+	
+	return replyson
+	
+
+def predict(barcode, zombie):
 	query = []
 	quantity = []
 	date = []
@@ -128,24 +138,32 @@ def predict(barcode):
 	m = len(query)
 	
 	#Here we have to get all the data points from the stats database (usage) so we can do fancy things to get some nice predictions.
-	for i in range(m):
-		if (i+1) == m:
-			quantity.append(float(query[i]['quantity']))
-			date.append(float((query[0]['date'] - query[i]['date']).days))
-			print "+1"
-			break
-		elif (query[i]['quantity'] > query[i+1]['quantity']):
-			quantity.append(float(query[i]['quantity']))
-			date.append(float((query[0]['date'] - query[i]['date']).days))
-			print "going"
-			break
-		else:
-			quantity.append(float(query[i]['quantity']))
-			date.append(float((query[0]['date'] - query[i]['date']).days))
-			print "woops"
-	
-	print date
-	print quantity
+	if zombie:
+		for i in range(m):
+			if (i+1) == m:
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((datetime.now() - query[i]['date']).days))
+				break
+			elif (query[i]['quantity'] > query[i+1]['quantity']):
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((datetime.now() - query[i]['date']).days))
+				break
+			else:
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((datetime.now() - query[i]['date']).days))
+	else:
+		for i in range(m):
+			if (i+1) == m:
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((query[0]['date'] - query[i]['date']).days))
+				break
+			elif (query[i]['quantity'] > query[i+1]['quantity']):
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((query[0]['date'] - query[i]['date']).days))
+				break
+			else:
+				quantity.append(float(query[i]['quantity']))
+				date.append(float((query[0]['date'] - query[i]['date']).days))
 	
 	#its 2am and I got bored with standard naming conventions...
 	bob = thorVector(date)
@@ -169,25 +187,34 @@ def predict(barcode):
 	'''
 	
 	#load the stats info
-	stat  = db.query('SELECT `last_5`, `all` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
+	stat  = db.query('SELECT `last_5`, `all`, `data` FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
 	
 	#error prevention stuff...
 	for q in range(len(stat)):
 		raven.append(stat[q])
 	
 	try:
-		last_5Raw = raven[0]['last_5']
+		dataRaw = json.loads(raven[0]['data'])
 	except:
-		lasat_5Raw = []
+		pass
+	
+	try:
+		#last_5Raw = raven[0]['last_5']
+		last_5 = dataRaw['last5']
+	except:
+		#last_5Raw = []
+		last_5= []
 		
 	try:
-		allRaw = raven[0]['all']
+		#allRaw = raven[0]['all']
+		all = dataRaw['all']
 	except:
-		allRaw = []
+		#allRaw = []
+		all = []
 
-	last_5 = json.loads(last_5Raw)
+	#last_5 = json.loads(last_5Raw)
 
-	all = json.loads(allRaw)
+	#all = json.loads(allRaw)
 
 	if len(last_5) == 5:
 		last_5.pop(0)
@@ -200,8 +227,8 @@ def predict(barcode):
 		
 	try:
 		batman = reduce((lambda x, y: x + y), last_5)/5
-		#He's a ninja...
 	except:
+		#He's a ninja...
 		batman = 'NED'
 
 	if batman != 'NED':
@@ -212,21 +239,53 @@ def predict(barcode):
 		intSpider = 'NED'
 
 	#and now I have the hic-ups...
-	db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode})
-
 	try:
 		current = frank[1][0]
 	except:
 		current = 'NED'
 	
+	try:
+		allDay = dataRaw['allDay']
+	except:
+		allDay = []
+	allDay.append(intSpider)
+	
+	try:
+		lastDay = dataRaw['last5Day']
+	except:
+		lastDay = []
+	
+	if len(lastDay) == 5:
+		lastDay.pop(0)
+	else:
+		pass
+	
+	lastDay.append(intSpider)
+	
+	dat = {'day': intSpider, 'allDay': allDay, 'last5Day': lastDay, 'all': all, 'last5': last_5}
+	
+	db.query('UPDATE `stats` SET `last_5` = $last_5, `all` = $all, `data` = $data WHERE `barcode` = $barcode', vars={'last_5': json.dumps(last_5), 'all': json.dumps(all) , 'barcode': barcode, 'data': json.dumps(dat)})
+
+	#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
+	#Ie: Raptor eats everything... nom nom nom
+	#raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
+	#raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
+	raptor = {'guess': batman, 'predicted': intSpider}
+	
+	return raptor
+
+
+def rank(barcode):
 	#these next few lines set up the rank to the rest of the products.
 	blowing = []
 	soda = 5
 	
-	bubble = db.query('SELECT `barcode`, `last_5` FROM `stats`')
+	bubble = db.query('SELECT `barcode`, `last_5`, `data` FROM `stats`')
 	
 	for q in range(len(bubble)):
 		blowing.append(bubble[q])
+	
+	
 		
 	#insert programming joke here....
 	bubble_sort = sorted(blowing, key=lambda bubbles: bubbles['last_5'][0])
@@ -264,14 +323,5 @@ def predict(barcode):
 		flag = 'L'
 		db.query("UPDATE `products` SET `flag` = $flag WHERE `barcode` = $barcode",vars={'flag': flag, 'barcode': barcode})
 	
-	#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
-	#Ie: Raptor eats everything... nom nom nom
-	#raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
-	#raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
-	raptor = {'guess': batman, 'predictedNF': intSpider, 'rank': soda, 'popularity': ger}
-	
-	return raptor
-	
-
-app = web.application(urls, globals(), autoreload=False)
-application = app.wsgifunc()
+	raptop = {'rank': soda, 'popularity': ger}
+	return json.dumps(raptop)

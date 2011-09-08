@@ -69,15 +69,18 @@ class info:
 			barcode = kwargs['barcode']
 		
 		#name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		name = db.select('products', where="barcode=$barcode", vars = {'barcode': barcode}, limit=1, _test=False)
-		inform = name[0]
+		#name = db.select('products', where="barcode=$barcode", vars = {'barcode': barcode}, limit=1, _test=False)
+		#inform = name[0]
 		
 		#for s in range(len(inform)):
-		inform['tags'] = json.loads(inform['tags'])
+		#inform['tags'] = json.loads(inform['tags'])
+		
+		name = database.get(barcode)
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps(inform)
+		#return json.dumps(inform)
+		return name
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -169,6 +172,21 @@ class info:
 			
 			#db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `cat` = $cat, `tags` = $tags WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'cat': cat, 'tags': tags})
 			db.update('products', where='barcode=$barcode', name=nam, description=found, barcode=bar, quantity=quant, picture=frodo, cat=ca, tags=tag, vars={'barcode':oldbarcode}, _test=debug)
+			
+			try:
+				product = productDoc(barcode=bar).get(bar)
+			except:
+				product = productDoc(barcode=bar)
+			
+			product.name = nam
+			product.description = found
+			product.quantity = quant
+			product.photo = frodo
+			product.cat = ca
+			product.tags = tag
+			
+			product._id = bar
+			product.save()
 			
 			if oldbarcode != bar:
 				#db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': bar})
