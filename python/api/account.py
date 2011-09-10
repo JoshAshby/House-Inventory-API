@@ -37,7 +37,7 @@ class account:
 		if type is 'username':
 			alpha = "admin/user"
 		elif type is 'key':
-			alpha = "admin/all"
+			alpha = "admin/key"
 		else:
 			alpha = "admin/user"
 	
@@ -69,7 +69,8 @@ class account:
 		reply = {
 			"user": kwargs['name'],
 			"added": 'true',
-			"hash": hashed
+			"hash": hashed,
+			"salt": saltdb
 		}
 		
 		return reply
@@ -169,7 +170,8 @@ class account:
 		reply = {
 			"username": user,
 			"temp_password": passwd,
-			"temp_hash": hashed
+			"temp_hash": hashed,
+			"temp_salt": saltdb
 		}
 		
 		return reply
@@ -177,6 +179,11 @@ class account:
 	def update(self, user, **kwargs):
 		a = database.view("admin/user", key=user).first()['value']['_id']
 		new = userDoc.get(a)
+		
+		reply = {
+			"username": user,
+			"updated": 'true'
+		}
 		
 		if 'passwd' in kwargs:
 			saltdb = ''.join(map(lambda x:'./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'[ord(x)%64], os.urandom(16)))
@@ -186,17 +193,15 @@ class account:
 		
 			hashed = hashlib.sha512(kwargs['passwd']+saltdb).hexdigest()
 			new.hash = hashed
+			
+			reply['salt'] = saltdb
+			reply['hash'] = hashed
 		
 		if 'email' in kwargs: new.email = kwargs['email']
 		if 'permission' in kwargs: new.permission = kwargs['permission']
 		if 'name' in kwargs: new.username = kwargs['name']
 		
 		new.save()
-		
-		reply = {
-			"username": user,
-			"updated": 'true'
-		}
 		
 		return reply
 	
@@ -207,6 +212,25 @@ class account:
 		reply = {
 			"username": user,
 			"deleted": 'true'
+		}
+		
+		return reply
+	
+	def oauthKeys(self, user):
+		a = database.view("admin/user", key=user).first()['value']['_id']
+		use = userDoc.get(a)
+		
+		sharedwd = ''.join(map(lambda x:'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'[ord(x)%62], os.urandom(50)))
+		secretwd = ''.join(map(lambda x:'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'[ord(x)%62], os.urandom(50)))
+		
+		use.oauth = {"shared": sharedwd, "secret": secretwd}
+		
+		use.save()
+		
+		reply = {
+			"user": user,
+			"shared": sharedwd,
+			"secret": secretwd
 		}
 		
 		return reply

@@ -61,13 +61,11 @@ class catInfo:
 		except:
 			cat = kwargs['category']
 			
-		query = []
-		name = db.query('SELECT `barcode`, `name`, `picture`, `tags` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
-		for i in range(len(name)):
-			query.append(name[i])
+		query = database.view("cattag/categorys", key=cat).all()
 		
-		for s in range(len(query)):
-			query[s]['tags'] = json.loads(query[s]['tags'])
+		for i in range(len(query)):
+			query[i] = query[i]['value']
+		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({'products': query})
@@ -143,7 +141,8 @@ class catTotal:
 		
 		for i in range(len(name)):
 			query.append(name[i]['value']['category'])
-			
+		
+		
 		queryFix = list(set(query))
 		
 		if spam:
@@ -226,21 +225,18 @@ class catTag:
 			
 		query = []
 		dog = []
-		#name = db.query('SELECT `tags`, `barcode`, `name`, `picture` FROM `products` WHERE `cat` = $cat', vars = {'cat': cat})
-		name = db.select('products', where='cat=$cat', what='tags, barcode, name, picture', vars={'cat':cat}, _test=False)
 		
-		for i in range(len(name)):
-			query.append(name[i])
+		query = database.view("cattag/categorys", key=cat).all()
+		
+		for i in range(len(query)):
+			query[i] = query[i]['value']
 		
 		for x in range(len(query)):
-			e = json.loads(query[x]['tags'])
+			e = query[x]['tags']
 			for z in range(len(e)):
 				if e[z] == tag:
 					dog.append(query[x])
 				else: pass
-		
-		for f in range(len(dog)):
-			dog[f]['tags'] = json.loads(dog[f]['tags'])
 		
 		if spam:
 			web.header('Content-Type', 'application/json')

@@ -1,0 +1,11 @@
+{
+   "language": "coffeescript",
+   "views": {
+       "key": {
+           "map": "(doc) ->\n if doc.doc_type is 'userDoc'\n  emit doc.oauth.shared, doc\n"
+       },
+       "user": {
+           "map": "(doc) ->\n if doc.doc_type is 'userDoc'\n  emit doc.username, doc\n"
+       }
+   }
+}

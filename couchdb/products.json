@@ -1,0 +1,11 @@
+{
+   "language": "coffeescript",
+   "views": {
+      "all": {
+         "map": "(doc) ->\n if doc.doc_type is 'productDoc'\n  emit doc.barcode, \n  {\n   barcode: doc.barcode\n   name: doc.name\n   quantity: doc.quantity\n   description: doc.description\n   tags: doc.tags\n   category: doc.category\n  }"
+      },
+      "admin": {
+           "map": "(doc) ->\n if doc.doc_type is 'productDoc'\n  emit doc.barcode, doc\n"
+       }
+   }
+}

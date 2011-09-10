@@ -78,7 +78,6 @@ def validate_two_leg_oauth():
 
 	# Create an oauth2 Consumer with an account's consumer_key and consumer_secret
 	# to be used to verify the request
-	#consumer = oauth2.Consumer('rGgkUYhqjNEtwZdhnnLZoBkXkdKCPJmI', 'OSdTYJAeQJLLOHlOdmatRvEdBcuxuKGD')
 	consumer = oauth2.Consumer(account['shared'], account['secret'])
 
 	# Create our oauth2 Server and add hmac-sha1 signature method

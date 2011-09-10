@@ -93,7 +93,10 @@ def predict(bar, zombie):
 		frank.append(polyderiv([sara[d],-bob[d],math.pow(-bob[d], 2)]))
 	
 	if frank[len(frank)-1][0]:
-		yoyo = sara[1]/frank[1][0]
+		try:
+			yoyo = sara[1]/frank[1][0]
+		except:
+			yoyo = 'NED'
 	else:
 		yoyo = 'NED'
 	
@@ -105,7 +108,7 @@ def predict(bar, zombie):
 		#He's a ninja...
 		batman = 'NED'
 
-	if batman != 'NED':
+	if batman != 'NED' and yoyo != 'NED':
 		spider = sara[1]/batman
 		intSpider = int(spider)
 	else:

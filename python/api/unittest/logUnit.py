@@ -1,3 +1,12 @@
+if __name__=="__main__":
+	import os
+	os.chdir('../')
+
+	import sys
+	abspath = os.getcwd()
+	sys.path.append(abspath)
+	os.chdir(abspath)
+	
 import json
 import log
 

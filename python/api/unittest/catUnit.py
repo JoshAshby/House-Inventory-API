@@ -1,3 +1,12 @@
+if __name__=="__main__":
+	import os
+	os.chdir('../')
+
+	import sys
+	abspath = os.getcwd()
+	sys.path.append(abspath)
+	os.chdir(abspath)
+	
 import json
 import cat
 
@@ -128,8 +137,8 @@ unittestCatInfo = catInfoTester()
 unittestCatTotal = catTotalTester()
 unittestCatTag = catTagTester()
 
-unittestCatInfo.testFunc(method='GET', category='Other')
+unittestCatInfo.testFunc(method='GET', category='Animal')
 
 unittestCatTotal.testFunc(method='GET')
 
-unittestCatTag.testFunc(method='GET', category='Other', tag='paper')
+unittestCatTag.testFunc(method='GET', category='Notebook', tag='paper')

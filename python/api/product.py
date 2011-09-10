@@ -158,7 +158,6 @@ class info:
 			b.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": bobbins['quantity']})
 			
 			product.barcode = bar
-			product._id = bar
 			product.log = list(b)
 			product.save()
 
@@ -195,7 +194,9 @@ class info:
 		
 		inform = json.dumps(reply)
 		
-		database.delete_doc(bar)
+		a = database.view("products/admin", key=bar).first()['value']['_id']
+		
+		database.delete_doc(a)
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
@@ -234,9 +235,11 @@ class total:
 		Args:
 			barcode - the products barcode
 		Returns:
-			A JSON object like: {"total": [{"value": {"category": "Notebook", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "3037921120217", "quantity": 1, "name": "Orange Graph Composition"}, "id": "3037921120217", "key": "3037921120217"}, {"value": {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}, "id": "718103025027", "key": "718103025027"}]}
+			A JSON object like: {"total": [{"category": "Notebook", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "3037921120217", "quantity": 1, "name": "Orange Graph Composition"}, {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}, {"category": "Animal", "description": "A dog of god", "tags": ["Beagle", "dog", "pet"], "barcode": "dog987", "quantity": "2", "name": "Dog"}]}
 		'''
 		name = database.view("products/all").all()
+		for i in range(len(name)):
+			name[i] = name[i]['value']
 		inform = json.dumps({'total': name})
 		
 		if spam:
@@ -315,7 +318,6 @@ class total:
 			product.picture = frodo
 			
 			product.barcode = bar
-			product._id = bar
 			product.save()
 
 			name = database.view("products/all", key=bar).all()

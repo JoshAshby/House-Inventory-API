@@ -60,13 +60,10 @@ class tagsInfo:
 		except:
 			tag = kwargs['tag']
 		
-		query = []
-		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `tags` LIKE "%'+ tags +'%"')
+		query = database.view("cattag/tags", key=tag).all()
 		
-		for i in range(len(name)):
-			query.append(name[i])
-		
-		print query
+		for i in range(len(query)):
+			query[i] = query[i]['value']
 		
 		if spam:
 			web.header('Content-Type', 'application/json')

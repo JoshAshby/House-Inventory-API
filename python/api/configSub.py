@@ -14,14 +14,9 @@ joshuaashby@joshashby.com
 import web
 import couchdbkit
 
-db = web.database(dbn='mysql', user='root', pw='speeddyy5', db='barcode')
+databaseName = 'stats'
 
 render = web.template.render('/srv/http/template/')
-
-swivel_mount = 'http://localhost/'
-
-#debug setter
-spamandeggs = 0
 
 debug = 0
 
@@ -35,7 +30,7 @@ class slash:
 	def GET(self): raise web.seeother("/")
 
 
-database = couchdbkit.Server()["stats"]
+database = couchdbkit.Server()[databaseName]
 
 class productDoc(couchdbkit.Document):
 	barcode = couchdbkit.StringProperty()
