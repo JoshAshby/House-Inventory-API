@@ -33,30 +33,21 @@ class infoTester(product.info):
 			got = self.postFunc(barcode)
 		if method == 'PUT':
 			#We have to get all the update info so make sure it's all passed...
-			desc = kwargs['description']
-			nam = kwargs['name']
-			tag = kwargs['tags']
-			ca = kwargs['cat']
+			#desc = kwargs['description']
+			#nam = kwargs['name']
+			#tag = kwargs['tags']
+			#ca = kwargs['cat']
 			quant = kwargs['quantity']
-			got = self.putFunc(barcode=bar, name=nam, description=desc, cat=ca, tags=tag, quantity=quant)
+			got = self.putFunc(barcode=bar, quantity=quant)
 		if method == 'DELETE':
 			#We just need the barcode for this one since it's just to delete the product...
 			got = self.deleteFunc(barcode=bar)
-			
-		#answer_json = json.loads(got)
-		
-		#this is just a copy from the test class, needs to be updated for each method...
-		#answer = answer_json['barcode']
-		
-		answer = got
-		
-		print json.dumps(got)
 		
 		print "Got back: ", got
 		
 		print "#########################################################"
 		
-		if answer:
+		if got:
 			print "%s: Passed" % str(method)
 		else:
 			print "%s: FAILED" % str(method)
@@ -90,27 +81,13 @@ class totalTester(product.total):
 			got = self.putFunc()
 		if method == 'DELETE':
 			got = self.deleteFunc()
-			
-		answer_json = json.loads(got)
 		
-		#this is just a copy from the test class, needs to be updated for each method...
-		try:
-			answer = answer_json['total']
-		except:
-			try:
-				answer = answer_json['barcode']
-			except:
-				pass
-			try:
-				answer = answer_json['COP']
-			except:
-				pass
 		
 		print "Got back: ", got
 		
 		print "#########################################################"
 		
-		if answer:
+		if got:
 			print "%s: Passed" % str(method)
 		else:
 			print "%s: FAILED" % str(method)
@@ -124,10 +101,13 @@ unittestTotal = totalTester()
 
 unittestInfo.testFunc(method='GET', barcode='718103025027')
 
-#unittestInfo.testFunc(method='PUT', barcode='dog987', name='Dog', description='A dog of god', cat='Animal', tags='["Pet", "beagle"]', quantity='2')
+unittestInfo.testFunc(method='PUT', barcode='dog987', quantity='2')
 
-#unittestTotal.testFunc(method='GET')
+unittestTotal.testFunc(method='GET')
 
-#unittestTotal.testFunc(method='POST', barcode='tv9', name='tv', description='A tv', cat='Electronics', tags='["tv", "electronics"]', quantity='6')
+tag = ['tv', 'electronics', 'media']
+tag = json.dumps(tag)
 
-#unittestInfo.testFunc(method='DELETE', barcode='tv9')
+unittestTotal.testFunc(method='POST', barcode='tv9', name='tv', description='A tv', cat='Electronics', tags=tag, quantity='6')
+
+unittestInfo.testFunc(method='DELETE', barcode='tv9')

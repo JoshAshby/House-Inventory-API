@@ -18,6 +18,7 @@ import web
 import json
 import re
 import time
+import datetime
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
@@ -59,28 +60,20 @@ class info:
 		Args:
 			barcode - the products barcode
 		Returns:
-			A JSON object like: {"picture": "dog.png", "description": "a dog of god", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 10, "id": 52}
+			A JSON object like: {"product": {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}}
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		try: 
 			wi = web.input()
-			barcode = wi['barcode']
+			bar = wi['barcode']
 		except:
-			barcode = kwargs['barcode']
+			bar = kwargs['barcode']
 		
-		#name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		#name = db.select('products', where="barcode=$barcode", vars = {'barcode': barcode}, limit=1, _test=False)
-		#inform = name[0]
-		
-		#for s in range(len(inform)):
-		#inform['tags'] = json.loads(inform['tags'])
-		
-		name = database.get(barcode)
+		name = database.view("products/all", key=bar).first()['value']
+		inform = json.dumps({"product": name})
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
-		#return json.dumps(inform)
-		return name
+		return inform
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -114,37 +107,21 @@ class info:
 			else: bobbins['picture'] = {}
 		
 		if bobbins['barcode']:
-			the_ring = []
-			
 			bar = bobbins['barcode']
+				
+			product = productDoc.get(bar)
+			pro = database.view("products/all", key=bar).first()['value']
 			
-			#bilbo = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-			bilbo = db.select('products', where='barcode=$barcode', vars={'barcode':bar}, limit=1, _test=False)
+			if 'name' in bobbins: product.name = bobbins['name']
 			
-			for e in range(len(bilbo)):
-				the_ring.append(bilbo[e])
+			if 'quantity' in bobbins: product.quantity = bobbins['quantity']
 			
-			if 'name' in bobbins: nam = bobbins['name']
-			else: nam = the_ring[0]['name']
+			if 'cat' in bobbins: product.category = bobbins['cat']
 			
-			if 'newbarcode' in bobbins: oldbarcode = bobbins['newbarcode']
-			else: oldbarcode = the_ring[0]['barcode']
-			
-			if 'description' in bobbins: desc = bobbins['description']
-			else: desc = the_ring[0]['description']
-			
-			if 'quantity' in bobbins: quant = bobbins['quantity']
-			else: quant = the_ring[0]['quantity']
-			
-			if 'cat' in bobbins: ca = bobbins['cat']
-			else: ca = the_ring[0]['cat']
-			
-			if 'tags' in bobbins: tag = bobbins['tags']
-			else: tag = '["None"]'
+			if 'tags' in bobbins: product.tags = json.loads(bobbins['tags'])
 			
 			if 'picTrue' in bobbins: pictureTrue = int(bobbins['picTrue'])
 			else: pictureTrue = 0
-			#pic = bobbins.picture
 			pic = bobbins['picture']
 			
 			if pictureTrue == 1:
@@ -163,53 +140,36 @@ class info:
 				
 				goop = freyaPics(frodo)
 				goop.odinsThumb()
-				
 			else:
-				frodo = the_ring[0]['picture']
+				try:
+					frodo = pro['picture']
+				except:
+					frodo = "null"
+
+			if 'description' in bobbins:
+				desc = bobbins['description']
+				p = re.compile('\+')
+				found = p.sub( ' ', desc)
+				product.description = found
 			
-			p = re.compile('\+')
-			found = p.sub( ' ', desc)
+			product.picture = frodo
 			
-			#db.query('UPDATE `products` SET `name` = $name, `description` = $description, `barcode` = $barcode, `quantity` = $quantity, `picture` = $picture, `cat` = $cat, `tags` = $tags WHERE `barcode` = $oldbarcode', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': oldbarcode, 'picture': frodo, 'oldbarcode': barcode, 'cat': cat, 'tags': tags})
-			db.update('products', where='barcode=$barcode', name=nam, description=found, barcode=bar, quantity=quant, picture=frodo, cat=ca, tags=tag, vars={'barcode':oldbarcode}, _test=debug)
+			b = product.log
+			b.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": bobbins['quantity']})
 			
-			try:
-				product = productDoc(barcode=bar).get(bar)
-			except:
-				product = productDoc(barcode=bar)
-			
-			product.name = nam
-			product.description = found
-			product.quantity = quant
-			product.photo = frodo
-			product.cat = ca
-			product.tags = tag
-			
+			product.barcode = bar
 			product._id = bar
+			product.log = list(b)
 			product.save()
-			
-			if oldbarcode != bar:
-				#db.query('UPDATE `stats` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': bar})
-				db.update('stats', where='barcode=$barcode', barcode=bar, vars={'barcode':oldbarcode}, _test=debug)
-				#db.query('UPDATE `usage` SET `barcode` = $barcode WHERE `barcode` = $oldbarcode', vars={'barcode': oldbarcode, 'oldbarcode': bar})
-				db.update('usage', where='barcode=$barcode', barcode=bar, vars={'barcode':oldbarcode}, _test=debug)
-				
-			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quant, 'barcode': oldbarcode})
-			#db.insert('usage', barcode=oldbarcode, quantity=str(quant), _test=debug)
-			#name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode': oldbarcode})
-			name = db.select('products', where='barcode=$barcode', vars={'barcode':oldbarcode}, _test=False)
-			
-			inform = name[0]
-			inform['updated'] = 'true'
-			inform['oldbarcode'] = bar
-			inform['barcode'] = oldbarcode
-			inform['tags'] = json.loads(inform['tags'])
+
+			name = database.view("products/all", key=bar).all()
+			inform = json.dumps({"product": name[0]['value']})
 			
 			if spam:
 				web.header('Content-Type', 'application/json')
-			return json.dumps(inform)
+			return inform
 		else:
-			return json.dumps(['NS'])
+			return json.dumps({'error': 'Not enough data'})
 		
 	def deleteFunc(self, **kwargs):
 		'''
@@ -227,38 +187,19 @@ class info:
 		except:
 			bar = kwargs['barcode']
 		
-		log = []
-		vallog = []
+		name = database.view("products/all", key=bar).first()['value']
 		
-		#name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		name = db.select('products', where='barcode=$barcode', vars={'barcode':bar}, _test=False)
-		inform = name[0]
+		name['deleted'] = 'true'
 		
-		#stated = db.query('SELECT * FROM `stats` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-		stated = db.select('stats', where='barcode=$barcode', vars={'barcode':bar}, _test=False)
-		stat = stated[0]
-			
-		loged = db.query('SELECT `date`, `quantity` FROM `usage` WHERE `barcode` = $barcode', vars={'barcode':bar})
-		#loged = db.select('usage', where='barcode=$barcode', vars={'barcode':bar}, _test=False, what='date, quantity')
-		for x in range(len(loged)):
-			vallog.append(loged[x])
-			val = {'date': vallog[x]['date'].isoformat(' '), 'quantity': vallog[x]['quantity']}
-			log.append(val)
+		reply = {'product': name}
 		
-		logSON = json.dumps(log)
+		inform = json.dumps(reply)
 		
-		db.query('INSERT INTO `backup` (`id`, `barcode`, `name`, `description`, `quantity`, `cat`, `tags`, `picture`, `flag`, `last_5`, `all`, `log`) VALUES ($id, $barcode, $name, $description, $quantity, $cat, $tags, $picture, $flag, $last_5, $all, $log) ', vars={'barcode': inform['barcode'], 'name': inform['name'], 'quantity':inform['quantity'], 'id': inform['id'], 'description': inform['description'], 'quantity': inform['quantity'], 'cat': inform['cat'], 'tags': inform['tags'], 'picture': inform['picture'], 'flag': inform['flag'], 'last_5': stat['last_5'], 'all': stat['all'], 'log': logSON})
-		
-		db.query('DELETE FROM `products` WHERE `barcode` = $barcode', vars={'barcode': bar})
-		db.query('DELETE FROM `stats` WHERE `barcode` = $barcode', vars={'barcode': bar})
-		db.query('DELETE FROM `usage` WHERE `barcode` = $barcode', vars={'barcode': bar})
-		
-		inform['deleted'] = 'true'
-		inform['tags'] = json.loads(inform['tags'])
+		database.delete_doc(bar)
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps(inform)
+		return inform
 	
 	def GET(self, bar):
 		return self.getFunc(barcode=bar)
@@ -293,19 +234,14 @@ class total:
 		Args:
 			barcode - the products barcode
 		Returns:
-			A JSON object like: {"total" : [{"picture": "718103025027.png", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "barcode": "718103025027", "name": "Green Graph Composition", "flag": "M", "quantity": 1, "id": 3, "thumb": "718103025027_thumb.png"}, {"picture": "3037921120217.png", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "barcode": "3037921120217", "name": "Orange Graph Notebook", "flag": "L", "quantity": 1, "id": 4, "thumb": "3037921120217_thumb.png"}]}
+			A JSON object like: {"total": [{"value": {"category": "Notebook", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "3037921120217", "quantity": 1, "name": "Orange Graph Composition"}, "id": "3037921120217", "key": "3037921120217"}, {"value": {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}, "id": "718103025027", "key": "718103025027"}]}
 		'''
-		query = []
-		name = db.query('SELECT * FROM `products`')
-		for i in range(len(name)):
-			query.append(name[i])
-		
-		for f in range(len(query)):
-			query[f]['tags'] = json.loads(query[f]['tags'])
+		name = database.view("products/all").all()
+		inform = json.dumps({'total': name})
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
-		return json.dumps({"total": query})
+		return inform
 		
 	def postFunc(self, **kwargs):
 		'''
@@ -325,44 +261,41 @@ class total:
 			if 'picture' in bobbins: pass
 			else: bobbins['picture'] = {}
 		
-		#if there is data in the Post go through the stuff to add it to the table if not, then let the client know there was no data sent...
-		if bobbins['barcode'] and bobbins['name'] and bobbins['description'] and bobbins['quantity']:
-			name = bobbins['name']
-			barcode = bobbins['barcode']
-			description = bobbins['description']
-			quantity = bobbins['quantity']
-			if 'cat' in bobbins: cat = bobbins['cat']
-			else: cat = 'None'
-			if 'tags' in bobbins: tags = bobbins['tags']
-			else: tags = '["None"]'
-			try:
-				pictureTrue = int(bobbins['picTrue'])
-				picture = bobbins.picture
-			except:
-				pictureTrue = 0
-			
-			query = []
-			copy = 0
-			
-			names = db.query('SELECT `barcode` FROM `products`')
-			for i in range(len(names)):
-				query.append(names[i])
-			
-			for k in range(len(query)):
-				if (query[k]['barcode'] == barcode):
-					return json.dumps({'COP': barcode})
-				else:
-					pass
-
-			if pictureTrue == 1:
-				catdog = re.search('(\..*)', picture.filename).group()
+		if bobbins['barcode']:
+			bar = bobbins['barcode']
 				
-				frodo = barcode + catdog
+			tests = database.view("products/all", key=bar).all()
+			if tests:
+				inform = json.dumps({'copy': bar})
+				if spam:
+					web.header('Content-Type', 'application/json')
+				return inform
+			
+			product = productDoc(barcode=bar)
+			
+			if 'name' in bobbins: product.name = bobbins['name']
+			
+			if 'description' in bobbins: product.description = bobbins['description']
+			
+			if 'quantity' in bobbins: product.quantity = bobbins['quantity']
+			
+			if 'cat' in bobbins: product.category = bobbins['cat']
+			
+			if 'tags' in bobbins: product.tags = json.loads(bobbins['tags'])
+			
+			if 'picTrue' in bobbins: pictureTrue = int(bobbins['picTrue'])
+			else: pictureTrue = 0
+			pic = bobbins['picture']
+			
+			if pictureTrue == 1:
+				catdog = re.search('(\..*)', pic.filename).group()
+				
+				frodo = bar + catdog
 				
 				f = open(abspath + '/pictures/' + frodo, "wb")
 
 				while 1:
-					chunk = picture.file.read(10000)
+					chunk = pic.file.read(10000)
 					if not chunk:
 						break
 					f.write( chunk )
@@ -371,25 +304,28 @@ class total:
 				goop = freyaPics(frodo)
 				goop.odinsThumb()
 			else:
-				frodo = 'NULL'
+				frodo = "null"
 			
-			p = re.compile('\+')
-			found = p.sub( ' ', description)
+			if 'description' in bobbins:
+				desc = bobbins['description']
+				p = re.compile('\+')
+				found = p.sub( ' ', desc)
+				product.description = found
 			
-			db.query('INSERT INTO `products` (`name`, `description`, `barcode`, `quantity`, `picture`, `cat`, `tags`) VALUES ($name, $description, $barcode, $quantity, $picture, $cat, $tags)', vars={'name': name, 'description': found, 'quantity': quantity , 'barcode': barcode, 'picture':frodo, 'cat': cat, 'tags': tags})
-			name = db.query('SELECT * FROM `products` WHERE `barcode` = $barcode', vars={'barcode':barcode})
-			db.query('INSERT INTO `usage` (`barcode`, `quantity`) VALUES ($barcode, $quantity)', vars={'quantity': quantity , 'barcode': barcode})
-			db.query('INSERT INTO `stats` (`barcode`, `last_5`, `all`) VALUES ($barcode, "[]", "[]")', vars={'barcode': barcode})
+			product.picture = frodo
 			
-			inform = name[0]
-			inform['added'] = 'true'
-			inform['tags'] = json.loads(inform['tags'])
+			product.barcode = bar
+			product._id = bar
+			product.save()
+
+			name = database.view("products/all", key=bar).all()
+			inform = json.dumps({"product": name[0]['value']})
 			
 			if spam:
 				web.header('Content-Type', 'application/json')
-			return json.dumps(inform)
+			return inform
 		else:
-			return json.dumps(['NS'])
+			return json.dumps({'error': 'Not enough data'})
 	
 	def putFunc(self, **kwargs):
 		'''

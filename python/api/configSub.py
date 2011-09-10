@@ -39,5 +39,11 @@ database = couchdbkit.Server()["stats"]
 
 class productDoc(couchdbkit.Document):
 	barcode = couchdbkit.StringProperty()
-	
+
+
+class userDoc(couchdbkit.Document):
+	username = couchdbkit.StringProperty()
+
+
 productDoc.set_db(database)
+userDoc.set_db(database)

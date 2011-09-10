@@ -49,7 +49,7 @@ class log:
 		GET verb call
 		
 		Returns:
-			A JSON object like: {"log" : [["2011-03-19 01:15:17", 1], ["2011-02-19 01:15:09", 2], ["2011-02-06 00:47:43", 6], ["2011-02-05 00:47:43", 3]]}
+			A JSON object like: 
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		try:
@@ -57,15 +57,9 @@ class log:
 			bar = wi['barcode']
 		except:
 			bar = kwargs['barcode']
-			
-		query = []
-		log = []
-		name = db.query('SELECT `quantity`, `date` FROM `usage` WHERE `barcode` = $barcode ORDER BY `date` desc', vars={'barcode':bar})
-		#name = db.select('usage', where='barcode=$barcode', vars={'barcode':bar}, _test=False)
-		for i in range(len(name)):
-			query.append(name[i])
-		for i in range(len(query)):
-			log.append([query[i]['date'].isoformat(' '), query[i]['quantity']])
+		
+		log = productDoc.get(bar)['log']
+		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({"log": log})

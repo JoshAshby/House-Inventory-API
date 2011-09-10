@@ -56,9 +56,9 @@ class tagsInfo:
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		try:
 			wi = web.input()
-			tags = wi['tag']
+			tag = wi['tag']
 		except:
-			tags = kwargs['tag']
+			tag = kwargs['tag']
 		
 		query = []
 		name = db.query('SELECT `barcode`, `name`, `picture` FROM `products` WHERE `tags` LIKE "%'+ tags +'%"')
@@ -132,16 +132,12 @@ class tagsTotal:
 		Returns:
 			A JSON object like: {"tags" : ["abc", "def"]}
 		'''
-		query = []
 		dog = []
-		woof = []
-		name = db.query('SELECT `tags` FROM `products`')
-		for i in range(len(name)):
-			query.append(json.loads(name[i]['tags']))
+		query = database.view("products/admin").all()
 		
 		for x in range(len(query)):
-			for z in range(len(query[x])):
-				dog.append(query[x][z])
+			for z in range(len(query[x]['value']['tags'])):
+				dog.append(query[x]['value']['tags'][z])
 		
 		queryFix = list(set(dog))
 		

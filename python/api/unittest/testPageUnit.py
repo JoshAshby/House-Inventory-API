@@ -37,16 +37,16 @@ class tester(testPage.test):
 		if method == 'DELETE':
 			got = self.deleteFunc(barcode=bar)
 			
-		answer_json = json.loads(got)
+		#answer_json = json.loads(got)
 		
-		answer = answer_json['barcode']
+		#answer = answer_json['barcode']
 		
 		print "Got back: ", got
 		
 		print "#########################################################"
 		
 		try:
-			if answer == bar:
+			if got:
 				print "%s: Passed" % str(method)
 		except:
 			print "%s: FAILED" % str(method)
@@ -55,4 +55,4 @@ class tester(testPage.test):
 
 #testUnit = testPage.test()
 testUnit = tester()
-testUnit.testFunc(method='GET', barcode='718103025027')
+testUnit.testFunc(method='GET', barcode='dog987')

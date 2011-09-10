@@ -15,7 +15,7 @@ joshuaashby@joshashby.com
 """
 import web
 import json
-
+import couchdbkit
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
@@ -139,11 +139,13 @@ class catTotal:
 		Returns:
 		'''
 		query = []
-		#name = db.query('SELECT `cat` FROM `products`')
-		name = db.select('products', what='cat', _test=False)
+		name = database.view("products/admin").all()
+		
 		for i in range(len(name)):
-			query.append(name[i]['cat'])
+			query.append(name[i]['value']['category'])
+			
 		queryFix = list(set(query))
+		
 		if spam:
 			web.header('Content-Type', 'application/json')
 		return json.dumps({'categories': queryFix})
