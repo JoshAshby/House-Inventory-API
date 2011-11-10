@@ -1,0 +1,38 @@
+{
+   "all": {
+   },
+   "description": "A dog of god",
+   "picture": "null",
+   "barcode": "dog987",
+   "rank": 2,
+   "flag": "M",
+   "log": [
+       {
+           "date": "2011-03-16 17:27:45",
+           "quantity": 10
+       },
+       {
+           "date": "2011-03-17 17:27:45",
+           "quantity": 5
+       },
+       {
+           "date": "2011-03-18 17:27:45",
+           "quantity": 1
+       }
+   ],
+   "category": "Animal",
+   "doc_type": "productDoc",
+   "allDay": {
+   },
+   "name": "Dog",
+   "tags": [
+       "Beagle",
+       "dog",
+       "pet"
+   ],
+   "predicted": {
+       "rate": null,
+       "days": null
+   },
+   "quantity": "8"
+}

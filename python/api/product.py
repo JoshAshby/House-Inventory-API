@@ -108,8 +108,8 @@ class info:
 		
 		if bobbins['barcode']:
 			bar = bobbins['barcode']
-				
-			product = productDoc.get(bar)
+			
+			product = productDoc.view("products/admin", key=bar).first()
 			pro = database.view("products/all", key=bar).first()['value']
 			
 			if 'name' in bobbins: product.name = bobbins['name']
@@ -396,4 +396,4 @@ class total:
 		
 
 app = web.application(urls, globals(), autoreload=False)
-application = app.wsgifunc()
+#application = app.wsgifunc()

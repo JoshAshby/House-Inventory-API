@@ -1,0 +1,47 @@
+{
+   "all": {
+       "-0.0114285714286": 4,
+       "-0.0210970464135": 2
+   },
+   "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.",
+   "picture": "3037921120217.png",
+   "barcode": "3037921120217",
+   "rank": null,
+   "flag": "M",
+   "name": "Orange Graph Composition",
+   "category": "Notebook",
+   "doc_type": "productDoc",
+   "allDay": {
+       "-175": 4,
+       "-237": 6
+   },
+   "log": [
+       {
+           "date": "2011-03-16 17:27:45",
+           "quantity": 10
+       },
+       {
+           "date": "2011-03-17 17:27:45",
+           "quantity": 7
+       },
+       {
+           "date": "2011-05-18 17:27:45",
+           "quantity": 2
+       },
+       {
+           "date": "2011-06-19 17:27:45",
+           "quantity": 1
+       }
+   ],
+   "tags": [
+       "paper",
+       "notebook",
+       "graph",
+       "graph paper"
+   ],
+   "predicted": {
+       "rate": null,
+       "days": null
+   },
+   "quantity": 1
+}

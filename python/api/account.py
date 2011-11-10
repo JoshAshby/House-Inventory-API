@@ -35,11 +35,11 @@ USERERROR_MESSAGE = "There was a error with the username or password"
 class account:
 	def findUser(self, keyer, type=''):
 		if type is 'username':
-			alpha = "admin/user"
+			alpha = "user/user"
 		elif type is 'key':
-			alpha = "admin/key"
+			alpha = "user/key"
 		else:
-			alpha = "admin/user"
+			alpha = "user/user"
 	
 		beta = database.view(alpha, key=keyer).first()['value']
 		
@@ -76,7 +76,7 @@ class account:
 		return reply
 	
 	def loginPass(self, user, passed):
-		a = database.view("admin/user", key=user).first()['value']
+		a = database.view("user/user", key=user).first()['value']
 
 		passwd = str(a['password'])
 		saltwd = str(a['salt'])
@@ -105,7 +105,7 @@ class account:
 		else: raise web.unauthorized( USERERROR_MESSAGE )
 		
 	def loginHash(self, user, hash):
-		a = database.view("admin/user", key=user).first()['value']
+		a = database.view("user/user", key=user).first()['value']
 
 		passwd = str(a['password'])
 		saltwd = str(a['salt'])
@@ -132,7 +132,7 @@ class account:
 		else: raise web.unauthorized( USERERROR_MESSAGE )
 	
 	def logout(self, user):
-		a = database.view("admin/user", key=user).first()['value']['_id']
+		a = database.view("user/user", key=user).first()['value']['_id']
 		use = userDoc.get(a)
 		
 		use.logged_in = 'false'
@@ -146,14 +146,14 @@ class account:
 		return reply
 	
 	def isLoged(self, user):
-		a = database.view("admin/user", key=user).first()['value']['logged_in']
+		a = database.view("user/user", key=user).first()['value']['logged_in']
 		if a == 'true':
 			return True
 		else:
 			return False
 	
 	def reset(self, user):
-		a = database.view("admin/user", key=user).first()['value']['_id']
+		a = database.view("user/user", key=user).first()['value']['_id']
 		new = userDoc.get(a)
 		
 		saltdb = ''.join(map(lambda x:'./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'[ord(x)%64], os.urandom(16)))
@@ -177,7 +177,7 @@ class account:
 		return reply
 	
 	def update(self, user, **kwargs):
-		a = database.view("admin/user", key=user).first()['value']['_id']
+		a = database.view("user/user", key=user).first()['value']['_id']
 		new = userDoc.get(a)
 		
 		reply = {
@@ -206,7 +206,7 @@ class account:
 		return reply
 	
 	def delete(self, user):
-		a = database.view("admin/user", key=user).first()['value']['_id']
+		a = database.view("user/user", key=user).first()['value']['_id']
 		database.delete_doc(a)
 		
 		reply = {
@@ -217,7 +217,7 @@ class account:
 		return reply
 	
 	def oauthKeys(self, user):
-		a = database.view("admin/user", key=user).first()['value']['_id']
+		a = database.view("user/user", key=user).first()['value']['_id']
 		use = userDoc.get(a)
 		
 		sharedwd = ''.join(map(lambda x:'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'[ord(x)%62], os.urandom(50)))

@@ -58,7 +58,7 @@ class log:
 		except:
 			bar = kwargs['barcode']
 		
-		log = productDoc.get(bar)['log']
+		log = productDoc.view("products/admin", key=bar).first()['log']
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
@@ -114,4 +114,4 @@ class log:
 			
 
 app = web.application(urls, globals(), autoreload=False)
-application = app.wsgifunc()
+##application = app.wsgifunc()

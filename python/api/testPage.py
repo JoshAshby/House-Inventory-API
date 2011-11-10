@@ -115,4 +115,4 @@ class test:
 
 
 app = web.application(urls, globals(), autoreload=False)
-application = app.wsgifunc()
+#application = app.wsgifunc()

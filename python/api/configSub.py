@@ -16,7 +16,7 @@ import couchdbkit
 
 databaseName = 'stats'
 
-render = web.template.render('/srv/http/template/')
+render = web.template.render('template/')
 
 debug = 0
 

@@ -37,38 +37,35 @@ from ashmath import *
 def stat(bar):
 	query=[]
 	
-	predict(bar, 1)
-	rank(bar)
+	tryal = predict(bar)
 	
-	dataRaw = database.view("products/admin", key=bar).first()['value']
+	if 'error' in tryal:
+		return {'barcode': bar, 'error': 'NED'}
 	
 	replyson = {
 		'barcode': bar,
-		'guess': dataRaw['predicted']['rate'],
-		'predicted': dataRaw['predicted']['days'],
-		'rank': dataRaw['rank']
+		'rate': tryal['rate'],
+		'days': tryal['days']
 	}
 	
 	return replyson
 	
 
-def predict(bar, zombie):
+def predict(bar):
 	query = []
 	quantity = []
 	date = []
-		
-	a = database.get(bar)['log']
+	
+	product = productDoc.view("products/admin", key=bar).first()
+	
+	a = product.log
 	
 	query = sorted(a, key=lambda a: a['date'], reverse=True)
 	
 	m = len(query)
 	
-	#Here we have to get all the data points from the stats database (usage) so we can do fancy things to get some nice predictions.
-	if zombie:
-		dateTime = datetime.datetime.now() 
-	else:
-		dateTime = datetime.datetime.strptime(query[0]['date'], '%Y-%m-%d %H:%M:%S')
-		
+	dateTime = datetime.datetime.now()
+
 	for i in range(m):
 		if (i+1) == m:
 			quantity.append(float(query[i]['quantity']))
@@ -90,82 +87,38 @@ def predict(bar, zombie):
 	
 	#take the partial deriv of each part of the vector to gain the total deriv or gradient...
 	for d in range(len(bob)):
-		frank.append(polyderiv([sara[d],-bob[d],math.pow(-bob[d], 2)]))
+		frank.append(polyderiv([sara[d],-bob[d],-math.pow(-bob[d], 2)]))
 	
 	if frank[len(frank)-1][0]:
 		try:
-			yoyo = sara[1]/frank[1][0]
+			yoyo = float(sara[1]/frank[1][0])
 		except:
 			yoyo = 'NED'
 	else:
 		yoyo = 'NED'
-	
-	last_5 = database.get(bar)['last5']
-	
-	try:
-		batman = reduce((lambda x, y: x + y), last_5)/5
-	except:
-		#He's a ninja...
-		batman = 'NED'
 
-	if batman != 'NED' and yoyo != 'NED':
-		spider = sara[1]/batman
-		intSpider = int(spider)
+	if yoyo != 'NED':
+		spider = sara[1]/yoyo
 	else:
-		intSpider = 'NED'
+		spider = 'NED'
+		
+	if (str(yoyo)) in product.all:
+		product.all[str(yoyo)] += 1
+	else:
+		product.all[str(yoyo)] = 1
+	
+	if (str(spider)) in product.allDay:
+		product.allDay[str(spider)] += 1
+	else:
+		product.allDay[str(spider)] = 1
+	
+	product.predicted['days'] = spider
+	product.predicted['rate'] = yoyo
+	
+	product.save()
 	
 	#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
 	#Ie: Raptor eats everything... nom nom nom
-	#raptor = {'current': current, 'standard':  yoyo, 'guess': batman, 'predicted': spider, 'predictedNF': intSpider}
-	#raptor = {'predicted': spider, 'rank': soda, 'popularity': ger}
-	raptor = {'guess': batman, 'predicted': intSpider}
+	raptor = {'rate': yoyo, 'days': spider}
 	
 	return raptor
-
-
-def rank(barcode):
-	#these next few lines set up the rank to the rest of the products.
-	blowing = []
-	soda = 0
-	
-	blowing = database.view("products/admin").all()
-		
-	#insert programming joke here....
-	bubble_sort = sorted(blowing, key=lambda bubbles: bubbles['value']['last5'][0])
-	
-	for h in range(len(bubble_sort)):
-		bubble_sort[h]['value']['rank'] = h
-	
-	for k in range(len(bubble_sort)):
-		if bubble_sort[k]['value']['barcode'] == str(barcode):
-			soda = bubble_sort[k]['value']['rank']
-	
-	pop = float(soda)/float(len(bubble_sort))
-	
-	ran = (float(bubble_sort[len(bubble_sort)-1]['value']['rank'])/float(len(bubble_sort)))/3
-	
-	'''
-	Next we'll go through and set the flag for the called product, this again may later be the flags for the whole product group
-	so that even if a product hasn't been checked in years and years for popularity (it just isn't popular I guess) it will still have updated
-	stats. 
-	'''
-	pro = productDoc.get(barcode)
-	if pop <= ran:
-		ger = 'High'
-		flag = 'H'
-		pro.flag = flag
-	elif pop <= (ran*2):
-		ger = 'Med'
-		flag = 'M'
-		pro.flag = flag
-	elif pop >= (ran*2):
-		ger = 'Low'
-		flag = 'L'
-		pro.flag = flag
-	else:
-		ger = 'NED'
-		flag = 'L'
-		pro.flag = flag
-	
-	raptop = {'rank': soda, 'popularity': ger}
-	return json.dumps(raptop)

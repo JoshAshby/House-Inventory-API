@@ -293,4 +293,4 @@ class catTag:
 		
 		
 app = web.application(urls, globals(), autoreload=False)
-application = app.wsgifunc()
+#application = app.wsgifunc()

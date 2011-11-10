@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
 Project Blue Ring
 An inventory control and management API that provides public and admin functions.
@@ -32,18 +32,10 @@ except:
 from config import *
 from configSub import *
 
-"""
-Fancy TODO list:
-public Tag function that returns something like {"tags": ["a", "b"]}
-admin Tag function to add or remove or edit a tag
-admin category Stats function that is like the normal admin.py stats however calls it for every product
-clean up admin.py Stats function
-make tag.py; sort of like cat.py but with tags instead. This way products can be grouped even better, you can look at a 
-	category but then also look at the tags within that category to really refine the search
-tags inside of categories: category/(.*)/tag/(.*)/
+#web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
 
-Think about making this RESTful...
-"""
+app = web.application(urls, globals())
+app.internalerror = web.debugerror
 
 class index:        
 	'''
@@ -54,6 +46,7 @@ class index:
 	'''
 	
 	def endFunc(self):
+		print "start"
 		return render.index()
 	
 	def GET(self):
@@ -62,11 +55,11 @@ class index:
 	def POST(self):
 		return self.endFunc()
 		
+#app = web.application(urls, globals(), autoreload=False)
+#app.internalerror = web.debugerror
+#application = app.wsgifunc()
 		
 		
 if __name__ == "__main__":
+	print "running"
 	app.run()
-
-#wsgi stuff
-app = web.application(urls, globals(), autoreload=False)
-application = app.wsgifunc()

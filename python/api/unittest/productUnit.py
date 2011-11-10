@@ -101,7 +101,7 @@ unittestTotal = totalTester()
 
 unittestInfo.testFunc(method='GET', barcode='718103025027')
 
-unittestInfo.testFunc(method='PUT', barcode='dog987', quantity='2')
+unittestInfo.testFunc(method='PUT', barcode='dog987', quantity='8')
 
 unittestTotal.testFunc(method='GET')
 
