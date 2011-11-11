@@ -115,8 +115,6 @@ class info:
 			
 			if 'name' in bobbins: product.name = bobbins['name']
 			
-			if 'quantity' in bobbins: product.quantity = bobbins['quantity']
-			
 			if 'cat' in bobbins: product.category = bobbins['cat']
 			
 			if 'tags' in bobbins: product.tags = json.loads(bobbins['tags'])
@@ -155,16 +153,17 @@ class info:
 			
 			product.picture = frodo
 			
-			#incase the product is being restocked, run the machine learning stuff
-			#if not then just change the value of the quantity 
-			if bobbins['quantity'] > product.quantity:
-				stats.restock(bar, bobbins['quantity'])
-			else:
-				product.quantity = bobbins['quantity']
-				product.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": bobbins['quantity']})
-			
 			product.barcode = bar
 			product.save()
+			
+			#incase the product is being restocked, run the machine learning stuff
+			#if not then just change the value of the quantity 
+			if int(bobbins['quantity']) > product.quantity:
+				stats.restock(bar, int(bobbins['quantity']))
+			else:
+				product.quantity = int(bobbins['quantity'])
+				product.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": int(bobbins['quantity'])})
+				product.save()
 
 			name = database.view("products/all", key=bar).all()
 			inform = json.dumps({"product": name[0]['value']})
@@ -279,8 +278,8 @@ class total:
 					web.header('Content-Type', 'application/json')
 				return inform
 			
-			product = productDoc.view("products/admin", key=bar).first()
-			#product = productDoc(barcode=bar)
+			#product = productDoc.view("products/admin", key=bar).first()
+			product = productDoc(barcode=bar)
 			
 			if 'name' in bobbins: product.name = bobbins['name']
 			
