@@ -95,7 +95,7 @@ class totalTester(product.total):
 		print "#########################################################"
 	
 	
-
+'''
 unittestInfo = infoTester()
 unittestTotal = totalTester()
 
@@ -111,3 +111,4 @@ tag = json.dumps(tag)
 unittestTotal.testFunc(method='POST', barcode='tv9', name='tv', description='A tv', cat='Electronics', tags=tag, quantity='6')
 
 unittestInfo.testFunc(method='DELETE', barcode='tv9')
+'''

@@ -66,14 +66,12 @@ def validate_two_leg_oauth():
 		parameters = parameters )
 
 	if not req.has_key('oauth_consumer_key'):
-		print "wrong"
 		raise web.unauthorized()
 	#print req
 	# Verify the account referenced in the request is valid
 	accoun = acc.account()
 	account = accoun.findByKey(req['oauth_consumer_key'])
 	if not account:
-		print "ops"
 		raise web.unauthorized( UNAUTHORIZED_MESSAGE )
 
 	# Create an oauth2 Consumer with an account's consumer_key and consumer_secret
@@ -88,14 +86,11 @@ def validate_two_leg_oauth():
 	try:
 		server.verify_request( req, consumer, None )
 	except oauth2.Error, e:
-		print "fail"
 		print '%s %s' % ( repr(e), str(e) )
 		raise web.unauthorized( e )
 	except KeyError, e:
-		print "ugh"
 		raise web.unauthorized( "You failed to supply the necessary parameters (%s) to properly authenticate " % e )
 	except Exception, e:
-		print "bug"
 		raise web.unauthorized( repr(e) + ' ' + str(e) )
 
 	return True

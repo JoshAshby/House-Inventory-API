@@ -132,7 +132,7 @@ class catTagTester(cat.catTag):
 		
 		print "#########################################################"
 
-
+'''
 unittestCatInfo = catInfoTester()
 unittestCatTotal = catTotalTester()
 unittestCatTag = catTagTester()
@@ -142,3 +142,4 @@ unittestCatInfo.testFunc(method='GET', category='Animal')
 unittestCatTotal.testFunc(method='GET')
 
 unittestCatTag.testFunc(method='GET', category='Notebook', tag='paper')
+'''

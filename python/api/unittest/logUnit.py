@@ -52,6 +52,8 @@ class logTester(log.log):
 			
 		print "#########################################################"
 
+'''
 unittestLog = logTester()
 
 unittestLog.testFunc(method='GET', barcode='dog987')
+'''

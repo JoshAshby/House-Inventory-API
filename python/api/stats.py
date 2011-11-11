@@ -208,17 +208,22 @@ def gradient(bar):
 	rateWeight = math.pow((currentCorrectRate - currentPredictedRate), -2)
 	dayWeight = math.pow((currentCorrectDay - currentPredictedDay), -2)
 	
+	#now apply the average weights to the current correct day and rates to
+	#make learned days and rates
+	weightedDays = dayWeight * currentCorrectDay
+	weightedRate = rateWeight * currentCorrectRate
+	
 	#store the new weights into the buckets which we use to easily calculate the
 	#average of the rate and day weights
-	if str(rateWeight) in product.weightedRate:
-		product.weightedRate[str(rateWeight)] += 1
+	if str(weightedRate) in product.weightedRate:
+		product.weightedRate[str(weightedRate)] += 1
 	else:
-		product.weightedRate[str(rateWeight)] = 1
+		product.weightedRate[str(weightedRate)] = 1
 	
-	if str(dayWeight) in product.weightedDay:
-		product.weightedDay[str(dayWeight)] += 1
+	if str(weightedDays) in product.weightedDay:
+		product.weightedDay[str(weightedDays)] += 1
 	else:
-		product.weightedDay[str(dayWeight)] = 1
+		product.weightedDay[str(weightedDays)] = 1
 	
 	#from the buckets, calculate the average of the weights to use to make the new prediction
 	#This should help it eventually get to a fairly accurate prediction
@@ -240,13 +245,8 @@ def gradient(bar):
 	
 	weightedRateAverage = weightedRateAveragePre/weightedRateAverageCount
 	
-	#now apply the average weights to the current correct day and rates to
-	#make learned days and rates
-	weightedDays = weightedDaysAverage * currentCorrectDay
-	weightedRate = weightedRateAverage * currentCorrectRate
-	
 	#now use the learned days and rates to make a learned prediction
-	learnedPrediction = weightedDays/weightedRate
+	learnedPrediction = weightedDaysAverage/weightedRateAverage
 	
 	#store it all for  future reference
 	product.learned['predicted'] = learnedPrediction

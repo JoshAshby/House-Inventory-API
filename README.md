@@ -18,7 +18,7 @@ This work is licensed under the Creative Commons Attribution-NonCommercial-Share
 
 Abstract:
 -------------
-A RESTful API written in Python with the web.py Python web framwork which handles all the nasty stuff for keeping a basic inventory
+A RESTful API written in Python with the web.py Python web framwork and Couch Database which handles all the nasty stuff for keeping a basic inventory.
 
 API Info:
 --------------

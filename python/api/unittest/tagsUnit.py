@@ -93,9 +93,10 @@ class tagTotalTester(tags.tagsTotal):
 		
 		print "#########################################################"
 
-
+'''
 tagInfoUnit = tagInfoTester()
 tagTotalUnit = tagTotalTester()
 
 tagInfoUnit.testFunc(method='GET', tag='paper')
 tagTotalUnit.testFunc(method='GET')
+'''
