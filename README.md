@@ -58,7 +58,7 @@ This means users, products and views are all one and the same to the database. V
 Other info:
 -----------------
 
-Nothing yet!
+It uses a gradient descent machine learning algorithm in the restock function to try and make better predictions of when to restock a product. The code which makes use of this prediction isn't available yet however the results can be seen in the database under ``correct`` ``predicted`` and ``learned``.
 
 Libraries used:
 ----------------------
