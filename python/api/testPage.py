@@ -59,11 +59,7 @@ class test:
 		except:
 			bar = kwargs['barcode']
 		
-		reply = stats.stat(bar)
-		
-		answer = json.dumps(reply)
-		
-		return answer
+		return json.dumps({"error": 'not a valid page'})
 	
 	def postFunc(self, **kwargs):
 		'''
