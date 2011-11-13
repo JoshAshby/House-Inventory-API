@@ -2,7 +2,8 @@
 """
 Project Blue Ring
 An inventory control and management API
-Main admin functions
+Restock and statistical function calls. Everytime a product is restocked, the machine learning algorithm in this
+file runs to make a prediction of how long it'll take for the product ot run out based off of previous rates.
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -35,9 +36,6 @@ from configSub import *
 from ashmath import *
 
 def restock(bar, restockQuantity):
-	f = open("/tmp/statsCalled", "wr")
-	f.write("True")
-	f.close()
 	#try to predict the when the current quantity will run out. The data this saves to the database 
 	#is then used later in gradient but needs to ran now before the log and quantity of the product 
 	#are updated since it looks at the last peak
@@ -56,6 +54,7 @@ def restock(bar, restockQuantity):
 	
 	#calculate the difference between now and the last time the quantity changed, ie: the time
 	#it took for the product to reach zero. Then store the correct values in the database
+	
 	correctDay = float((dateTimeNow - dateTimeLast).days)
 	
 	if str(correctDay) in product.allCorrectDay:
@@ -65,11 +64,11 @@ def restock(bar, restockQuantity):
 	
 	#calculate the correctRate by taking the current quantity and dividing it by the number of days it took to reach zero
 	#then store it in the bucket list for furture needs
-	correctRate = float(int(product.quantity)/correctDay)
+	correctRate = float(product.quantity/correctDay)
 	
 	#store the current correct values for easy access in gradient()
 	product.correct['rate'] = correctRate
-	product.correct['days'] = correctDay
+	#product.correct['days'] = correctDay
 	
 	if str(correctRate) in product.allCorrectRate:
 		product.allCorrectRate[str(correctRate)] += 1
@@ -84,9 +83,15 @@ def restock(bar, restockQuantity):
 	product.save()
 	
 	#run the machine learning code on this to make a new learned prediction now that all the needed data is in the database
-	gradient(bar)
+	tryal = gradient(bar)
+	return tryal
 
 def predict(bar):
+	'''
+	This tries to make a prediction on when the current stock will run out based off the rate of use.
+	It is used as a comparison and as the sort of random element in the machine learning gradient descent below
+	It also functions as a point of comparison for how off the prediction can be from the actual time.
+	'''
 	query = []
 	quantity = []
 	date = []
@@ -138,30 +143,33 @@ def predict(bar):
 	else:
 		yoyo = 'NED'
 
+	'''
 	#if we had enough data to calculate a rate, use it to 
 	if yoyo != 'NED':
 		spider = abs(float(sara[1]/yoyo))
 	else:
 		spider = 'NED'
-	
-	if spider is frank[1][0]:
-		f = open("/tmp/predictTrue", "wr")
-		f.write("True")
-		f.close()
-		
-	if (str(yoyo)) in product.allPredictedRate:
+	'''
+	#add the predictions to the buckets for future reference and then also store the most
+	#recent in a seperate variable in the database
+	if (str(abs(yoyo))) in product.allPredictedRate:
 		product.allPredictedRate[str(abs(yoyo))] += 1
 	else:
 		product.allPredictedRate[str(abs(yoyo))] = 1
 	
+	'''
 	if (str(spider)) in product.allPredictedDay:
 		product.allPredictedDay[str(spider)] += 1
 	else:
 		product.allPredictedDay[str(spider)] = 1
 	
 	product.predicted['days'] = spider
+	'''
 	product.predicted['rate'] = abs(yoyo)
 	
+	#save and return nothing because this is no longer is called as a seperate API call but instead when a product
+	#is restocks, and no info about the prediction is needed to be returned yet, only after it has code to predict based
+	#off the current new quantity. 
 	product.save()
 	
 	#raptor stores everything that gets dumped to the browser as JSON so this goes after everything above....
@@ -198,19 +206,22 @@ def gradient(bar):
 	'''
 	
 	currentCorrectRate = product.correct['rate']
-	currentCorrectDay = product.correct['days']
+	#currentCorrectDay = product.correct['days']
 	
 	currentPredictedRate = product.predicted['rate']
-	currentPredictedDay = product.predicted['days']
+	#currentPredictedDay = product.predicted['days']
 	
 	#now calculate the weight for the rate and days by squaring the difference between the
 	#correct and predicted values
 	rateWeight = math.pow((currentCorrectRate - currentPredictedRate), -2)
-	dayWeight = math.pow((currentCorrectDay - currentPredictedDay), -2)
+	#dayWeight = math.pow((currentCorrectDay - currentPredictedDay), -2)
 	
 	#now apply the average weights to the current correct day and rates to
 	#make learned days and rates
-	weightedDays = dayWeight * currentCorrectDay
+	#
+	#now apply the average weights to the current correct day and rates to
+	#make learned days and rates
+	#weightedDays = dayWeight * currentCorrectDay
 	weightedRate = rateWeight * currentCorrectRate
 	
 	#store the new weights into the buckets which we use to easily calculate the
@@ -219,14 +230,15 @@ def gradient(bar):
 		product.weightedRate[str(weightedRate)] += 1
 	else:
 		product.weightedRate[str(weightedRate)] = 1
-	
+	'''
 	if str(weightedDays) in product.weightedDay:
-		product.weightedDay[str(weightedDays)] += 1
+		product.weightedDay[str(weighted,Days)] += 1
 	else:
 		product.weightedDay[str(weightedDays)] = 1
-	
+	'''
 	#from the buckets, calculate the average of the weights to use to make the new prediction
 	#This should help it eventually get to a fairly accurate prediction
+	'''
 	weightedDaysAveragePre = 0
 	weightedDaysAverageCount = 0
 		
@@ -235,6 +247,7 @@ def gradient(bar):
 		weightedDaysAverageCount += product.weightedDay[key]
 	
 	weightedDaysAverage = weightedDaysAveragePre/weightedDaysAverageCount
+	'''
 	
 	weightedRateAveragePre = 0
 	weightedRateAverageCount = 0
@@ -246,13 +259,13 @@ def gradient(bar):
 	weightedRateAverage = weightedRateAveragePre/weightedRateAverageCount
 	
 	#now use the learned days and rates to make a learned prediction
-	learnedPrediction = weightedDaysAverage/weightedRateAverage
+	learnedPrediction = (product.quantity)/weightedRateAverage
 	
 	#store it all for  future reference
 	product.learned['predicted'] = learnedPrediction
 	product.learned['rate'] = weightedRate
-	product.learned['days'] = weightedDays
-	
-	#save it and hope we did it right, if we did we don't return anything
-	#(nothing to really return at this point
+	#product.learned['days'] = weightedDays
+
 	product.save()
+	
+	return learnedPrediction

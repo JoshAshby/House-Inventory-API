@@ -159,13 +159,15 @@ class info:
 			#incase the product is being restocked, run the machine learning stuff
 			#if not then just change the value of the quantity 
 			if int(bobbins['quantity']) > product.quantity:
-				stats.restock(bar, int(bobbins['quantity']))
+				tryal = stats.restock(bar, int(bobbins['quantity']))
 			else:
 				product.quantity = int(bobbins['quantity'])
 				product.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": int(bobbins['quantity'])})
 				product.save()
 
 			name = database.view("products/all", key=bar).all()
+			if tryal:
+				name[0]['value']['predicted'] = tryal
 			inform = json.dumps({"product": name[0]['value']})
 			
 			if spam:
