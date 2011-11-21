@@ -31,11 +31,9 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
-from ashmath import *
+from productDocument import *
 from ashpic import *
 import auth
-import account
-import stats
 
 urls = (
 	'', 'slash',
@@ -143,7 +141,7 @@ class info:
 				try:
 					frodo = product.picture
 				except:
-					frodo = "null"
+					frodo = None
 
 			if 'description' in bobbins:
 				desc = bobbins['description']
@@ -156,18 +154,21 @@ class info:
 			product.barcode = bar
 			product.save()
 			
+			tryal = product.restock(int(bobbins['quantity']))
+			
 			#incase the product is being restocked, run the machine learning stuff
 			#if not then just change the value of the quantity 
-			if int(bobbins['quantity']) > product.quantity:
-				tryal = stats.restock(bar, int(bobbins['quantity']))
-			else:
-				product.quantity = int(bobbins['quantity'])
-				product.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": int(bobbins['quantity'])})
-				product.save()
+			#if int(bobbins['quantity']) > product.quantity:
+			#	tryal,days= stats.restock(bar, int(bobbins['quantity']))
+			#else:
+			#	product.quantity = int(bobbins['quantity'])
+			#	product.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": int(bobbins['quantity'])})
+			#	product.save()
 
 			name = database.view("products/all", key=bar).all()
 			if tryal:
-				name[0]['value']['predicted'] = tryal
+				name[0]['value']['predicted_days'] = tryal[0]
+				name[0]['value']['predicted_date'] = tryal[1]
 			inform = json.dumps({"product": name[0]['value']})
 			
 			if spam:
@@ -287,7 +288,7 @@ class total:
 			
 			if 'description' in bobbins: product.description = bobbins['description']
 			
-			if 'quantity' in bobbins: product.quantity = bobbins['quantity']
+			if 'quantity' in bobbins: product.quantity = int(bobbins['quantity'])
 			
 			if 'cat' in bobbins: product.category = bobbins['cat']
 			
@@ -313,16 +314,13 @@ class total:
 				
 				goop = freyaPics(frodo)
 				goop.odinsThumb()
-			else:
-				frodo = "null"
+				product.picture = frodo
 			
 			if 'description' in bobbins:
 				desc = bobbins['description']
 				p = re.compile('\+')
 				found = p.sub( ' ', desc)
 				product.description = found
-			
-			product.picture = frodo
 			
 			product.barcode = bar
 			product.save()

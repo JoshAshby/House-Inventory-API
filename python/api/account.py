@@ -26,6 +26,8 @@ except:
 	abspath = os.path.dirname(__file__)
 	sys.path.append(abspath)
 	os.chdir(abspath)
+from configSub import *
+from userDocument import *
 import couchdbkit
 import hashlib
 import datetime

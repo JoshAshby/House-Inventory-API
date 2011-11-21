@@ -2,7 +2,8 @@
 """
 Project Blue Ring
 An inventory control and management API
-A test sub app for messing around with new things and what not before I decide to use them or not.
+A graphing sub app to return various graphs in png format from the product data.
+This may later on also do PDF reports for the whole inventory or a product
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -28,14 +29,27 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
+from productDocument import *
 import auth
+
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from StringIO import StringIO
+
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+from matplotlib.dates import MonthLocator, DateFormatter
+import datetime
 
 urls = (
 	"", "slash",
-	"/(.*)/", "test"
+	"/(.*)/", "graph"
 )
 
-class test:
+class graph:
 	'''
 	class documentation
 	
@@ -49,7 +63,7 @@ class test:
 		GET verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			A png formated graph of the product log 
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		try:
@@ -58,7 +72,40 @@ class test:
 		except:
 			bar = kwargs['barcode']
 		
-		return None
+		buffer = StringIO()
+		
+		fig = plt.figure()
+		ax = fig.add_subplot(111)
+
+		product = productDoc.view("products/admin", key=bar).first()
+
+		a = product.log
+
+		query = sorted(a, key=lambda a: a['date'], reverse=True)
+
+		date = []
+		quantity = []
+
+		for key in range(len(query)):
+			date.append(datetime.datetime.strptime(query[key]['date'], '%Y-%m-%d %H:%M:%S'))
+			quantity.append(query[key]['quantity'])
+
+		ax.plot(date, quantity)
+
+		ax.xaxis.set_major_locator( MonthLocator() )
+		ax.xaxis.set_major_formatter( DateFormatter('%m-%Y') )
+
+		ax.fmt_xdata = DateFormatter('%Y-%m-%d %H:%M:%S')
+		fig.autofmt_xdate()
+
+		fig.savefig(buffer)
+
+		graph = buffer.getvalue()
+		buffer.close()
+		
+		web.header('Content-Type', "image/png")
+		
+		return graph
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -67,9 +114,9 @@ class test:
 		POST verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			Nothing
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def putFunc(self, **kwargs):
 		'''
@@ -78,9 +125,9 @@ class test:
 		PUT verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			Nothing
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def deleteFunc(self, **kwargs):
 		'''
@@ -89,9 +136,9 @@ class test:
 		DELETE verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			Nothing
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def GET(self, bar):
 		return self.getFunc(barcode=bar)

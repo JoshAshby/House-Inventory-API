@@ -25,6 +25,7 @@ import cat
 import product
 import tags
 import log
+import graph
 
 urls = (
 	'/', 'index',
@@ -32,6 +33,7 @@ urls = (
 	'/category', cat.app,
 	'/tag', tags.app,
 	'/log', log.app,
+	'/graph', graph.app,
 	#Test stuff...
 	'/test', testPage.app
 )

@@ -25,6 +25,7 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
+from userDocument import *
 import account as acc
 
 UNAUTHORIZED_MESSAGE = 'You are not authorized to access this content'

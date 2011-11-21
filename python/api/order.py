@@ -28,14 +28,18 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
+from productDocument import *
+from orderDocument import *
 import auth
+
+import datetime
 
 urls = (
 	"", "slash",
-	"/(.*)/", "test"
+	"/(.*)/", "order"
 )
 
-class test:
+class order:
 	'''
 	class documentation
 	
@@ -49,16 +53,43 @@ class test:
 		GET verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		try:
 			wi = web.input()
-			bar = wi['barcode']
+			user = wi['user']
+			order = wi['order']
+			
 		except:
-			bar = kwargs['barcode']
+			user = kwargs['user']
+			order = kwargs['order']
+			
+		#go through and check things
+		for bar in order:
+			product = productDoc.view("products/admin", key=bar).first()
+			
+			if product.quantity >= order[bar]:
+				pass
+			else:
+				return json.dumps({"error": "Product quantity too low", "barcode": bar})
 		
-		return None
+		
+		tempid = ''.join(map(lambda x:'0123456789'[ord(x)%10], os.urandom(10)))
+		order_doc = orderDoc.view("order/admin", key=tempid).first()
+		
+		while order_doc:
+			tempid = ''.join(map(lambda x:'0123456789'[ord(x)%10], os.urandom(10)))
+			order_doc = orderDoc.view("order/admin", key=tempid).first()
+		
+		for bar in order:
+			product = productDoc.view("products/admin", key=bar).first()
+			
+			product.order(order[bar])
+		
+		ordered = {"user": user, "order": order, "id": order_id}
+		
+		return json.dumps(ordered)
 	
 	def postFunc(self, **kwargs):
 		'''

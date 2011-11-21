@@ -2,7 +2,7 @@
 """
 Project Blue Ring
 An inventory control and management API
-Sub-App config files
+Sub-App config files and currently the database handlers but those will move soon
 
 http://xkcd.com/353/
 
@@ -15,6 +15,7 @@ import web
 import couchdbkit
 
 databaseName = 'stats'
+database = couchdbkit.Server()[databaseName]
 
 render = web.template.render('template/')
 
@@ -28,17 +29,3 @@ spam = 0
 
 class slash:
 	def GET(self): raise web.seeother("/")
-
-
-database = couchdbkit.Server()[databaseName]
-
-class productDoc(couchdbkit.Document):
-	barcode = couchdbkit.StringProperty()
-
-
-class userDoc(couchdbkit.Document):
-	username = couchdbkit.StringProperty()
-
-
-productDoc.set_db(database)
-userDoc.set_db(database)

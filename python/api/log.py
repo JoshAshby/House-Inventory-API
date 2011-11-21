@@ -30,6 +30,7 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
+from productDocument import *
 import auth
 
 urls = (
