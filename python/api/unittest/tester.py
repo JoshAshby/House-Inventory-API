@@ -80,8 +80,6 @@ try:
 		unittestInfo.testFunc(method='DELETE', barcode=bar)
 		
 except:
-	pass
-	'''
 	unittestInfo.testFunc(method='GET', barcode='718103025027')
 
 	unittestInfo.testFunc(method='PUT', barcode='3037921120217', quantity=8)
@@ -107,4 +105,3 @@ except:
 	unittestLog.testFunc(method='GET', barcode='dog987')
 
 	unittestAccount.testFunc()
-	'''

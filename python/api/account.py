@@ -70,7 +70,7 @@ class account:
 		
 		reply = {
 			"user": kwargs['name'],
-			"added": 'true',
+			"added": True,
 			"hash": hashed,
 			"salt": saltdb
 		}
@@ -89,7 +89,7 @@ class account:
 
 		if b == c:
 			use = userDoc.get(a['_id'])
-			use.logged_in = 'true'
+			use.logged_in = True
 			use.datetime = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
 			try:
 				use.ip = web.ctx.ip.get()
@@ -100,7 +100,7 @@ class account:
 			
 			reply = {
 				"username": user,
-				"logged_in": "true"
+				"logged_in": True
 			}
 			
 			return reply
@@ -113,10 +113,10 @@ class account:
 		saltwd = str(a['salt'])
 
 		c = hashlib.sha512(passwd+saltwd).hexdigest()
-
+		
 		if hash == c:
 			use = userDoc.get(a['_id'])
-			use.logged_in = 'true'
+			use.logged_in = True
 			use.datetime = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
 			try:
 				use.ip = web.ctx.ip.get()
@@ -127,32 +127,30 @@ class account:
 			
 			reply = {
 				"username": user,
-				"logged_in": "true"
+				"logged_in": True
 			}
 			
 			return reply
-		else: raise web.unauthorized( USERERROR_MESSAGE )
+		else:
+			raise web.unauthorized( USERERROR_MESSAGE )
 	
 	def logout(self, user):
 		a = database.view("user/user", key=user).first()['value']['_id']
 		use = userDoc.get(a)
 		
-		use.logged_in = 'false'
+		use.logged_in = False
 		use.save()
 		
 		reply = {
 			"username": user,
-			"logged_in": "false"
+			"logged_in": False
 		}
 		
 		return reply
 	
 	def isLoged(self, user):
 		a = database.view("user/user", key=user).first()['value']['logged_in']
-		if a == 'true':
-			return True
-		else:
-			return False
+		return a
 	
 	def reset(self, user):
 		a = database.view("user/user", key=user).first()['value']['_id']
@@ -184,7 +182,7 @@ class account:
 		
 		reply = {
 			"username": user,
-			"updated": 'true'
+			"updated": True
 		}
 		
 		if 'passwd' in kwargs:
@@ -213,7 +211,7 @@ class account:
 		
 		reply = {
 			"username": user,
-			"deleted": 'true'
+			"deleted": True
 		}
 		
 		return reply

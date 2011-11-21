@@ -30,6 +30,9 @@ class accountTester:
 		d = hashlib.sha512(e).hexdigest()
 		print d
 		print c['hash']
+		print type(d)
+		print type(c['hash'])
+		print d == c['hash']
 		print "logging in with hash: ", a.loginHash('jow', d)
 		print "check login: ", a.isLoged('jow')
 		print "logging out: ", a.logout('jow')
