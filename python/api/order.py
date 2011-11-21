@@ -43,8 +43,7 @@ class order:
 	'''
 	class documentation
 	
-	Testing page object. Functions include full REST with OAuth protection on the POST PUT DELETE calls.
-	Testing frameowrk for unittests included.
+	
 	'''
 	def getFunc(self, **kwargs):	
 		'''
@@ -59,11 +58,11 @@ class order:
 		try:
 			wi = web.input()
 			user = wi['user']
-			order = wi['order']
+			order = json.loads(wi['order'])
 			
 		except:
 			user = kwargs['user']
-			order = kwargs['order']
+			order = json.loads(kwargs['order'])
 			
 		#go through and check things
 		for bar in order:
@@ -74,18 +73,14 @@ class order:
 			else:
 				return json.dumps({"error": "Product quantity too low", "barcode": bar})
 		
-		
-		tempid = ''.join(map(lambda x:'0123456789'[ord(x)%10], os.urandom(10)))
-		order_doc = orderDoc.view("order/admin", key=tempid).first()
-		
-		while order_doc:
-			tempid = ''.join(map(lambda x:'0123456789'[ord(x)%10], os.urandom(10)))
-			order_doc = orderDoc.view("order/admin", key=tempid).first()
+		order_doc = orderDoc()
 		
 		for bar in order:
 			product = productDoc.view("products/admin", key=bar).first()
 			
 			product.order(order[bar])
+		
+		order_id = order_doc.genOrder(user, order)
 		
 		ordered = {"user": user, "order": order, "id": order_id}
 		

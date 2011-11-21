@@ -53,8 +53,7 @@ class graph:
 	'''
 	class documentation
 	
-	Testing page object. Functions include full REST with OAuth protection on the POST PUT DELETE calls.
-	Testing frameowrk for unittests included.
+	Current'y generates graphs for the product log
 	'''
 	def getFunc(self, **kwargs):	
 		'''

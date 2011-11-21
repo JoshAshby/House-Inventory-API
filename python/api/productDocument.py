@@ -100,7 +100,7 @@ class productDoc(couchdbkit.Document):
 		#then try to make the rate from the derivative data...
 		if frank[len(frank)-1][0]:
 			try:
-				yoyo = float(sara[1]/frank[1][0])
+				yoyo = abs(float(sara[1]/frank[1][0]))
 			except:
 				yoyo = 'NED'
 		else:
@@ -108,12 +108,12 @@ class productDoc(couchdbkit.Document):
 		
 		#add the predictions to the buckets for future reference and then also store the most
 		#recent in a seperate variable in the database
-		if (str(abs(yoyo))) in self.allPredictedRate:
-			self.allPredictedRate[str(abs(yoyo))] += 1
+		if (str(yoyo)) in self.allPredictedRate:
+			self.allPredictedRate[str(yoyo)] += 1
 		else:
-			self.allPredictedRate[str(abs(yoyo))] = 1
+			self.allPredictedRate[str(yoyo)] = 1
 		
-		self.predicted['rate'] = abs(yoyo)
+		self.predicted['rate'] = yoyo
 		
 		#calculate the difference between now and the last time the quantity changed, ie: the time
 		#it took for the product to reach zero. Then store the correct values in the database
@@ -184,8 +184,8 @@ class productDoc(couchdbkit.Document):
 		
 		
 	def order(self, quantity):
-		self.quantity = quantity
-		self.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": quantity})
+		self.quantity = self.quantity - quantity
+		self.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": self.quantity})
 		self.save()
 
 

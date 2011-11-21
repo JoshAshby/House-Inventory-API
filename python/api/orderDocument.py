@@ -26,6 +26,7 @@ except:
 	abspath = os.path.dirname(__file__)
 	sys.path.append(abspath)
 	os.chdir(abspath)
+import os
 from configSub import *
 
 class orderDoc(couchdbkit.Document):
@@ -36,5 +37,20 @@ class orderDoc(couchdbkit.Document):
 	doc_type = "orderDoc"
 	
 	order = couchdbkit.DictProperty()
+	
+	def genOrder(self, user, order):
+		tempid = ''.join(map(lambda x:'0123456789'[ord(x)%10], os.urandom(10)))
+		temp = orderDoc.view("order/admin", key=tempid).first()
+		while temp:
+			tempid = ''.join(map(lambda x:'0123456789'[ord(x)%10], os.urandom(10)))
+			temp = orderDoc.view("order/admin", key=tempid).first()
+		
+		self.id = tempid
+		self.user = user
+		self.order = order
+		
+		self.save()
+		
+		return self.id
 
 orderDoc.set_db(database)
