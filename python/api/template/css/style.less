@@ -1,0 +1,198 @@
+@big_font: 2.0em;
+@width: 950px;
+@margin: 10px;
+@grid_cells: 24;
+
+/* JoshAshby's Colors :D */
+@khaki: #C4B3A4;
+@black: #dbdbdb; /* thats not quiet black... */
+@charcoal: #36454F; /* blue dark grey */
+@grey: #848482;
+@light-grey: #B2BEB5;
+@really-light-grey: #E5E4E2;
+@anti-flash-white: #F2F3F4;
+@eggshell: #F0EAD6;
+@blue: #0067A5;
+@orange: #CC5500;
+@red: #B22222;
+@green: #8DB600;
+@yellow: #E4D00A;
+
+body {
+	background-color: @anti-flash-white;
+	margin: 0;
+	padding: 0;
+}
+
+header {
+	height: 30px;
+	background: -moz-linear-gradient(right, @charcoal, @really-light-grey);
+	background: -webkit-gradient(linear, right center, left center, from(@charcoal), to(@really-light-grey));
+	width: 100%;
+	display: inline-block;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+	#logoLine {
+		display: inline-block;
+		#logo {
+			position: relative;
+			margin: 0;
+			padding: 0;
+			top: -5px;
+			display: inline-block;
+			width: 75px;
+			height: 75px;
+		}
+	}
+	#pageTitle {
+		position: relative;
+		top: -50px;
+		left: 25px;
+		display: inline-block;
+		font-size: 2em;
+		color: @blue;
+		b {
+			color: @charcoal;
+		}
+	}
+}
+
+#spacer {
+	height: 25px;
+	margin-left:auto;
+	margin-right:auto;
+	width: 800px;
+	background-color: @really-light-grey;
+	border-right: 2px solid @light-grey;
+	border-left: 2px solid @light-grey;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	position: relative;
+	top: -4px;
+}
+
+#content {
+	margin-left:auto;
+	margin-right:auto;
+	width: 780px;
+	height: 100%;
+	background-color: @really-light-grey;
+	border-right: 2px solid @light-grey;
+	border-left: 2px solid @light-grey;
+	position: relative;
+	top: -4px;
+	padding: 10px 10px 10px 10px;
+	#productMain {
+		font-size: 1.5em;
+		color: @charcoal;
+		b {
+			color: @blue;
+			a {
+				text-decoration: None;
+			}
+		}
+		display: inline-block;
+		#productImage {
+			display: inline-block;
+			width: 148px;
+			height: 148px;
+			position: relative;
+			top: -70px;
+			padding: 10px 10px 10px 10px;
+			background-color: @anti-flash-white;
+			.round();
+		}
+		#productMainInfo {
+			display: inline-block;
+			position: relative;
+			top: 10px;
+		}
+	}
+	#productSub {
+		font-size: 1em;
+		color: @blue;
+	}
+	#productGeneralInfo {
+		
+	}
+	#productGraphs {
+		
+	}
+	#productLastLog {
+		
+	}
+}
+
+
+footer {
+	position: relative;
+	top: -4px;
+	height: 50px;
+	background-color: @charcoal;
+	background: -moz-linear-gradient(left, @charcoal, @really-light-grey);
+	background: -webkit-gradient(linear, left center, right center, from(@charcoal), to(@really-light-grey));
+	display: inline-block;
+	padding-left: 20px;
+	padding-right: 20px;
+	width: 100% - 4px;
+	a {
+		.label(@blue);
+		position: relative;
+		top: 15px;
+		color: @anti-flash-white;
+		display: inline-block;
+		#pdf {
+			display: inline-block;
+		}
+		#json {
+			display: inline-block;
+		}
+	}
+}
+
+//various Mixin styles
+.two_gradient (@one, @two) {
+	background: @one;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(@one), to(@two)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient(top, @one, @two); /* Chrome 10+, Saf5.1+ */
+	background-image: -moz-linear-gradient(top,@one, @two); /* FF3.6 */
+	background-image: -ms-linear-gradient(top, @one, @two); /* IE10 */
+	background-image: -o-linear-gradient(top, @one, @two); /* Opera 11.10+ */
+	background-image: linear-gradient(top, @one, @two);
+}
+
+.shadow (@hor: 3px, @vert: 2px, @blur: 5px, @shadow: @khaki) {
+	-webkit-box-shadow: @hor @vert @blur @shadow;
+	-moz-box-shadow: @hor @vert @blur @shadow;
+	box-shadow: @hor @vert @blur @shadow;
+}
+
+.round (@one: 5px, @two: 5px, @three: 5px, @four: 5px) {
+	-webkit-border-top-left-radius: @one;
+	-webkit-border-top-right-radius: @two;
+	-webkit-border-bottom-right-radius: @four;
+	-webkit-border-bottom-left-radius: @three;
+	-moz-border-radius-topleft: @one;
+	-moz-border-radius-topright: @two;
+	-moz-border-radius-bottomright: @four;
+	-moz-border-radius-bottomleft: @three;
+	border-top-left-radius: @one;
+	border-top-right-radius: @two;
+	border-bottom-right-radius: @four;
+	border-bottom-left-radius: @three;
+}
+
+.label (@color) {
+	background: @color;
+	padding: 2px;
+	font-size: .6em;
+	color: white;
+	font-weight: bold;
+	height: auto;
+	width: auto;
+	.round(2px, 2px, 2px, 2px);
+	position: relative;
+	top: -2px;
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>Project Bluering</title>
+	<meta name="description" content="Project Bluering">
+	<meta name="author" content="Joshua Ashby">
+	<link rel="stylesheet/less" href="/web/css/style.less">
+	<script src="/web/js/less.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		less.env = "development";
+		less.watch();
+	</script>
+</head>
+
+<body>
+	<header>
+		<div id="logoLine">
+			<a href="/product/?t=html"><img src="/web/css/images/ring.png" id="logo"/></a>
+		</div>
+		
+		<div id="pageTitle">
+			<b>Total Inventory</b>
+		</div>
+	</header>
+	
+	<section id="spacer">
+	
+	</section>
+	
+	<section id="content">
+		#for $x in $range($len($data))
+			<div id="productMain">
+				<div id="productImage">
+					<img src="/pictures/thumb/data[$x].picture" />
+				</div>
+				
+				<div id="productMainInfo">
+					Barcode: <b><a href="/product/$data[$x].barcode/?t=html">$data[$x].barcode</a></b> <br>
+					Name: <b>$data[$x].name</b> <br>
+					Quantity: <b>$data[$x].quantity</b>
+				</div>
+			</div>
+			<hr>
+		#end for
+	</section>
+	
+	<footer>
+		<a id="pdf" href="?t=pdf">PDF</a>
+		<a id="json" href="?t=json">JSON</a>
+	</footer>
+	
+	<script src="/web/js/jquery.js"></script>
+	<script src="/web/js/coffee-script.js"></script>
+</body>
+</html>

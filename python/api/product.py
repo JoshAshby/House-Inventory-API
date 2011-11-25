@@ -34,6 +34,7 @@ from configSub import *
 from productDocument import *
 from ashpic import *
 import auth
+import productView
 
 urls = (
 	'', 'slash',
@@ -61,17 +62,26 @@ class info:
 		Returns:
 			A JSON object like: {"product": {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}}
 		'''
+		wi = web.input()
 		try: 
-			wi = web.input()
 			bar = wi['barcode']
 		except:
 			bar = kwargs['barcode']
 		
 		name = database.view("products/all", key=bar).first()['value']
-		inform = json.dumps({"product": name})
 		
-		if spam:
-			web.header('Content-Type', 'application/json')
+		view = productView.infoView(name)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
 		return inform
 	
 	def postFunc(self, **kwargs):
@@ -244,13 +254,26 @@ class total:
 		Returns:
 			A JSON object like: {"total": [{"category": "Notebook", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "3037921120217", "quantity": 1, "name": "Orange Graph Composition"}, {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}, {"category": "Animal", "description": "A dog of god", "tags": ["Beagle", "dog", "pet"], "barcode": "dog987", "quantity": "2", "name": "Dog"}]}
 		'''
+		wi = web.input()
+		
 		name = database.view("products/all").all()
 		for i in range(len(name)):
 			name[i] = name[i]['value']
-		inform = json.dumps({'total': name})
+			
+		view = productView.totalView(name)
 		
-		if spam:
-			web.header('Content-Type', 'application/json')
+		print view
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
 		return inform
 		
 	def postFunc(self, **kwargs):
