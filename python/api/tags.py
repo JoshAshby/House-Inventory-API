@@ -33,6 +33,7 @@ except:
 from configSub import *
 from productDocument import *
 import auth
+import tagView
 
 urls = (
 	'', 'slash',
@@ -55,8 +56,8 @@ class tagsInfo:
 		Returns:
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
+		wi = web.input()
 		try:
-			wi = web.input()
 			tag = wi['tag']
 		except:
 			tag = kwargs['tag']
@@ -66,9 +67,19 @@ class tagsInfo:
 		for i in range(len(query)):
 			query[i] = query[i]['value']
 		
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps({'products': query})
+		view = tagView.infoView(query, tag)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
+		return inform
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -130,6 +141,7 @@ class tagsTotal:
 		Returns:
 			A JSON object like: {"tags" : ["abc", "def"]}
 		'''
+		wi = web.input()
 		dog = []
 		query = database.view("products/admin").all()
 		
@@ -139,9 +151,19 @@ class tagsTotal:
 		
 		queryFix = list(set(dog))
 		
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps({'tags': queryFix})
+		view = tagView.totalView(queryFix)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
+		return inform
 	
 	def postFunc(self, **kwargs):
 		'''

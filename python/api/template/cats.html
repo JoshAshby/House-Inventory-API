@@ -32,23 +32,13 @@
 	<section id="content">
 		#for $x in $range($len($data))
 			<div id="productMain">
-				<div id="productImage">
-					<img src="/pictures/thumb/data[$x].picture" />
-				</div>
-				
 				<div id="productMainInfo">
-					Barcode: <b><a href="/product/$data[$x].barcode/?t=html">$data[$x].barcode</a></b> <br>
-					Name: <b>$data[$x].name</b> <br>
-					Quantity: <b>$data[$x].quantity</b>
-				</div>
-				
-				<div id="productSubInfo">
-					Tags: 
-						#for $y in $range($len($data[$x].tags))
-							<b><a href="/tag/$data[$x].tags[$y]/?t=html">$data[$x].tags[$y]</a></b>
-						#end for
-						<br>
-					Category: <b><a href="/category/$data[$x].category/?t=html">$data[$x].category</a></b>
+					#if $type == 'tag'
+						Tag: <b><a href="/tag/$data[$x]/?t=html">$data[$x]</a></b>
+					#end if
+					#if $type == 'category'
+						Category: <b><a href="/category/$data[$x]/?t=html">$data[$x]</a></b>
+					#end if
 				</div>
 			</div>
 			<hr>

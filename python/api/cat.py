@@ -30,6 +30,7 @@ except:
 from configSub import *
 from productDocument import *
 import auth
+import catView
 
 urls = (
 	'', 'slash',
@@ -56,8 +57,8 @@ class catInfo:
 			cat - the cateogry
 		Returns:
 		'''
+		wi = web.input()
 		try:
-			wi = web.input()
 			cat = wi['category']
 		except:
 			cat = kwargs['category']
@@ -67,9 +68,19 @@ class catInfo:
 		for i in range(len(query)):
 			query[i] = query[i]['value']
 		
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps({'products': query})
+		view = catView.infoView(query)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
+		return inform
 		
 	def postFunc(self, **kargs):
 		'''
@@ -137,6 +148,7 @@ class catTotal:
 		Args:
 		Returns:
 		'''
+		wi = web.input()
 		query = []
 		name = database.view("products/admin").all()
 		
@@ -146,9 +158,19 @@ class catTotal:
 		
 		queryFix = list(set(query))
 		
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps({'categories': queryFix})
+		view = catView.totalView(queryFix)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
+		return inform
 	
 	def postFunc(self, **kargs):
 		'''
@@ -216,8 +238,8 @@ class catTag:
 		Args:
 		Returns:
 		'''
+		wi = web.input()
 		try:
-			wi = web.input()
 			cat = wi['category']
 			tag = wi['tag']
 		except:
@@ -239,9 +261,19 @@ class catTag:
 					dog.append(query[x])
 				else: pass
 		
-		if spam:
-			web.header('Content-Type', 'application/json')
-		return json.dumps({'products': dog})
+		view = catView.tagView(dog, tag)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
+		return inform
 	
 	def postFunc(self, **kargs):
 		'''

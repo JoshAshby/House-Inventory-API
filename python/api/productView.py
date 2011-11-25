@@ -105,7 +105,7 @@ class totalView(object):
 		
 	def HTML(self):
 		print self.data
-		page = Template(file="template/total.html", searchList=[{"data": self.data}])
+		page = Template(file="template/total.html", searchList=[{"data": self.data, "title": "<b>Total Inventory</b>", 'type': 'Total Inventory'}])
 		web.header('Content-Type', "text/html")
 		return page
 		

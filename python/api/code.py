@@ -47,7 +47,7 @@ class index:
 	
 	def endFunc(self):
 		print "start"
-		return render.index()
+		raise web.seeother("/product/")
 	
 	def GET(self):
 		return self.endFunc()

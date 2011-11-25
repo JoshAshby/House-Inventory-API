@@ -45,10 +45,10 @@
 		<div id="productGeneralInfo">
 			Tags:
 			#for $x in $range($len($tags))
-				$tags[$x], 
+				<a href="/tag/$tags[$x]/?t=html">$tags[$x]</a>,
 			#end for
 			<br>
-			Category: $category</br>
+			Category: <a href="/category/$category/?t=html">$category</a></br>
 			Description: $description<br>
 			Predicted: $days days<div id="predictedHelp"><img src="/web/css/images/question.png" /></div><br>
 		</div>
