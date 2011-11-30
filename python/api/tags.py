@@ -151,7 +151,9 @@ class tagsTotal:
 		
 		queryFix = list(set(dog))
 		
-		view = tagView.totalView(queryFix)
+		queryFinal = {'data': queryFix}
+		
+		view = tagView.totalView(queryFinal)
 		
 		if 't' in wi: t = wi['t']
 		elif 't' in kwargs: t = kwargs['t']

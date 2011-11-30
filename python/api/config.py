@@ -26,6 +26,7 @@ import product
 import tags
 import log
 import graph
+import order
 
 urls = (
 	'/', 'index',
@@ -34,6 +35,7 @@ urls = (
 	'/tag', tags.app,
 	'/log', log.app,
 	'/graph', graph.app,
+	'/order', order.app,
 	#Test stuff...
 	'/test', testPage.app
 )

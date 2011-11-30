@@ -68,7 +68,9 @@ class catInfo:
 		for i in range(len(query)):
 			query[i] = query[i]['value']
 		
-		view = catView.infoView(query)
+		totals = {'data': query}
+		
+		view = catView.infoView(totals)
 		
 		if 't' in wi: t = wi['t']
 		elif 't' in kwargs: t = kwargs['t']
@@ -158,7 +160,9 @@ class catTotal:
 		
 		queryFix = list(set(query))
 		
-		view = catView.totalView(queryFix)
+		names = {'data': queryFix}
+		
+		view = catView.totalView(names)
 		
 		if 't' in wi: t = wi['t']
 		elif 't' in kwargs: t = kwargs['t']
@@ -260,6 +264,8 @@ class catTag:
 				if e[z] == tag:
 					dog.append(query[x])
 				else: pass
+		
+		dog = {'data': dog}
 		
 		view = catView.tagView(dog, tag)
 		

@@ -2,7 +2,7 @@
 """
 Project Blue Ring
 An inventory control and management API
-Product information views
+Order information views
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -31,11 +31,34 @@ from configSub import *
 from pdfView import *
 from htmlView import *
 
+class orderView(object):
+	def __init__(self, data):
+		self.data = {'type': "orderInfo", 'data': data}
+		
+	def PDF(self):
+		preReport = pdfView(self.data)
+		
+		report = preReport.build()
+		
+		web.header('Content-Type', 'application/pdf')
+		return report
+		
+	def HTML(self):
+		prePage = htmlView(self.data)
+		
+		page = prePage.build()
+		
+		web.header('Content-Type', "text/html")
+		return page
+		
+	def JSON(self):
+		web.header('Content-Type', 'application/json')
+		return json.dumps({'order': self.data['data']})
+
 class infoView(object):
 	def __init__(self, data):
-		self.data = data
-		self.data['type'] = "catInfo"
-	
+		self.data = {'type': "orderInfo", 'data': data}
+		
 	def PDF(self):
 		preReport = pdfView(self.data)
 		
@@ -54,55 +77,4 @@ class infoView(object):
 		
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
-		return json.dumps({'products': self.data['data']})
-
-class totalView(object):
-	def __init__(self, data):
-		self.data = data
-		self.data['type'] = "catTotal"
-	
-	def PDF(self):
-		preReport = pdfView(self.data)
-		
-		report = preReport.build()
-		
-		web.header('Content-Type', 'application/pdf')
-		return report
-		
-	def HTML(self):
-		prePage = htmlView(self.data)
-		
-		page = prePage.build()
-		
-		web.header('Content-Type', "text/html")
-		return page
-		
-	def JSON(self):
-		web.header('Content-Type', 'application/json')
-		return json.dumps({"categories": self.data['data']})
-		
-class tagView(object):
-	def __init__(self, data, tag):
-		self.data = data
-		self.data['tag'] = tag
-		self.data['type'] = "catTag"
-	
-	def PDF(self):
-		preReport = pdfView(self.data)
-		
-		report = preReport.build()
-		
-		web.header('Content-Type', 'application/pdf')
-		return report
-		
-	def HTML(self):
-		prePage = htmlView(self.data)
-		
-		page = prePage.build()
-		
-		web.header('Content-Type', "text/html")
-		return page
-		
-	def JSON(self):
-		web.header('Content-Type', 'application/json')
-		return json.dumps({"products": self.data['data']})
+		return json.dumps({'order': self.data['data']})

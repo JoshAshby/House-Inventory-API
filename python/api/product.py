@@ -259,10 +259,10 @@ class total:
 		name = database.view("products/all").all()
 		for i in range(len(name)):
 			name[i] = name[i]['value']
-			
-		view = productView.totalView(name)
 		
-		print view
+		totals = {'data': name}
+			
+		view = productView.totalView(totals)
 		
 		if 't' in wi: t = wi['t']
 		elif 't' in kwargs: t = kwargs['t']

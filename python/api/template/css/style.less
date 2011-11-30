@@ -85,13 +85,9 @@ header {
 	top: -4px;
 	padding: 10px 10px 10px 10px;
 	#productMain {
-		font-size: 1.5em;
 		color: @charcoal;
 		b {
 			color: @blue;
-			a {
-				text-decoration: None;
-			}
 		}
 		display: inline-block;
 		#productImage {
@@ -102,17 +98,20 @@ header {
 			top: -70px;
 			padding: 10px 10px 10px 10px;
 			background-color: @anti-flash-white;
-			.round();
+			.round;
 		}
 		#productMainInfo {
 			display: inline-block;
 			position: relative;
 			top: 10px;
 		}
+		font-size: 1.5em;
 	}
-	#productSub {
-		font-size: 1em;
-		color: @blue;
+	#productSubInfo {
+		font-size: 5px;
+		color: @red;
+		position: relative;
+		top: -20px;
 	}
 	#productGeneralInfo {
 		

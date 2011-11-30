@@ -34,18 +34,19 @@ import auth
 
 import datetime
 
+import orderView
+
 urls = (
 	"", "slash",
-	"/(.*)/", "order"
+	"/", "placeOrder",
+	"/(.*)/", "viewOrder"
 )
 
-class order:
+class placeOrder:
 	'''
 	class documentation
-	
-	
 	'''
-	def getFunc(self, **kwargs):	
+	def getFunc(self, **kwargs):
 		'''
 		function documentation
 		
@@ -55,10 +56,11 @@ class order:
 			
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
+		wi = web.input()
 		try:
-			wi = web.input()
 			user = wi['user']
-			order = json.loads(wi['order'])
+			orderWi = str(wi['order'])
+			order = json.loads(orderWi)
 			
 		except:
 			user = kwargs['user']
@@ -68,7 +70,7 @@ class order:
 		for bar in order:
 			product = productDoc.view("products/admin", key=bar).first()
 			
-			if product.quantity >= order[bar]:
+			if product.quantity > order[bar]:
 				pass
 			else:
 				return json.dumps({"error": "Product quantity too low", "barcode": bar})
@@ -84,7 +86,19 @@ class order:
 		
 		ordered = {"user": user, "order": order, "id": order_id}
 		
-		return json.dumps(ordered)
+		view = orderView.orderView(ordered)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
+		return inform
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -119,8 +133,8 @@ class order:
 		'''
 		return self.getFunc(barcode=kwargs['barcode'])
 	
-	def GET(self, bar):
-		return self.getFunc(barcode=bar)
+	def GET(self):
+		return self.getFunc()
 	
 	@auth.oauth_protect
 	def POST(self):
@@ -134,6 +148,91 @@ class order:
 	def DELETE(self):
 		return self.deleteFunc()
 
+
+class viewOrder:
+	'''
+	class documentation
+	'''
+	def getFunc(self, **kwargs):	
+		'''
+		function documentation
+		
+		GET verb call
+		
+		Returns:
+			
+		'''
+		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
+		wi = web.input()
+		try:
+			orderId = wi['id']
+			
+		except:
+			orderId = kwargs['id']
+		
+		order_doc = database.view("order/all", key=orderId).first()['value']
+		
+		view = orderView.infoView(order_doc)
+		
+		if 't' in wi: t = wi['t']
+		elif 't' in kwargs: t = kwargs['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = view.HTML()
+		elif t == 'json':
+			inform = view.JSON()
+		elif t == 'pdf':
+			inform = view.PDF()
+		return inform
+	
+	def postFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		POST verb call
+		
+		Returns:
+			whatever I tell it to since it's a testing page...
+		'''
+		return self.getFunc(barcode=kwargs['barcode'])
+	
+	def putFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		PUT verb call
+		
+		Returns:
+			whatever I tell it to since it's a testing page...
+		'''
+		return self.getFunc(barcode=kwargs['barcode'])
+	
+	def deleteFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		DELETE verb call
+		
+		Returns:
+			whatever I tell it to since it's a testing page...
+		'''
+		return self.getFunc(barcode=kwargs['barcode'])
+	
+	def GET(self, orderId):
+		return self.getFunc(id=orderId)
+	
+	@auth.oauth_protect
+	def POST(self):
+		return self.postFunc()
+	
+	@auth.oauth_protect
+	def PUT(self):
+		return self.putFunc()
+	
+	@auth.oauth_protect
+	def DELETE(self):
+		return self.deleteFunc()
 
 app = web.application(urls, globals(), autoreload=False)
 #application = app.wsgifunc()

@@ -27,88 +27,56 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
-from ashpic import *
-from productDocument import *
 
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
-
-import matplotlib
-matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
-from matplotlib.dates import MonthLocator, DateFormatter
-import datetime
-
-from Cheetah.Template import Template
-
-from reportlab.platypus import *
+from pdfView import *
+from htmlView import *
 
 class infoView(object):
 	def __init__(self, data):
 		self.data = data
+		self.data['type'] = "productInfo"
 	
 	def PDF(self):
-		pass
+		preReport = pdfView(self.data)
+		
+		report = preReport.build()
+		
+		web.header('Content-Type', 'application/pdf')
+		return report
 		
 	def HTML(self):
-		page = Template(file="template/info.html", searchList=[self.data])
+		prePage = htmlView(self.data)
+		
+		page = prePage.build()
+		
 		web.header('Content-Type', "text/html")
 		return page
 		
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
 		return json.dumps({'product': self.data})
-	
-	def graph(self):
-		buffer = StringIO()
-		
-		fig = plt.figure()
-		ax = fig.add_subplot(111)
-
-		product = productDoc.view("products/admin", key=self.data['barcode']).first()
-
-		a = product.log
-
-		query = sorted(a, key=lambda a: a['date'], reverse=True)
-
-		date = []
-		quantity = []
-
-		for key in range(len(query)):
-			date.append(datetime.datetime.strptime(query[key]['date'], '%Y-%m-%d %H:%M:%S'))
-			quantity.append(query[key]['quantity'])
-
-		ax.plot(date, quantity)
-
-		ax.xaxis.set_major_locator( MonthLocator() )
-		ax.xaxis.set_major_formatter( DateFormatter('%m-%Y') )
-
-		ax.fmt_xdata = DateFormatter('%Y-%m-%d %H:%M:%S')
-		fig.autofmt_xdate()
-
-		fig.savefig(buffer, format='png')
-
-		graph = buffer.getvalue()
-		buffer.close()
-		
-		return graph
 
 class totalView(object):
 	def __init__(self, data):
 		self.data = data
+		self.data['type'] = "productTotal"
 	
 	def PDF(self):
-		pass
+		preReport = pdfView(self.data)
+		
+		report = preReport.build()
+		
+		web.header('Content-Type', 'application/pdf')
+		return report
 		
 	def HTML(self):
-		print self.data
-		page = Template(file="template/total.html", searchList=[{"data": self.data, "title": "<b>Total Inventory</b>", 'type': 'Total Inventory'}])
+		prePage = htmlView(self.data)
+		
+		page = prePage.build()
+		
 		web.header('Content-Type', "text/html")
 		return page
 		
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
-		return json.dumps({"total": self.data})
+		return json.dumps({"total": self.data['data']})

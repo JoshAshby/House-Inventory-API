@@ -27,42 +27,55 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
-from ashpic import *
 
-from Cheetah.Template import Template
-
-from reportlab.platypus import *
+from pdfView import *
+from htmlView import *
 
 class infoView(object):
 	def __init__(self, data, tag):
-		self.data = data
-		self.tag = tag
-	
+		self.data = {'tag': tag, 'type': "tagInfo", 'data': data}
+		
 	def PDF(self):
-		pass
+		preReport = pdfView(self.data)
+		
+		report = preReport.build()
+		
+		web.header('Content-Type', 'application/pdf')
+		return report
 		
 	def HTML(self):
-		page = Template(file="template/total.html", searchList=[{'data': self.data, "title": ("<b>Tag: </b>" + self.tag), 'type': self.tag}])
+		prePage = htmlView(self.data)
+		
+		page = prePage.build()
+		
 		web.header('Content-Type', "text/html")
 		return page
 		
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
-		return json.dumps({'products': self.data})
+		return json.dumps({'products': self.data['data']})
 
 class totalView(object):
 	def __init__(self, data):
 		self.data = data
+		self.data['type'] = "tagTotal"
 	
 	def PDF(self):
-		pass
+		preReport = pdfView(self.data)
+		
+		report = preReport.build()
+		
+		web.header('Content-Type', 'application/pdf')
+		return report
 		
 	def HTML(self):
-		print self.data
-		page = Template(file="template/cats.html", searchList=[{"data": self.data, "title": "<b>Tags</b>", 'type': 'tag'}])
+		prePage = htmlView(self.data)
+		
+		page = prePage.build()
+		
 		web.header('Content-Type', "text/html")
 		return page
 		
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
-		return json.dumps({"tags": self.data})
+		return json.dumps({"tags": self.data['data']})
