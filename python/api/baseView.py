@@ -2,7 +2,7 @@
 """
 Project Blue Ring
 An inventory control and management API
-Product information views
+Base view prototype
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -28,19 +28,30 @@ except:
 	os.chdir(abspath)
 from configSub import *
 
-import baseView
-
-class infoView(baseView.baseView):
-	def JSON(self):
-		web.header('Content-Type', 'application/json')
-		return json.dumps({'products': self.data['data']})
-
-class totalView(baseView.baseView):
-	def JSON(self):
-		web.header('Content-Type', 'application/json')
-		return json.dumps({"categories": self.data['data']})
+class baseView(object):
+	def __init__(self, data, wi):
+		self.data = data
 		
-class tagView(baseView.baseView):
+		if 't' in wi: t = wi['t']
+		else: t = 'json'
+		
+		if t == 'html':
+			inform = self.HTML()
+		elif t == 'json':
+			inform = self.JSON()
+		elif t == 'pdf':
+			inform = self.PDF()
+			
+		self.inform = inform
+	
+	def PDF(self):
+		pass
+		
+	def HTML(self):
+		pass
+		
 	def JSON(self):
-		web.header('Content-Type', 'application/json')
-		return json.dumps({"products": self.data['data']})
+		pass
+	
+	def returnData(self):
+		return self.inform

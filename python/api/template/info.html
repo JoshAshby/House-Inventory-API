@@ -50,11 +50,17 @@
 			<br>
 			Category: <a href="/category/$category/?t=html">$category</a></br>
 			Description: $description<br>
-			Predicted: $days days<div id="predictedHelp"><img src="/web/css/images/question.png" /></div><br>
+			Predicted: $days days<br>
 		</div>
 		
 		<div id="productGraphs">
-			<!--<img src=$picture /> This isn't the right way to embed a dynamically generated image into the page but it's just a place holder for now -->
+			<h1>Stock Usage Timeline</h1>
+			<a href='/graph/timeline/$barcode/' ><img src='/graph/timeline/$barcode/' width="750px" /></a><br />
+			The Timeline showing product use over the labeled months.<br />
+			<br />
+			<h1>Stock Usage With Delta Days Scatter Plot and Prediction</h1>
+			<a href='/graph/scatter/$barcode/' ><img src='/graph/scatter/$barcode/' width='750px' /></a>
+			Each dot is a stock quantity change, at the difference from last restock and the quantity. The line represents the predicted product use graph, and the DoZ (Date of Zero) is shown at the x intercept.<br />
 		</div>
 		
 		<div id="productLastLog">

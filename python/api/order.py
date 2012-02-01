@@ -86,19 +86,9 @@ class placeOrder:
 		
 		ordered = {"user": user, "order": order, "id": order_id}
 		
-		view = orderView.orderView(ordered)
+		view = orderView.orderView(ordered, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -136,15 +126,12 @@ class placeOrder:
 	def GET(self):
 		return self.getFunc()
 	
-	@auth.oauth_protect
 	def POST(self):
 		return self.postFunc()
 	
-	@auth.oauth_protect
 	def PUT(self):
 		return self.putFunc()
 	
-	@auth.oauth_protect
 	def DELETE(self):
 		return self.deleteFunc()
 
@@ -160,7 +147,7 @@ class viewOrder:
 		GET verb call
 		
 		Returns:
-			
+			A PDF HTML or JSON formated response accoriding to the attached type tag.
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		wi = web.input()
@@ -172,19 +159,9 @@ class viewOrder:
 		
 		order_doc = database.view("order/all", key=orderId).first()['value']
 		
-		view = orderView.infoView(order_doc)
+		view = orderView.infoView(order_doc, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -193,7 +170,7 @@ class viewOrder:
 		POST verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			None
 		'''
 		return self.getFunc(barcode=kwargs['barcode'])
 	
@@ -204,7 +181,7 @@ class viewOrder:
 		PUT verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			None
 		'''
 		return self.getFunc(barcode=kwargs['barcode'])
 	
@@ -215,22 +192,19 @@ class viewOrder:
 		DELETE verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			None
 		'''
 		return self.getFunc(barcode=kwargs['barcode'])
 	
 	def GET(self, orderId):
 		return self.getFunc(id=orderId)
 	
-	@auth.oauth_protect
 	def POST(self):
 		return self.postFunc()
 	
-	@auth.oauth_protect
 	def PUT(self):
 		return self.putFunc()
 	
-	@auth.oauth_protect
 	def DELETE(self):
 		return self.deleteFunc()
 

@@ -30,6 +30,9 @@ except:
 from configSub import *
 import auth
 
+from productDocument import *
+
+
 urls = (
 	"", "slash",
 	"/(.*)/", "test"
@@ -58,7 +61,10 @@ class test:
 		except:
 			bar = kwargs['barcode']
 		
-		return None
+		product = productDoc.view("products/admin", key=bar).first()
+		a = product.stock(50)
+		
+		return a
 	
 	def postFunc(self, **kwargs):
 		'''

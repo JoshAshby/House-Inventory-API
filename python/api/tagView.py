@@ -28,54 +28,14 @@ except:
 	os.chdir(abspath)
 from configSub import *
 
-from pdfView import *
-from htmlView import *
+import baseView
 
-class infoView(object):
-	def __init__(self, data, tag):
-		self.data = {'tag': tag, 'type': "tagInfo", 'data': data}
-		
-	def PDF(self):
-		preReport = pdfView(self.data)
-		
-		report = preReport.build()
-		
-		web.header('Content-Type', 'application/pdf')
-		return report
-		
-	def HTML(self):
-		prePage = htmlView(self.data)
-		
-		page = prePage.build()
-		
-		web.header('Content-Type', "text/html")
-		return page
-		
+class infoView(baseView.baseView):
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
 		return json.dumps({'products': self.data['data']})
 
-class totalView(object):
-	def __init__(self, data):
-		self.data = data
-		self.data['type'] = "tagTotal"
-	
-	def PDF(self):
-		preReport = pdfView(self.data)
-		
-		report = preReport.build()
-		
-		web.header('Content-Type', 'application/pdf')
-		return report
-		
-	def HTML(self):
-		prePage = htmlView(self.data)
-		
-		page = prePage.build()
-		
-		web.header('Content-Type', "text/html")
-		return page
-		
+class totalView(baseView.baseView):
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
 		return json.dumps({"tags": self.data['data']})

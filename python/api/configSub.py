@@ -29,3 +29,16 @@ spam = 0
 
 class slash:
 	def GET(self): raise web.seeother("/")
+
+def format(view):
+	if 't' in wi: t = wi['t']
+	elif 't' in kwargs: t = kwargs['t']
+	else: t = 'json'
+	
+	if t == 'html':
+		inform = view.HTML()
+	elif t == 'json':
+		inform = view.JSON()
+	elif t == 'pdf':
+		inform = view.PDF()
+	return inform

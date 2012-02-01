@@ -28,8 +28,9 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
+
 from productDocument import *
-import auth
+
 import catView
 
 urls = (
@@ -70,19 +71,9 @@ class catInfo:
 		
 		totals = {'data': query}
 		
-		view = catView.infoView(totals)
+		view = catView.infoView(totals, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 		
 	def postFunc(self, **kargs):
 		'''
@@ -121,15 +112,12 @@ class catInfo:
 	def GET(self, cat):
 		return self.getFunc(category=cat)
 	
-	@auth.oauth_protect
 	def POST(self, cat):
 		return self.postFunc(category=cat)
 	
-	@auth.oauth_protect
 	def PUT(self, cat):
 		return self.putFunc(category=cat)
 	
-	@auth.oauth_protect
 	def DELETE(self, cat):
 		return self.deleteFunc(category=cat)
 		
@@ -162,19 +150,9 @@ class catTotal:
 		
 		names = {'data': queryFix}
 		
-		view = catView.totalView(names)
+		view = catView.totalView(names, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 	
 	def postFunc(self, **kargs):
 		'''
@@ -213,15 +191,12 @@ class catTotal:
 	def GET(self):
 		return self.getFunc()
 	
-	@auth.oauth_protect
 	def POST(self):
 		return self.postFunc()
 	
-	@auth.oauth_protect
 	def PUT(self):
 		return self.putFunc()
 	
-	@auth.oauth_protect
 	def DELETE(self):
 		return self.deleteFunc()
 		
@@ -267,19 +242,9 @@ class catTag:
 		
 		dog = {'data': dog}
 		
-		view = catView.tagView(dog, tag)
+		view = catView.tagView(dog, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 	
 	def postFunc(self, **kargs):
 		'''
@@ -318,15 +283,12 @@ class catTag:
 	def GET(self, cat, tags):
 		return self.getFunc(category=cat, tag=tags)
 	
-	@auth.oauth_protect
 	def POST(self, cat, tags):
 		return self.postFunc(category=cat, tag=tags)
 	
-	@auth.oauth_protect
 	def PUT(self, cat, tags):
 		return self.putFunc(category=cat, tag=tags)
 	
-	@auth.oauth_protect
 	def DELETE(self, cat, tags):
 		return self.deleteFunc(category=cat, tag=tags)
 		

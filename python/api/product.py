@@ -68,21 +68,13 @@ class info:
 		except:
 			bar = kwargs['barcode']
 		
-		name = database.view("products/all", key=bar).first()['value']
+		name =  productDoc.view("products/all", key=bar).first()
 		
-		view = productView.infoView(name)
+		name = dict(name)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
+		view = productView.infoView(name, wi)
 		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -119,7 +111,6 @@ class info:
 			bar = bobbins['barcode']
 			
 			product = productDoc.view("products/admin", key=bar).first()
-			#pro = database.view("products/all", key=bar).first()['value']
 			
 			if 'name' in bobbins: product.name = bobbins['name']
 			
@@ -164,25 +155,18 @@ class info:
 			product.barcode = bar
 			product.save()
 			
-			tryal = product.restock(int(bobbins['quantity']))
+			tryal = product.stock(int(bobbins['quantity']))
 			
-			#incase the product is being restocked, run the machine learning stuff
-			#if not then just change the value of the quantity 
-			#if int(bobbins['quantity']) > product.quantity:
-			#	tryal,days= stats.restock(bar, int(bobbins['quantity']))
-			#else:
-			#	product.quantity = int(bobbins['quantity'])
-			#	product.log.append({"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": int(bobbins['quantity'])})
-			#	product.save()
-
 			name = database.view("products/all", key=bar).all()
+			
 			if tryal:
-				name[0]['value']['predicted_days'] = tryal[0]
-				name[0]['value']['predicted_date'] = tryal[1]
+				name[0]['value']['predicted_days'] = tryal
+				
 			inform = json.dumps({"product": name[0]['value']})
 			
 			if spam:
 				web.header('Content-Type', 'application/json')
+				
 			return inform
 		else:
 			return json.dumps({'error': 'Not enough data'})
@@ -217,20 +201,18 @@ class info:
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
+			
 		return inform
 	
 	def GET(self, bar):
 		return self.getFunc(barcode=bar)
 	
-	@auth.oauth_protect
 	def POST(self, bar):
 		return self.postFunc(barcode=bar)
 	
-	@auth.oauth_protect
 	def PUT(self, bar):
 		return self.putFunc(barcode=bar)
 	
-	@auth.oauth_protect
 	def DELETE(self, bar):
 		return self.deleteFunc(barcode=bar)
 		
@@ -257,24 +239,15 @@ class total:
 		wi = web.input()
 		
 		name = database.view("products/all").all()
+		
 		for i in range(len(name)):
 			name[i] = name[i]['value']
 		
 		totals = {'data': name}
 			
-		view = productView.totalView(totals)
+		view = productView.totalView(totals, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 		
 	def postFunc(self, **kwargs):
 		'''
@@ -389,7 +362,6 @@ class total:
 		'''
 		return self.getFunc()
 	
-	@auth.oauth_protect
 	def POST(self):
 		'''
 		function documentation
@@ -400,7 +372,6 @@ class total:
 		'''
 		return self.postFunc()
 	
-	@auth.oauth_protect
 	def PUT(self):
 		'''
 		function documentation
@@ -411,7 +382,6 @@ class total:
 		'''
 		return self.putFunc()
 	
-	@auth.oauth_protect
 	def DELETE(self):
 		'''
 		function documentation

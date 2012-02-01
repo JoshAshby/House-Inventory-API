@@ -31,8 +31,9 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
+
 from productDocument import *
-import auth
+
 import tagView
 
 urls = (
@@ -66,20 +67,12 @@ class tagsInfo:
 		
 		for i in range(len(query)):
 			query[i] = query[i]['value']
+			
+		query = {'data': query}
 		
-		view = tagView.infoView(query, tag)
+		view = tagView.infoView(query, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -113,15 +106,12 @@ class tagsInfo:
 	def GET(self, ta):
 		return self.getFunc(tag=ta)
 	
-	@auth.oauth_protect
 	def POST(self, ta):
 		return self.postFunc(tag=ta)
 	
-	@auth.oauth_protect
 	def PUT(self, ta):
 		return self.putFunc(tag=ta)
 	
-	@auth.oauth_protect
 	def DELETE(self, ta):
 		return self.deleteFunc(tag=ta)
 
@@ -153,19 +143,9 @@ class tagsTotal:
 		
 		queryFinal = {'data': queryFix}
 		
-		view = tagView.totalView(queryFinal)
+		view = tagView.totalView(queryFinal, wi)
 		
-		if 't' in wi: t = wi['t']
-		elif 't' in kwargs: t = kwargs['t']
-		else: t = 'json'
-		
-		if t == 'html':
-			inform = view.HTML()
-		elif t == 'json':
-			inform = view.JSON()
-		elif t == 'pdf':
-			inform = view.PDF()
-		return inform
+		return view.returnData()
 	
 	def postFunc(self, **kwargs):
 		'''
@@ -199,15 +179,12 @@ class tagsTotal:
 	def GET(self):
 		return self.getFunc()
 	
-	@auth.oauth_protect
 	def POST(self):
 		return self.postFunc()
 	
-	@auth.oauth_protect
 	def PUT(self):
 		return self.putFunc()
 	
-	@auth.oauth_protect
 	def DELETE(self):
 		return self.deleteFunc()
 
