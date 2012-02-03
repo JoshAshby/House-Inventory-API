@@ -48,14 +48,15 @@ import datetime
 urls = (
 	"", "slash",
 	"/timeline/(.*)/", "timelineGraph",
-	"/scatter/(.*)/", "scatterGraph"
+	"/scatter/(.*)/", "scatterGraph",
+	"/cluster/quantity/", "quantityClusterGraph"
 )
 
 class timelineGraph:
 	'''
 	class documentation
 	
-	Current'y generates graphs for the product log
+	Currently generates graphs for the product log
 	'''
 	def getFunc(self, **kwargs):	
 		'''
@@ -122,7 +123,7 @@ class timelineGraph:
 		POST verb call
 		
 		Returns:
-			Nothing
+			
 		'''
 		pass
 	
@@ -133,7 +134,7 @@ class timelineGraph:
 		PUT verb call
 		
 		Returns:
-			Nothing
+			
 		'''
 		pass
 	
@@ -144,22 +145,19 @@ class timelineGraph:
 		DELETE verb call
 		
 		Returns:
-			Nothing
+			
 		'''
 		pass
 	
 	def GET(self, bar):
 		return self.getFunc(barcode=bar)
 	
-	@auth.oauth_protect
 	def POST(self):
 		return self.postFunc()
 	
-	@auth.oauth_protect
 	def PUT(self):
 		return self.putFunc()
 	
-	@auth.oauth_protect
 	def DELETE(self):
 		return self.deleteFunc()
 
@@ -168,8 +166,7 @@ class scatterGraph:
 	'''
 	class documentation
 	
-	Testing page object. Functions include full REST with OAuth protection on the POST PUT DELETE calls.
-	Testing frameowrk for unittests included.
+	
 	'''
 	def getFunc(self, **kwargs):	
 		'''
@@ -178,7 +175,7 @@ class scatterGraph:
 		GET verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			
 		'''
 		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
 		try:
@@ -273,9 +270,9 @@ class scatterGraph:
 		POST verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def putFunc(self, **kwargs):
 		'''
@@ -284,9 +281,9 @@ class scatterGraph:
 		PUT verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def deleteFunc(self, **kwargs):
 		'''
@@ -295,22 +292,123 @@ class scatterGraph:
 		DELETE verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			
 		'''
-		return self.getFunc(barcode=kwargs['barcode'])
+		pass
 	
 	def GET(self, bar):
 		return self.getFunc(barcode=bar)
 	
-	@auth.oauth_protect
 	def POST(self):
 		return self.postFunc()
 	
-	@auth.oauth_protect
 	def PUT(self):
 		return self.putFunc()
 	
-	@auth.oauth_protect
+	def DELETE(self):
+		return self.deleteFunc()
+
+class quantityClusterGraph:
+	'''
+	class documentation
+	
+	
+	'''
+	def getFunc(self, **kwargs):	
+		'''
+		function documentation
+		
+		GET verb call
+		
+		Returns:
+			
+		'''
+		buffer = StringIO()
+		
+		fig = plt.figure()
+		ax = fig.add_subplot(111)
+		
+		date = []
+		quantity = []
+		
+		names = database.view("products/admin").all()
+		
+		for i in range(len(names)):
+			date.append(datetime.datetime.strptime(names[i]['value']['restock']['date'], '%Y-%m-%d %H:%M:%S').month)
+			quantity.append(names[i]['value']['restock']['quantity'])
+		
+		ax.scatter(date, quantity)
+
+		plt.xlabel('Month')
+		plt.ylabel('Quantity')
+		
+		plt.title('General Restock During Time of Year')
+		
+		plt.grid(which='both', axis='both')
+		
+		ax.xaxis.set_minor_locator( MonthLocator(interval=1) )
+		ax.xaxis.set_minor_formatter( DateFormatter('%m') )
+
+		ax.fmt_xdata = DateFormatter('%m')
+		fig.autofmt_xdate()
+		
+		plt.xlabel('Month')
+		plt.ylabel('Quantity (Units)')
+		
+		plt.xlim([-0.50, 12.50])
+		plt.ylim([0, (max(quantity) + 5)])
+		
+		fig.savefig(buffer)
+
+		graph = buffer.getvalue()
+		buffer.close()
+		
+		web.header('Content-Type', "image/png")
+		
+		return graph
+	
+	def postFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		POST verb call
+		
+		Returns:
+			
+		'''
+		pass
+	
+	def putFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		PUT verb call
+		
+		Returns:
+			
+		'''
+		pass
+	
+	def deleteFunc(self, **kwargs):
+		'''
+		function documentation
+		
+		DELETE verb call
+		
+		Returns:
+			
+		'''
+		pass
+	
+	def GET(self):
+		return self.getFunc()
+	
+	def POST(self):
+		return self.postFunc()
+	
+	def PUT(self):
+		return self.putFunc()
+	
 	def DELETE(self):
 		return self.deleteFunc()
 

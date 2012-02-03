@@ -61,10 +61,9 @@ class test:
 		except:
 			bar = kwargs['barcode']
 		
-		product = productDoc.view("products/admin", key=bar).first()
-		a = product.stock(50)
+		pass
+			
 		
-		return a
 	
 	def postFunc(self, **kwargs):
 		'''

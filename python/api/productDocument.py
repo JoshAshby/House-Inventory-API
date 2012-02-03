@@ -124,13 +124,13 @@ class productDoc(couchdbkit.Document):
 		self.prediction['m'] = m
 		self.prediction['b'] = b
 		
-		additionalData = {"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": restockQuantity, "delta": 0, "norm": 1}
+		additionalData = {"date": datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S"), "quantity": self.quantity + restockQuantity, "delta": 0, "norm": 1}
 		self.log.append(additionalData)
 		
 		self.restock['date'] = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d %H:%M:%S")
-		self.restock['quantity'] =  restockQuantity
+		self.restock['quantity'] =  self.quantity + restockQuantity
 		
-		self.quantity = restockQuantity
+		self.quantity = self.quantity + restockQuantity
 		
 		m = m * max(quantity)
 		#b = b * max(quantity)
