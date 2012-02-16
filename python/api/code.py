@@ -17,7 +17,6 @@ joshuaashby@joshashby.com
 """
 import web
 import json
-
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
@@ -31,35 +30,26 @@ except:
 	os.chdir(abspath)
 from config import *
 from configSub import *
+import baseObject
 
-#web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
+baseObject.urlReset()
 
-app = web.application(urls, globals())
-app.internalerror = web.debugerror
-
-class index:        
+@baseObject.route('/')
+class index(baseObject.baseHTTPObject):  
 	'''
-	class documentation
 	Base Index...
 	
 	The page that is displayed if the root of the server is accessed, Currently just displays the template index.html
 	'''
-	
-	def endFunc(self):
-		print "start"
-		raise web.seeother("/product/")
-	
-	def GET(self):
-		return self.endFunc()
-		
-	def POST(self):
-		return self.endFunc()
-		
-#app = web.application(urls, globals(), autoreload=False)
-#app.internalerror = web.debugerror
-#application = app.wsgifunc()
+	def get(self, *args, **kwargs):
+		raise web.seeother("product/")
+
+
+urls += baseObject.urls
+
+app = web.application(urls, globals())
+app.internalerror = web.debugerror
 		
 		
 if __name__ == "__main__":
-	print "running"
 	app.run()

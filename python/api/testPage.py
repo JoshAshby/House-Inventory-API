@@ -28,91 +28,28 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
-import auth
+import baseObject
 
-from productDocument import *
+baseObject.urlReset()
 
 
-urls = (
-	"", "slash",
-	"/(.*)/", "test"
-)
-
-class test:
+@baseObject.route('/(.*)/')
+class test(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
 	Testing page object. Functions include full REST with OAuth protection on the POST PUT DELETE calls.
 	Testing frameowrk for unittests included.
 	'''
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
 			whatever I tell it to since it's a testing page...
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		try:
-			wi = web.input()
-			bar = wi['barcode']
-		except:
-			bar = kwargs['barcode']
+		self.members(*args, **kwargs)
+		bar = self.hasMember('barcode')
 		
 		pass
-			
-		
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-			whatever I tell it to since it's a testing page...
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-			whatever I tell it to since it's a testing page...
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-			whatever I tell it to since it's a testing page...
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def GET(self, bar):
-		return self.getFunc(barcode=bar)
-	
-	@auth.oauth_protect
-	def POST(self):
-		return self.postFunc()
-	
-	@auth.oauth_protect
-	def PUT(self):
-		return self.putFunc()
-	
-	@auth.oauth_protect
-	def DELETE(self):
-		return self.deleteFunc()
 
 
-app = web.application(urls, globals(), autoreload=False)
-#application = app.wsgifunc()
+app = web.application(baseObject.urls, globals())

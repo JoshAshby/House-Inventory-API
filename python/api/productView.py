@@ -39,3 +39,8 @@ class totalView(baseView.baseView):
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
 		return json.dumps({"total": self.data['data']})
+
+class errorView(baseView.baseView):
+	def JSON(self):
+		web.header('Content-Type', 'application/json')
+		return json.dumps({"error": self.data['error'], 'missing': self.data['missing']})

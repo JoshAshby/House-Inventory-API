@@ -30,38 +30,27 @@ except:
 	os.chdir(abspath)
 from configSub import *
 from productDocument import *
-import auth
 import math
-
 try:
 	from cStringIO import StringIO
 except ImportError:
 	from StringIO import StringIO
-
 import matplotlib
 matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
 from matplotlib.dates import MonthLocator, DateFormatter
 import datetime
+import baseObject
 
-urls = (
-	"", "slash",
-	"/timeline/(.*)/", "timelineGraph",
-	"/scatter/(.*)/", "scatterGraph",
-	"/cluster/quantity/", "quantityClusterGraph"
-)
+baseObject.urlReset()
 
-class timelineGraph:
+@baseObject.route("/timeline/(.*)/")
+class timelineGraph(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
 	Currently generates graphs for the product log
 	'''
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
@@ -115,63 +104,15 @@ class timelineGraph:
 		web.header('Content-Type', "image/png")
 		
 		return graph
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def GET(self, bar):
-		return self.getFunc(barcode=bar)
-	
-	def POST(self):
-		return self.postFunc()
-	
-	def PUT(self):
-		return self.putFunc()
-	
-	def DELETE(self):
-		return self.deleteFunc()
 
 
-class scatterGraph:
+@baseObject.route("/scatter/(.*)/")
+class scatterGraph(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
 	
 	'''
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
@@ -262,62 +203,15 @@ class scatterGraph:
 		web.header('Content-Type', "image/png")
 		
 		return graph
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def GET(self, bar):
-		return self.getFunc(barcode=bar)
-	
-	def POST(self):
-		return self.postFunc()
-	
-	def PUT(self):
-		return self.putFunc()
-	
-	def DELETE(self):
-		return self.deleteFunc()
 
-class quantityClusterGraph:
+
+@baseObject.route("/cluster/quantity/")
+class quantityClusterGraph(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
 	
 	'''
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
@@ -366,51 +260,63 @@ class quantityClusterGraph:
 		web.header('Content-Type', "image/png")
 		
 		return graph
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-			
-		'''
-		pass
-	
-	def GET(self):
-		return self.getFunc()
-	
-	def POST(self):
-		return self.postFunc()
-	
-	def PUT(self):
-		return self.putFunc()
-	
-	def DELETE(self):
-		return self.deleteFunc()
 
-app = web.application(urls, globals(), autoreload=False)
-#application = app.wsgifunc()
+
+@baseObject.route("/cluster/quantity/(.*)/")
+class singleQuantityClusterGraph(baseObject.baseHTTPObject):
+	'''
+	
+	'''
+	def get(self, *args, **kwargs):	
+		'''
+		GET verb call
+		
+		Returns:
+			
+		'''
+		buffer = StringIO()
+		
+		fig = plt.figure()
+		ax = fig.add_subplot(111)
+		
+		date = []
+		quantity = []
+		
+		names = database.view("products/admin").all()
+		
+		for i in range(len(names)):
+			date.append(datetime.datetime.strptime(names[i]['value']['restock']['date'], '%Y-%m-%d %H:%M:%S').month)
+			quantity.append(names[i]['value']['restock']['quantity'])
+		
+		ax.scatter(date, quantity)
+
+		plt.xlabel('Month')
+		plt.ylabel('Quantity')
+		
+		plt.title('General Restock During Time of Year')
+		
+		plt.grid(which='both', axis='both')
+		
+		ax.xaxis.set_minor_locator( MonthLocator(interval=1) )
+		ax.xaxis.set_minor_formatter( DateFormatter('%m') )
+
+		ax.fmt_xdata = DateFormatter('%m')
+		fig.autofmt_xdate()
+		
+		plt.xlabel('Month')
+		plt.ylabel('Quantity (Units)')
+		
+		plt.xlim([-0.50, 12.50])
+		plt.ylim([0, (max(quantity) + 5)])
+		
+		fig.savefig(buffer)
+
+		graph = buffer.getvalue()
+		buffer.close()
+		
+		web.header('Content-Type', "image/png")
+		
+		return graph
+		
+
+app = web.application(baseObject.urls, globals())

@@ -33,200 +33,19 @@ except:
 from configSub import *
 from productDocument import *
 from ashpic import *
-import auth
 import productView
+import baseObject
 
-urls = (
-	'', 'slash',
-	'/', 'total',
-	'/(.*)/', 'info'
-)
+baseObject.urlReset()
 
-class info:
+
+@baseObject.route('/')
+class total(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
-	Product manipulation class. Functions to return the info, update and delete products are contained below, including a testing function for unittests.
-	'''
-	
-	def getFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		GET verb call
-		
-		Returns the info on the product in JSON form.
-		
-		Args:
-			barcode - the products barcode
-		Returns:
-			A JSON object like: {"product": {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}}
-		'''
-		wi = web.input()
-		try: 
-			bar = wi['barcode']
-		except:
-			bar = kwargs['barcode']
-		
-		name =  productDoc.view("products/all", key=bar).first()
-		
-		name = dict(name)
-		
-		view = productView.infoView(name, wi)
-		
-		return view.returnData()
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Args:
-		Returns:
-			A JSON object like: {"picture": "dog.png", "updated": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "oldbarcode": "dog", "quantity": 3, "id": 53}
-	
-		Where:
-			oldbarcode = the previous barcode incase the barcode was changed.
-		'''
-		try:
-			bobbins= web.input(picture={})
-		except:
-			bobbins = kwargs
-			if 'picture' in bobbins: pass
-			else: bobbins['picture'] = {}
-		
-		if bobbins['barcode']:
-			bar = bobbins['barcode']
-			
-			product = productDoc.view("products/admin", key=bar).first()
-			
-			if 'name' in bobbins: product.name = bobbins['name']
-			
-			if 'cat' in bobbins: product.category = bobbins['cat']
-			
-			if 'tags' in bobbins: product.tags = json.loads(bobbins['tags'])
-			
-			if 'picTrue' in bobbins: pictureTrue = int(bobbins['picTrue'])
-			else: pictureTrue = 0
-			pic = bobbins['picture']
-			
-			if pictureTrue == 1:
-				catdog = re.search('(\..*)', pic.filename).group()
-				
-				frodo = bar + catdog
-				
-				f = open(abspath + '/pictures/' + frodo, "wb")
-
-				while 1:
-					chunk = pic.file.read(10000)
-					if not chunk:
-						break
-					f.write( chunk )
-				f.close()
-				
-				goop = freyaPics(frodo)
-				goop.odinsThumb()
-			else:
-				try:
-					frodo = product.picture
-				except:
-					frodo = None
-
-			if 'description' in bobbins:
-				desc = bobbins['description']
-				p = re.compile('\+')
-				found = p.sub( ' ', desc)
-				product.description = found
-			
-			product.picture = frodo
-			
-			product.barcode = bar
-			product.save()
-			
-			tryal = product.stock(int(bobbins['quantity']))
-			
-			name = database.view("products/all", key=bar).all()
-			
-			if tryal:
-				name[0]['value']['predicted_days'] = tryal
-				
-			inform = json.dumps({"product": name[0]['value']})
-			
-			if spam:
-				web.header('Content-Type', 'application/json')
-				
-			return inform
-		else:
-			return json.dumps({'error': 'Not enough data'})
-		
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Args:
-		Returns
-			A JSON object like: {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
-		'''
-		try: 
-			wi = web.input()
-			bar = wi['barcode']
-		except:
-			bar = kwargs['barcode']
-		
-		name = database.view("products/all", key=bar).first()['value']
-		
-		name['deleted'] = 'true'
-		
-		reply = {'product': name}
-		
-		inform = json.dumps(reply)
-		
-		a = database.view("products/admin", key=bar).first()['value']['_id']
-		
-		database.delete_doc(a)
-		
-		if spam:
-			web.header('Content-Type', 'application/json')
-			
-		return inform
-	
-	def GET(self, bar):
-		return self.getFunc(barcode=bar)
-	
-	def POST(self, bar):
-		return self.postFunc(barcode=bar)
-	
-	def PUT(self, bar):
-		return self.putFunc(barcode=bar)
-	
-	def DELETE(self, bar):
-		return self.deleteFunc(barcode=bar)
-		
-		
-class total:
-	'''
-	class documentation
-	
 	Returns and manipulates the total product database.
 	'''
-	def getFunc(self, **kwargs):
+	def get(self, *args, **kwargs):
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns the info on the product in JSON form.
@@ -236,8 +55,6 @@ class total:
 		Returns:
 			A JSON object like: {"total": [{"category": "Notebook", "description": "Orange notebook from Rhodia. Graph paper, model N11. 7.4cm x 10.5cm.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "3037921120217", "quantity": 1, "name": "Orange Graph Composition"}, {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}, {"category": "Animal", "description": "A dog of god", "tags": ["Beagle", "dog", "pet"], "barcode": "dog987", "quantity": "2", "name": "Dog"}]}
 		'''
-		wi = web.input()
-		
 		name = database.view("products/all").all()
 		
 		for i in range(len(name)):
@@ -245,14 +62,12 @@ class total:
 		
 		totals = {'data': name}
 			
-		view = productView.totalView(totals, wi)
+		view = productView.totalView(data=totals)
 		
 		return view.returnData()
 		
-	def postFunc(self, **kwargs):
+	def post(self, *args, **kwargs):
 		'''
-		function documentation
-		
 		POST verb call
 		
 		Args:
@@ -260,41 +75,37 @@ class total:
 			A JSON object like: {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53}
 	
 		'''
-		try:
-			bobbins= web.input(picture={})
-		except:
-			bobbins = kwargs
-			if 'picture' in bobbins: pass
-			else: bobbins['picture'] = {}
+		self.members(*args, **kwargs)
+		bar = self.hasMember('barcode')
 		
-		if bobbins['barcode']:
-			bar = bobbins['barcode']
-				
-			tests = database.view("products/all", key=bar).all()
+		if bar:
+			tests = database.view("products/admin", key=bar).all()
 			if tests:
 				inform = json.dumps({'copy': bar})
-				if spam:
-					web.header('Content-Type', 'application/json')
 				return inform
 			
-			#product = productDoc.view("products/admin", key=bar).first()
 			product = productDoc(barcode=bar)
 			
-			if 'name' in bobbins: product.name = bobbins['name']
+			name = self.hasMember('name', True)
+			if name: product.name = name
 			
-			if 'description' in bobbins: product.description = bobbins['description']
+			description = self.hasMember('description', True)
 			
-			if 'quantity' in bobbins: product.quantity = int(bobbins['quantity'])
+			quantity = self.hasMember('quantity', True)
+			if quantity: product.quantity = int(quantity)
 			
-			if 'cat' in bobbins: product.category = bobbins['cat']
+			cat = self.hasMember('cat', True)
+			if cat: product.category = cat
 			
-			if 'tags' in bobbins: product.tags = json.loads(bobbins['tags'])
+			tags = self.hasMember('tags', True)
+			if tags: product.tags = tags
 			
-			if 'picTrue' in bobbins: pictureTrue = int(bobbins['picTrue'])
-			else: pictureTrue = 0
-			pic = bobbins['picture']
+			picTrue = self.hasMember('picTrue', True)
+			if picTrue: pictureTrue = int(picTrue)
+			else: pictureTrue = None
+			pic = self.hasMember('picture', True)
 			
-			if pictureTrue == 1:
+			if pictureTrue is not None:
 				catdog = re.search('(\..*)', pic.filename).group()
 				
 				frodo = bar + catdog
@@ -312,8 +123,8 @@ class total:
 				goop.odinsThumb()
 				product.picture = frodo
 			
-			if 'description' in bobbins:
-				desc = bobbins['description']
+			if description:
+				desc = description
 				p = re.compile('\+')
 				found = p.sub( ' ', desc)
 				product.description = found
@@ -322,76 +133,147 @@ class total:
 			product.save()
 
 			name = database.view("products/all", key=bar).all()
-			inform = json.dumps({"product": name[0]['value']})
 			
-			if spam:
-				web.header('Content-Type', 'application/json')
-			return inform
-		else:
-			return json.dumps({'error': 'Not enough data'})
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
+			data = name[0]['value']
+			view = productView.infoView(data=data)
 		
+			return view.returnData()
+			
+		else:
+			view = productView.errorView({'error': 'Not enough data', 'missing': 'barcode'})
+			
+			return view.returnData()
+
+
+@baseObject.route("/(.*)/")
+class info(baseObject.baseHTTPObject):
+	'''
+	Product manipulation class. Functions to return the info, update and delete products are contained below, including a testing function for unittests.
+	'''
+	def get(self, *args, **kwargs):
+		'''
+		GET verb call
+		
+		Returns the info on the product in JSON form.
+		
+		Args:
+			barcode - the products barcode
+		Returns:
+			A JSON object like: {"product": {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}}
+		'''
+		self.members(*args, **kwargs)
+		bar = self.hasMember('barcode', None)
+		
+		name =  database.view("products/all", key=bar).first()
+		
+		name = dict(name)
+		
+		view = productView.infoView(data=name)
+		
+		return view.returnData()
+	
+	def put(self, *args, **kwargs):
+		'''
 		PUT verb call
 		
 		Args:
 		Returns:
+			A JSON object like: {"picture": "dog.png", "updated": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "oldbarcode": "dog", "quantity": 3, "id": 53}
+	
+		Where:
+			oldbarcode = the previous barcode incase the barcode was changed.
 		'''
-		pass
+		self.members(*args, **kwargs)
+		bar = self.hasMember('barcode', None)
 		
-	def deleteFun(self, **kwargs):
+		if bar:
+			tests = database.view("products/admin", key=bar).all()
+			if tests:
+				inform = json.dumps({'copy': bar})
+				return inform
+			
+			product = productDoc(barcode=bar)
+			
+			name = self.hasMember('name', True)
+			if name: product.name = name
+			
+			description = self.hasMember('description', True)
+			
+			quantity = self.hasMember('quantity', True)
+			if quantity: product.quantity = int(quantity)
+			
+			cat = self.hasMember('cat', True)
+			if cat: product.category = cat
+			
+			tags = self.hasMember('tags', True)
+			if tags: product.tags = tags
+			
+			picTrue = self.hasMember('picTrue', True)
+			if picTrue: pictureTrue = int(picTrue)
+			else: pictureTrue = None
+			pic = self.hasMember('picture', True)
+			
+			if pictureTrue is not None:
+				catdog = re.search('(\..*)', pic.filename).group()
+				
+				frodo = bar + catdog
+				
+				f = open(abspath + '/pictures/' + frodo, "wb")
+
+				while 1:
+					chunk = pic.file.read(10000)
+					if not chunk:
+						break
+					f.write( chunk )
+				f.close()
+				
+				goop = freyaPics(frodo)
+				goop.odinsThumb()
+				product.picture = frodo
+			
+			if description:
+				desc = description
+				p = re.compile('\+')
+				found = p.sub( ' ', desc)
+				product.description = found
+			
+			product.barcode = bar
+			product.save()
+			
+			tryal = product.stock(quantity)
+			
+			name = database.view("products/all", key=bar).all()
+			
+			data = {'data': name[0]['value']}
+			view = productView.infoView(data=data)
+		
+			return view.returnData()
+			
+		else:
+			view = productView.errorView({'error': 'Not enough data', 'missing': 'barcode'})
+			
+			return view.returnData()
+		
+	def delete(self, *args, **kwargs):
 		'''
-		function documentation
-		
 		DELETE verb call
 		
 		Args:
-		Returns:
+		Returns
+			A JSON object like: {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
 		'''
-		pass
-	
-	def GET(self):
-		'''
-		function documentation
+		self.members(*args, **kwargs)
+		bar = self.hasMember('barcode', None)
 		
-		Returns the given products info in JSON format
+		name = database.view("products/all", key=bar).first()['value']
 		
-		Returns:
-		'''
-		return self.getFunc()
-	
-	def POST(self):
-		'''
-		function documentation
+		name['deleted'] = 'true'
 		
-		Adds a new product
+		a = database.view("products/admin", key=bar).first()['value']['_id']
 		
-		Returns: 
-		'''
-		return self.postFunc()
-	
-	def PUT(self):
-		'''
-		function documentation
-		
-		Updates the current product according to the included data.
-		
-		Returns:
-		'''
-		return self.putFunc()
-	
-	def DELETE(self):
-		'''
-		function documentation
-		
-		Deletes the current product, and moves its data into the restore database.
-		
-		Returns: None
-		'''
-		return self.deleteFunc()
-		
+		database.delete_doc(a)
+			
+		view = productView.infoView(data=name)
 
-app = web.application(urls, globals(), autoreload=False)
-#application = app.wsgifunc()
+
+app = web.application(baseObject.urls, globals())

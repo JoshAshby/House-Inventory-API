@@ -46,7 +46,7 @@ class productDoc(couchdbkit.Document):
 	doc_type = "productDoc"
 	
 	quantity = couchdbkit.IntegerProperty()
-	rank = couchdbkit.IntegerProperty
+	rank = couchdbkit.IntegerProperty()
 	
 	tags = couchdbkit.ListProperty()
 	log = couchdbkit.ListProperty()

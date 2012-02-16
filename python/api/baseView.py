@@ -29,20 +29,20 @@ except:
 from configSub import *
 
 class baseView(object):
-	def __init__(self, data, wi):
-		self.data = data
+	def __init__(self, **kwargs):
+		self.data = kwargs['data']
 		
-		if 't' in wi: t = wi['t']
-		else: t = 'json'
+		self.t = 'json'
 		
-		if t == 'html':
-			inform = self.HTML()
-		elif t == 'json':
-			inform = self.JSON()
-		elif t == 'pdf':
-			inform = self.PDF()
-			
-		self.inform = inform
+		if 'wi' in kwargs:
+			if 't' in kwargs['wi']: self.t = kwargs['wi']['t']
+		
+		if self.t == 'html':
+			self.inform = self.HTML()
+		elif self.t == 'json':
+			self.inform = self.JSON()
+		elif self.t == 'pdf':
+			self.inform = self.PDF()
 	
 	def PDF(self):
 		pass

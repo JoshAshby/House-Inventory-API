@@ -31,37 +31,25 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
-
 from productDocument import *
-
 import tagView
+import baseObject
 
-urls = (
-	'', 'slash',
-	'/', 'tagsTotal',
-	'/(.*)/', 'tagsInfo'
-)
+baseObject.urlReset()
 
-class tagsInfo:
+@baseObject.route('/(.*)/')
+class tagsInfo(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
 	Returns all the products in a tag
 	'''
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		wi = web.input()
-		try:
-			tag = wi['tag']
-		except:
-			tag = kwargs['tag']
+		self.members(*args, **kwargs)
+		tag = self.hasMember('tag')
 		
 		query = database.view("cattag/tags", key=tag).all()
 		
@@ -70,68 +58,23 @@ class tagsInfo:
 			
 		query = {'data': query}
 		
-		view = tagView.infoView(query, wi)
+		view = tagView.infoView(data=query)
 		
 		return view.returnData()
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-		'''
-		pass
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-		'''
-		pass
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-		'''
-	
-	def GET(self, ta):
-		return self.getFunc(tag=ta)
-	
-	def POST(self, ta):
-		return self.postFunc(tag=ta)
-	
-	def PUT(self, ta):
-		return self.putFunc(tag=ta)
-	
-	def DELETE(self, ta):
-		return self.deleteFunc(tag=ta)
 
 
-class tagsTotal:
+@baseObject.route('/')
+class tagsTotal(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
 	Returns all the tags.
 	'''
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
 			A JSON object like: {"tags" : ["abc", "def"]}
 		'''
-		wi = web.input()
 		dog = []
 		query = database.view("products/admin").all()
 		
@@ -143,51 +86,9 @@ class tagsTotal:
 		
 		queryFinal = {'data': queryFix}
 		
-		view = tagView.totalView(queryFinal, wi)
+		view = tagView.totalView(data=queryFinal)
 		
 		return view.returnData()
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
 		
-		POST verb call
-		
-		Returns:
-		'''
-		pass
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-		'''
-		pass
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-		'''
-	
-	def GET(self):
-		return self.getFunc()
-	
-	def POST(self):
-		return self.postFunc()
-	
-	def PUT(self):
-		return self.putFunc()
-	
-	def DELETE(self):
-		return self.deleteFunc()
 
-		
-app = web.application(urls, globals(), autoreload=False)
-#application = app.wsgifunc()
+app = web.application(baseObject.urls, globals())

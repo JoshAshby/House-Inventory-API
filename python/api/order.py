@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
 Project Blue Ring
 An inventory control and management API
@@ -30,43 +30,28 @@ except:
 from configSub import *
 from productDocument import *
 from orderDocument import *
-import auth
-
 import datetime
-
 import orderView
+import baseObject
 
-urls = (
-	"", "slash",
-	"/", "placeOrder",
-	"/(.*)/", "viewOrder"
-)
+baseObject.urlReset()
 
-class placeOrder:
+
+@baseObject.route('/')
+class placeOrder(baseObject.baseHTTPObject):
 	'''
-	class documentation
 	'''
-	def getFunc(self, **kwargs):
+	def get(self, *args, **kwargs):
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
 			
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		wi = web.input()
-		try:
-			user = wi['user']
-			orderWi = str(wi['order'])
-			order = json.loads(orderWi)
+		self.members(*args, **kwargs)
+		user = self.hasMember('user')
+		user = json.loads(self.hasMember('order'))
 			
-		except:
-			user = kwargs['user']
-			order = json.loads(kwargs['order'])
-			
-		#go through and check things
 		for bar in order:
 			product = productDoc.view("products/admin", key=bar).first()
 			
@@ -86,127 +71,30 @@ class placeOrder:
 		
 		ordered = {"user": user, "order": order, "id": order_id}
 		
-		view = orderView.orderView(ordered, wi)
+		view = orderView.orderView(data=ordered)
 		
 		return view.returnData()
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-			whatever I tell it to since it's a testing page...
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-			whatever I tell it to since it's a testing page...
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-			whatever I tell it to since it's a testing page...
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def GET(self):
-		return self.getFunc()
-	
-	def POST(self):
-		return self.postFunc()
-	
-	def PUT(self):
-		return self.putFunc()
-	
-	def DELETE(self):
-		return self.deleteFunc()
 
 
-class viewOrder:
+@baseObject.route('/(.*)/')
+class viewOrder(baseObject.baseHTTPObject):
 	'''
-	class documentation
 	'''
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
 			A PDF HTML or JSON formated response accoriding to the attached type tag.
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		wi = web.input()
-		try:
-			orderId = wi['id']
-			
-		except:
-			orderId = kwargs['id']
+		self.members(*args, **kwargs)
+		orderId = self.hasMember('id')
 		
 		order_doc = database.view("order/all", key=orderId).first()['value']
 		
-		view = orderView.infoView(order_doc, wi)
+		view = orderView.infoView(data=order_doc)
 		
 		return view.returnData()
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
 		
-		POST verb call
-		
-		Returns:
-			None
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-			None
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-			None
-		'''
-		return self.getFunc(barcode=kwargs['barcode'])
-	
-	def GET(self, orderId):
-		return self.getFunc(id=orderId)
-	
-	def POST(self):
-		return self.postFunc()
-	
-	def PUT(self):
-		return self.putFunc()
-	
-	def DELETE(self):
-		return self.deleteFunc()
 
-app = web.application(urls, globals(), autoreload=False)
-#application = app.wsgifunc()
+app = web.application(baseObject.urls, globals())

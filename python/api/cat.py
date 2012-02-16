@@ -28,117 +28,25 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
-
 from productDocument import *
-
 import catView
+import baseObject
 
-urls = (
-	'', 'slash',
-	'/', 'catTotal',
-	'/(.*)/tag/(.*)/', 'catTag',
-	'/(.*)/', 'catInfo'
-)
+baseObject.urlReset()
 
-class catInfo:
+
+@baseObject.route('/')
+class catTotal(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
-	Category maniplulation object'''
-	
-	def getFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		GET verb call
-		
-		Returns the info on the product in JSON form.
-		
-		Args:
-			cat - the cateogry
-		Returns:
-		'''
-		wi = web.input()
-		try:
-			cat = wi['category']
-		except:
-			cat = kwargs['category']
-			
-		query = database.view("cattag/categorys", key=cat).all()
-		
-		for i in range(len(query)):
-			query[i] = query[i]['value']
-		
-		totals = {'data': query}
-		
-		view = catView.infoView(totals, wi)
-		
-		return view.returnData()
-		
-	def postFunc(self, **kargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	def GET(self, cat):
-		return self.getFunc(category=cat)
-	
-	def POST(self, cat):
-		return self.postFunc(category=cat)
-	
-	def PUT(self, cat):
-		return self.putFunc(category=cat)
-	
-	def DELETE(self, cat):
-		return self.deleteFunc(category=cat)
-		
-		
-class catTotal:
-	'''
-	class documentation
-	
 	Category maniplulation object
-	'''
-	
-	def getFunc(self, **kwargs):
+	'''	
+	def get(self, *args, **kwargs):
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Args:
 		Returns:
 		'''
-		wi = web.input()
 		query = []
 		name = database.view("products/admin").all()
 		
@@ -150,80 +58,58 @@ class catTotal:
 		
 		names = {'data': queryFix}
 		
-		view = catView.totalView(names, wi)
+		view = catView.totalView(data=names)
 		
 		return view.returnData()
-	
-	def postFunc(self, **kargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	def GET(self):
-		return self.getFunc()
-	
-	def POST(self):
-		return self.postFunc()
-	
-	def PUT(self):
-		return self.putFunc()
-	
-	def DELETE(self):
-		return self.deleteFunc()
-		
 
-class catTag:
+
+@baseObject.route('/(.*)/')
+class catInfo(baseObject.baseHTTPObject):
 	'''
-	class documentation
-	
 	Category maniplulation object
 	'''
-	
-	def getFunc(self, **kwargs):
+	def get(self, *args, **kwargs):
 		'''
-		function documentation
+		GET verb call
 		
+		Returns the info on the product in JSON form.
+		
+		Args:
+			cat - the cateogry
+		Returns:
+		'''
+		self.members(*args, **kwargs)
+		cat = self.hasMember('category')
+			
+		query = database.view("cattag/categorys", key=cat).all()
+		
+		for i in range(len(query)):
+			query[i] = query[i]['value']
+		
+		totals = {'data': query}
+		
+		view = catView.infoView(data=totals)
+		
+		return view.returnData()
+
+		
+
+@baseObject.route('/(.*)/tag/(.*)/')
+class catTag(baseObject.baseHTTPObject):
+	'''
+	Category maniplulation object
+	'''
+	def get(self, *args, **kwargs):
+		'''
 		GET verb call
 		
 		Args:
 		Returns:
 		'''
-		wi = web.input()
-		try:
-			cat = wi['category']
-			tag = wi['tag']
-		except:
-			cat = kwargs['category']
-			tag = kwargs['tag']
+		self.members(*args, **kwargs)
+		cat = self.hasMember('category')
+		tag = self.hasMember('tag')
+		if tag == cat: tag = self.hasMember(2)
 			
 		query = []
 		dog = []
@@ -242,56 +128,9 @@ class catTag:
 		
 		dog = {'data': dog}
 		
-		view = catView.tagView(dog, wi)
+		view = catView.tagView(data=dog)
 		
 		return view.returnData()
-	
-	def postFunc(self, **kargs):
-		'''
-		function documentation
 		
-		POST verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Args:
-		Returns:
-		'''
-		pass
-		
-	def GET(self, cat, tags):
-		return self.getFunc(category=cat, tag=tags)
-	
-	def POST(self, cat, tags):
-		return self.postFunc(category=cat, tag=tags)
-	
-	def PUT(self, cat, tags):
-		return self.putFunc(category=cat, tag=tags)
-	
-	def DELETE(self, cat, tags):
-		return self.deleteFunc(category=cat, tag=tags)
-		
-		
-app = web.application(urls, globals(), autoreload=False)
-#application = app.wsgifunc()
+
+app = web.application(baseObject.urls, globals())

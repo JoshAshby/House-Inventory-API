@@ -17,7 +17,6 @@ import web
 import json
 import re
 import time
-
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
@@ -31,88 +30,31 @@ except:
 	os.chdir(abspath)
 from configSub import *
 from productDocument import *
-import auth
+import baseObject
 
-urls = (
-	'', 'slash',
-	'/(.*)/', 'log'
-)
+baseObject.urlReset()
 
-class log:
+@baseObject.route('/(.*)/')
+class log(baseObject.baseHTTPObject):
 	'''
-	class documentation
 	Generates the use log about the given product.
 	'''		
-	def getFunc(self, **kwargs):	
+	def get(self, *args, **kwargs):	
 		'''
-		function documentation
-		
 		GET verb call
 		
 		Returns:
 			A JSON object like: 
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		try:
-			wi = web.input()
-			bar = wi['barcode']
-		except:
-			bar = kwargs['barcode']
+		self.members(*args, **kwargs)
+		bar = self.hasMember('barcode')
 		
 		log = productDoc.view("products/admin", key=bar).first()['log']
 		
 		if spam:
 			web.header('Content-Type', 'application/json')
+		
 		return json.dumps({"log": log})
-	
-	def postFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		POST verb call
-		
-		Returns:
-		
-		'''
-		pass
-	
-	def putFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		PUT verb call
-		
-		Returns:
-		
-		'''
-		pass
-	
-	def deleteFunc(self, **kwargs):
-		'''
-		function documentation
-		
-		DELETE verb call
-		
-		Returns:
-		
-		'''
-		pass
-	
-	def GET(self, bar):
-		return self.getFunc(barcode=bar)
-	
-	@auth.oauth_protect
-	def POST(self, bar):
-		return self.postFunc(barcode=bar)
-	
-	@auth.oauth_protect
-	def PUT(self, bar):
-		return self.putFunc(barcode=bar)
-	
-	@auth.oauth_protect
-	def DELETE(self, bar):
-		return self.deleteFunc(barcode=bar)
 			
 
-app = web.application(urls, globals(), autoreload=False)
-##application = app.wsgifunc()
+app = web.application(baseObject.urls, globals())

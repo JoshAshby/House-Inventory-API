@@ -28,14 +28,14 @@ import log
 import graph
 import order
 
+
+
 urls = (
-	'/', 'index',
 	'/product', product.app,
 	'/category', cat.app,
 	'/tag', tags.app,
 	'/log', log.app,
 	'/graph', graph.app,
 	'/order', order.app,
-	#Test stuff...
 	'/test', testPage.app
 )
