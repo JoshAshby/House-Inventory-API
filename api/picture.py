@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 '''
 Basic image stuff using PIL
 
 http://xkcd.com/353/
 
 Josh Ashby
-2011
+2012
 http://joshashby.com
 joshuaashby@joshashby.com
 '''
@@ -16,7 +16,7 @@ abspath = os.path.dirname(__file__)
 sys.path.append(abspath)
 os.chdir(abspath)
 
-#Don't ask... this error is just better than a standard raise
+
 class PicError(Exception):
 	'''
 	class documentation
@@ -27,6 +27,7 @@ class PicError(Exception):
 
 	def __str__(self):
 		return repr(self.value)
+
 
 class Pics(object):
 	def __init__(self, barcode=''):

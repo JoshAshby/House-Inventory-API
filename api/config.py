@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
 Project Blue Ring
 An inventory control and management API
@@ -7,35 +7,32 @@ Main app config file for URL's
 http://xkcd.com/353/
 
 Josh Ashby
-2011
+2012
 http://joshashby.com
 joshuaashby@joshashby.com
 """
-try:
-	from configSub import *
-except:
-	import sys, os
-	abspath = os.path.dirname(__file__)
-	sys.path.append(abspath)
-	os.chdir(abspath)
+import sys, os
+abspath = os.path.dirname(__file__)
+sys.path.append(abspath)
+os.chdir(abspath)
 from configSub import *
 import web
 import testPage
-import cat
-import product
-import tags
-import log
-import graph
-import order
+import catPage
+import productPage
+import tagsPage
+import logPage
+import graphPage
+import orderPage
 
-
+base = '/bluering/'
 
 urls = (
-	'/product', product.app,
-	'/category', cat.app,
-	'/tag', tags.app,
-	'/log', log.app,
-	'/graph', graph.app,
-	'/order', order.app,
-	'/test', testPage.app
+	(base + 'product'), product.app,
+	(base + 'category'), cat.app,
+	(base + 'tag'), tags.app,
+	(base + 'log'), log.app,
+	(base + 'graph'), graph.app,
+	(base + 'order'), order.app,
+	(base + 'test'), testPage.app
 )

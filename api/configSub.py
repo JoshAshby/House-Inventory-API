@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
 Project Blue Ring
 An inventory control and management API
@@ -7,14 +7,14 @@ Sub-App config files and currently the database handlers but those will move soo
 http://xkcd.com/353/
 
 Josh Ashby
-2011
+2012
 http://joshashby.com
 joshuaashby@joshashby.com
 """
 import web
 import couchdbkit
 
-databaseName = 'bluering'
+databaseName = 'stats'
 database = couchdbkit.Server()[databaseName]
 
 render = web.template.render('template/')

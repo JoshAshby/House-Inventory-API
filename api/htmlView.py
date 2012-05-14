@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
 Project Blue Ring
 An inventory control and management API
@@ -9,47 +9,25 @@ For more information, see: https://github.com/JoshAshby/House-Inventory-API
 http://xkcd.com/353/
 
 Josh Ashby
-2011
+2012
 http://joshashby.com
 joshuaashby@joshashby.com
 """
-'''
-From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
-This must be done to avoid the import errors which come up with having linear.py and config.py
-'''
-try:
-	from configSub import *
-except:
-	import sys, os
-	abspath = os.path.dirname(__file__)
-	sys.path.append(abspath)
-	os.chdir(abspath)
+import sys, os
+abspath = os.path.dirname(__file__)
+sys.path.append(abspath)
+os.chdir(abspath)
 from configSub import *
-
 from Cheetah.Template import Template
+
 
 class htmlView(object):
 	def __init__(self, data):
 		self.data = data
 	
 	def build(self):
-		if self.data['type'] == 'productInfo':
-			page = self.productInfo()
-		if self.data['type'] == 'productTotal':
-			page = self.productTotal()
-		if self.data['type'] == 'catInfo':
-			page = self.catInfo()
-		if self.data['type'] == 'catTotal':
-			page = self.catTotal()
-		if self.data['type'] == 'catTag':
-			page = self.catTag()
-		if self.data['type'] == 'tagInfo':
-			page = self.tagInfo()
-		if self.data['type'] == 'tagTotal':
-			page = self.tagTotal()
-		if self.data['type'] == 'orderInfo':
-			page = self.order()
-		
+		page = getattr(self, self.data['type'])()
+
 		return page
 		
 	def productInfo(self):
@@ -87,7 +65,7 @@ class htmlView(object):
 		
 		return page
 	
-	def order(self):
+	def orderInfo(self):
 		page = Template(file="template/order.html", searchList=[{"data": self.data['data']}])
 		
 		return page
