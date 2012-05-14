@@ -31,7 +31,6 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
-from ashmath import *
 from dateutil.relativedelta import relativedelta
 
 class productDoc(couchdbkit.Document):

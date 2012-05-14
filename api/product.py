@@ -32,7 +32,7 @@ except:
 	os.chdir(abspath)
 from configSub import *
 from productDocument import *
-from ashpic import *
+from picture import *
 import productView
 import baseObject
 
@@ -119,8 +119,8 @@ class total(baseObject.baseHTTPObject):
 					f.write( chunk )
 				f.close()
 				
-				goop = freyaPics(frodo)
-				goop.odinsThumb()
+				goop = Pics(frodo)
+				goop.Thumb()
 				product.picture = frodo
 			
 			if description:
@@ -227,8 +227,8 @@ class info(baseObject.baseHTTPObject):
 					f.write( chunk )
 				f.close()
 				
-				goop = freyaPics(frodo)
-				goop.odinsThumb()
+				goop = Pics(frodo)
+				goop.Thumb()
 				product.picture = frodo
 			
 			if description:

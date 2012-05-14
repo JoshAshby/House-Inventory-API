@@ -2,7 +2,7 @@
 """
 Project Blue Ring
 An inventory control and management API
-A test sub app for messing around with new things and what not before I decide to use them or not.
+Main admin functions
 
 For more information, see: https://github.com/JoshAshby/House-Inventory-API
 
@@ -15,7 +15,8 @@ joshuaashby@joshashby.com
 """
 import web
 import json
-import math
+import re
+import time
 '''
 From: http://webpy.org/install and http://code.google.com/p/modwsgi/wiki/ApplicationIssues
 This must be done to avoid the import errors which come up with having linear.py and config.py
@@ -28,28 +29,31 @@ except:
 	sys.path.append(abspath)
 	os.chdir(abspath)
 from configSub import *
+from productDocument import *
 import baseObject
 
 baseObject.urlReset()
 
-
 @baseObject.route('/(.*)/')
-class test(baseObject.baseHTTPObject):
+class log(baseObject.baseHTTPObject):
 	'''
-	Testing page object. Functions include full REST with OAuth protection on the POST PUT DELETE calls.
-	Testing frameowrk for unittests included.
-	'''
+	Generates the use log about the given product.
+	'''		
 	def get(self, *args, **kwargs):	
 		'''
 		GET verb call
 		
 		Returns:
-			whatever I tell it to since it's a testing page...
+			A JSON object like: 
 		'''
 		self.members(*args, **kwargs)
 		bar = self.hasMember('barcode')
 		
-		pass
-
+		log = productDoc.view("products/admin", key=bar).first()['log']
+		
+		web.header('Content-Type', 'application/json')
+		
+		return json.dumps({"log": log})
+			
 
 app = web.application(baseObject.urls, globals())

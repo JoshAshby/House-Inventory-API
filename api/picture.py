@@ -28,11 +28,11 @@ class PicError(Exception):
 	def __str__(self):
 		return repr(self.value)
 
-class freyaPics(object):
+class Pics(object):
 	def __init__(self, barcode=''):
 		self.barcode = barcode
 		
-	def odinsThumb(self):
+	def Thumb(self):
 		size = 128, 128
 		
 		try:
