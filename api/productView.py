@@ -26,11 +26,11 @@ import baseView
 class infoView(baseView.baseView):
 	def JSON(self):
 		web.header('Content-Type', 'application/json')
-		return json.dumps({'product': self.data})
+		return json.dumps({'product': self.data['value']})
 		
 	def HTML(self):
 		self.data['type'] = 'productInfo'
-		prePage = htmlView(self.data)
+		prePage = htmlView(self.data['value'])
 		page = prePage.build()
 		
 		web.header('Content-Type', "text/html")

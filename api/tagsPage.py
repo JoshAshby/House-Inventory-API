@@ -36,19 +36,18 @@ class tagsInfo(baseObject.baseHTTPObject):
 	'''
 	Returns all the products in a tag
 	'''
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
 		Returns:
 		'''
-		self.members(*args, **kwargs)
 		tag = self.hasMember('tag')
 		
 		query = database.view("cattag/tags", key=tag).all()
 		
-		for i in range(len(query)):
-			query[i] = query[i]['value']
+		for i in query:
+			i = i['value']
 			
 		query = {'data': query}
 		
@@ -62,7 +61,7 @@ class tagsTotal(baseObject.baseHTTPObject):
 	'''
 	Returns all the tags.
 	'''
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
@@ -72,9 +71,9 @@ class tagsTotal(baseObject.baseHTTPObject):
 		dog = []
 		query = database.view("products/admin").all()
 		
-		for x in range(len(query)):
-			for z in range(len(query[x]['value']['tags'])):
-				dog.append(query[x]['value']['tags'][z])
+		for x in query:
+			for z in x['value']['tags']:
+				dog.append(z)
 		
 		queryFix = list(set(dog))
 		

@@ -34,14 +34,13 @@ baseObject.urlReset()
 class placeOrder(baseObject.baseHTTPObject):
 	'''
 	'''
-	def get(self, *args, **kwargs):
+	def get(self):
 		'''
 		GET verb call
 		
 		Returns:
 			
 		'''
-		self.members(*args, **kwargs)
 		user = self.hasMember('user')
 		user = json.loads(self.hasMember('order'))
 			
@@ -73,14 +72,13 @@ class placeOrder(baseObject.baseHTTPObject):
 class viewOrder(baseObject.baseHTTPObject):
 	'''
 	'''
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
 		Returns:
 			A PDF HTML or JSON formated response accoriding to the attached type tag.
 		'''
-		self.members(*args, **kwargs)
 		orderId = self.hasMember('id')
 		
 		order_doc = database.view("order/all", key=orderId).first()['value']

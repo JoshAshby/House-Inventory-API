@@ -28,11 +28,11 @@ import orderPage
 base = '/bluering/'
 
 urls = (
-	(base + 'product'), product.app,
-	(base + 'category'), cat.app,
-	(base + 'tag'), tags.app,
-	(base + 'log'), log.app,
-	(base + 'graph'), graph.app,
-	(base + 'order'), order.app,
+	(base + 'product'), productPage.app,
+	(base + 'category'), catPage.app,
+	(base + 'tag'), tagsPage.app,
+	(base + 'log'), logPage.app,
+	(base + 'graph'), graphPage.app,
+	(base + 'order'), orderPage.app,
 	(base + 'test'), testPage.app
 )

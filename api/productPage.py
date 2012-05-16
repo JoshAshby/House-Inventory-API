@@ -37,7 +37,7 @@ class total(baseObject.baseHTTPObject):
 	'''
 	Returns and manipulates the total product database.
 	'''
-	def get(self, *args, **kwargs):
+	def get(self):
 		'''
 		GET verb call
 		
@@ -50,8 +50,8 @@ class total(baseObject.baseHTTPObject):
 		'''
 		name = database.view("products/all").all()
 		
-		for i in range(len(name)):
-			name[i] = name[i]['value']
+		for i in name:
+			i = i['value']
 		
 		totals = {'data': name}
 			
@@ -59,7 +59,7 @@ class total(baseObject.baseHTTPObject):
 		
 		return view.returnData()
 		
-	def post(self, *args, **kwargs):
+	def post(self):
 		'''
 		POST verb call
 		
@@ -68,7 +68,6 @@ class total(baseObject.baseHTTPObject):
 			A JSON object like: {"picture": "dog.png", "added": "true", "description": "dog", "barcode": "dog", "name": "god", "flag": "L", "quantity": 5, "id": 53}
 	
 		'''
-		self.members(*args, **kwargs)
 		bar = self.hasMember('barcode')
 		
 		if bar:
@@ -143,7 +142,7 @@ class info(baseObject.baseHTTPObject):
 	'''
 	Product manipulation class. Functions to return the info, update and delete products are contained below, including a testing function for unittests.
 	'''
-	def get(self, *args, **kwargs):
+	def get(self):
 		'''
 		GET verb call
 		
@@ -154,8 +153,7 @@ class info(baseObject.baseHTTPObject):
 		Returns:
 			A JSON object like: {"product": {"category": "Notebook", "description": "Green covered, graph paper filled (.1 in) 100 sheet composition notebook from stables.", "tags": ["paper", "notebook", "graph", "graph paper"], "barcode": "718103025027", "quantity": 1, "name": "Green Graph Composition"}}
 		'''
-		self.members(*args, **kwargs)
-		bar = self.hasMember('barcode', None)
+		bar = self.hasMember('barcode')
 		
 		name =  database.view("products/all", key=bar).first()
 		
@@ -165,7 +163,7 @@ class info(baseObject.baseHTTPObject):
 		
 		return view.returnData()
 	
-	def put(self, *args, **kwargs):
+	def put(self):
 		'''
 		PUT verb call
 		
@@ -176,8 +174,7 @@ class info(baseObject.baseHTTPObject):
 		Where:
 			oldbarcode = the previous barcode incase the barcode was changed.
 		'''
-		self.members(*args, **kwargs)
-		bar = self.hasMember('barcode', None)
+		bar = self.hasMember('barcode')
 		
 		if bar:
 			tests = database.view("products/admin", key=bar).all()
@@ -247,7 +244,7 @@ class info(baseObject.baseHTTPObject):
 			
 			return view.returnData()
 		
-	def delete(self, *args, **kwargs):
+	def delete(self):
 		'''
 		DELETE verb call
 		
@@ -255,8 +252,7 @@ class info(baseObject.baseHTTPObject):
 		Returns
 			A JSON object like: {"picture": "dog.png", "description": "a dog of god", "deleted": "true", "barcode": "dog", "name": "god's dog", "flag": "L", "quantity": 8, "id": 52, "thumb": "dog_thumb.png"}
 		'''
-		self.members(*args, **kwargs)
-		bar = self.hasMember('barcode', None)
+		bar = self.hasMember('barcode')
 		
 		name = database.view("products/all", key=bar).first()['value']
 		

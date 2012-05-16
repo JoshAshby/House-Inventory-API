@@ -33,7 +33,7 @@ class catTotal(baseObject.baseHTTPObject):
 	'''
 	Category maniplulation object
 	'''	
-	def get(self, *args, **kwargs):
+	def get(self):
 		'''
 		GET verb call
 		
@@ -43,8 +43,8 @@ class catTotal(baseObject.baseHTTPObject):
 		query = []
 		name = database.view("products/admin").all()
 		
-		for i in range(len(name)):
-			query.append(name[i]['value']['category'])
+		for i in name:
+			query.append(i['value']['category'])
 		
 		
 		queryFix = list(set(query))
@@ -61,7 +61,7 @@ class catInfo(baseObject.baseHTTPObject):
 	'''
 	Category maniplulation object
 	'''
-	def get(self, *args, **kwargs):
+	def get(self):
 		'''
 		GET verb call
 		
@@ -71,13 +71,12 @@ class catInfo(baseObject.baseHTTPObject):
 			cat - the cateogry
 		Returns:
 		'''
-		self.members(*args, **kwargs)
 		cat = self.hasMember('category')
 			
 		query = database.view("cattag/categorys", key=cat).all()
 		
-		for i in range(len(query)):
-			query[i] = query[i]['value']
+		for i in query:
+			i = i['value']
 		
 		totals = {'data': query}
 		
@@ -92,14 +91,13 @@ class catTag(baseObject.baseHTTPObject):
 	'''
 	Category maniplulation object
 	'''
-	def get(self, *args, **kwargs):
+	def get(self):
 		'''
 		GET verb call
 		
 		Args:
 		Returns:
 		'''
-		self.members(*args, **kwargs)
 		cat = self.hasMember('category')
 		tag = self.hasMember('tag')
 		if tag == cat: tag = self.hasMember(2)
@@ -109,14 +107,14 @@ class catTag(baseObject.baseHTTPObject):
 		
 		query = database.view("cattag/categorys", key=cat).all()
 		
-		for i in range(len(query)):
-			query[i] = query[i]['value']
+		for i in query:
+			i = i['value']
 		
-		for x in range(len(query)):
-			e = query[x]['tags']
-			for z in range(len(e)):
-				if e[z] == tag:
-					dog.append(query[x])
+		for x in query:
+			e = x['tags']
+			for z in e:
+				if z == tag:
+					dog.append(x)
 				else: pass
 		
 		dog = {'data': dog}

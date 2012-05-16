@@ -43,19 +43,14 @@ class timelineGraph(baseObject.baseHTTPObject):
 	'''
 	Currently generates graphs for the product log
 	'''
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
 		Returns:
 			A png formated graph of the product log 
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		try:
-			wi = web.input()
-			bar = wi['barcode']
-		except:
-			bar = kwargs['barcode']
+		bar = self.hasMember('barcode')
 		
 		buffer = StringIO()
 		
@@ -71,9 +66,9 @@ class timelineGraph(baseObject.baseHTTPObject):
 		date = []
 		quantity = []
 
-		for key in range(len(query)):
-			date.append(datetime.datetime.strptime(query[key]['date'], '%Y-%m-%d %H:%M:%S'))
-			quantity.append(query[key]['quantity'])
+		for key in query:
+			date.append(datetime.datetime.strptime(key['date'], '%Y-%m-%d %H:%M:%S'))
+			quantity.append(key['quantity'])
 
 		ax.plot(date, quantity)
 
@@ -105,19 +100,14 @@ class scatterGraph(baseObject.baseHTTPObject):
 	'''
 	
 	'''
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
 		Returns:
 			
 		'''
-		#Go through and make sure we're not in testing mode, in which case the unit tests will pass the barcode instead...
-		try:
-			wi = web.input()
-			bar = wi['barcode']
-		except:
-			bar = kwargs['barcode']
+		bar = self.hasMember('barcode')
 		
 		buffer = StringIO()
 		
@@ -133,9 +123,9 @@ class scatterGraph(baseObject.baseHTTPObject):
 		delta = []
 		quantity = []
 
-		for key in range(len(query)):
-			delta.append(query[key]['delta'])
-			quantity.append(query[key]['norm'])
+		for key in query:
+			delta.append(key['delta'])
+			quantity.append(key['norm'])
 		
 		# Start of the linear regression algorithm
 		
@@ -204,7 +194,7 @@ class quantityClusterGraph(baseObject.baseHTTPObject):
 	'''
 	
 	'''
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
@@ -221,9 +211,9 @@ class quantityClusterGraph(baseObject.baseHTTPObject):
 		
 		names = database.view("products/admin").all()
 		
-		for i in range(len(names)):
-			date.append(datetime.datetime.strptime(names[i]['value']['restock']['date'], '%Y-%m-%d %H:%M:%S').month)
-			quantity.append(names[i]['value']['restock']['quantity'])
+		for i in names:
+			date.append(datetime.datetime.strptime(i['value']['restock']['date'], '%Y-%m-%d %H:%M:%S').month)
+			quantity.append(i['value']['restock']['quantity'])
 		
 		ax.scatter(date, quantity)
 
@@ -261,7 +251,7 @@ class singleQuantityClusterGraph(baseObject.baseHTTPObject):
 	'''
 	
 	'''
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
@@ -278,9 +268,9 @@ class singleQuantityClusterGraph(baseObject.baseHTTPObject):
 		
 		names = database.view("products/admin").all()
 		
-		for i in range(len(names)):
-			date.append(datetime.datetime.strptime(names[i]['value']['restock']['date'], '%Y-%m-%d %H:%M:%S').month)
-			quantity.append(names[i]['value']['restock']['quantity'])
+		for i in names:
+			date.append(datetime.datetime.strptime(i['value']['restock']['date'], '%Y-%m-%d %H:%M:%S').month)
+			quantity.append(i['value']['restock']['quantity'])
 		
 		ax.scatter(date, quantity)
 

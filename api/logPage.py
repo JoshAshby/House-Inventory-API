@@ -33,14 +33,13 @@ class log(baseObject.baseHTTPObject):
 	'''
 	Generates the use log about the given product.
 	'''		
-	def get(self, *args, **kwargs):	
+	def get(self):	
 		'''
 		GET verb call
 		
 		Returns:
 			A JSON object like: 
 		'''
-		self.members(*args, **kwargs)
 		bar = self.hasMember('barcode')
 		
 		log = productDoc.view("products/admin", key=bar).first()['log']
