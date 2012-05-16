@@ -15,6 +15,8 @@ Josh Ashby
 http://joshashby.com
 joshuaashby@joshashby.com
 """
+from gevent import monkey; monkey.patch_all()
+from gevent.pywsgi import WSGIServer
 import web
 import json
 import sys, os
@@ -41,9 +43,13 @@ class index(baseObject.baseHTTPObject):
 
 urls += baseObject.urls
 
-app = web.application(urls, globals())
-app.internalerror = web.debugerror
-		
-		
 if __name__ == "__main__":
-	app.run()
+	if serverType is 'gevent':
+		app = web.application(urls, globals()).wsgifunc()
+		app.internalerror = web.debugerror
+		print 'Now serving py on port %i...' % (HTTPport)
+		WSGIServer(('', HTTPport), app).serve_forever()
+	else:
+		app = web.application(urls, globals())
+		app.internalerror = web.debugerror
+		app.run()

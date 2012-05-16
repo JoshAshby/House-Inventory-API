@@ -14,6 +14,20 @@ joshuaashby@joshashby.com
 import web
 import couchdbkit
 
+'''
+Set this to either:
+	gevent
+or
+	web.py
+	
+To determine the underlying wsgi server for the application.
+If set to gevent, be sure to also change HTTPport to the port
+you want to server the main HTTP interface on.
+'''
+serverType = 'gevent'
+
+HTTPport = 80
+
 databaseName = 'stats'
 database = couchdbkit.Server()[databaseName]
 
